@@ -109,4 +109,3 @@ class MongoStorage(AbstractStorage):
         """
         Set indexes on the tables.
         """
-        pass

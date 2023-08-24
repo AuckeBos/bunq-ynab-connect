@@ -1,5 +1,4 @@
 from abc import ABC
-from dataclasses import dataclass
 from logging import LoggerAdapter
 from typing import Iterable
 
