@@ -9,7 +9,9 @@ from kink import di
 from pymongo import MongoClient
 from pymongo.database import Database
 
-from bunq_ynab_connect.helpers.config import LOGS_DIR, LOGS_FILE
+from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
+from bunq_ynab_connect.data.storage.mongo_storage import MongoStorage
+from bunq_ynab_connect.helpers.config import CACHE_DIR, LOGS_DIR, LOGS_FILE
 
 
 def _load_env():
@@ -35,6 +37,7 @@ def bootstrap_di():
     """
     Inject dependencies into the dependency injection container.
     """
+    os.makedirs(CACHE_DIR, exist_ok=True)
     # Env
     _load_env()
 
@@ -50,3 +53,6 @@ def bootstrap_di():
         connectTimeoutMS=1000,
     )
     di[Database] = lambda _di: _di[MongoClient][os.getenv("MONGO_DB", "MYDB")]
+
+    # Set the MongoStorage as the default storage
+    di[AbstractStorage] = lambda _di: MongoStorage()

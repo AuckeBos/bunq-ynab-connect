@@ -1,0 +1,6 @@
+{
+    "name": "bunq_transactions",
+    "key_col": "id",
+    "timestamp_col": "updated",
+    "type": "source_table"
+}

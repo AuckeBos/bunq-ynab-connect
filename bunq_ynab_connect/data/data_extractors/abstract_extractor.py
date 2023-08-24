@@ -8,7 +8,7 @@ from kink import inject
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 
 
-class AbstractDataExtractors(ABC):
+class AbstractExtractor(ABC):
     destination: str
     storage: AbstractStorage
     logger: LoggerAdapter
