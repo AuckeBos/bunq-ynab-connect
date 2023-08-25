@@ -7,7 +7,8 @@ from bunq import ApiEnvironmentType, Pagination
 from bunq.sdk.context.api_context import ApiContext
 from bunq.sdk.context.bunq_context import BunqContext
 from bunq.sdk.model.generated import endpoint
-from bunq.sdk.model.generated.endpoint import Payment
+from bunq.sdk.model.generated.endpoint import BunqResponsePaymentList, Payment
+from dateutil.parser import parse
 from kink import inject
 
 from bunq_ynab_connect.data.data_extractors.abstract_extractor import AbstractExtractor
@@ -17,6 +18,16 @@ from bunq_ynab_connect.helpers.general import cache, get_public_ip
 
 
 class BunqExtractor(AbstractExtractor):
+    """
+    Extractor for bunq payments.
+    Loads all payments from all accounts.
+
+    Attributes:
+        PAYMENTS_PER_PAGE: The amount of payments to load per page
+    """
+
+    PAYMENTS_PER_PAGE = 10
+
     @inject
     def __init__(self, storage: AbstractStorage, logger: LoggerAdapter) -> None:
         super().__init__("bunq_transactions", storage, logger)
@@ -59,36 +70,45 @@ class BunqExtractor(AbstractExtractor):
         else:
             self.logger.info("Found bunq config file")
 
-    @cache(ttl=60 * 60 * 24)
+    def _should_continue(self, payment_list_response: BunqResponsePaymentList) -> bool:
+        """
+        Check if should load more payments:
+        - If there is no previous page, return False
+        - If the earliest payment is older than the last runmoment, return False
+        """
+        if not payment_list_response.pagination.has_previous_page():
+            return False
+        earliest_payment = payment_list_response.value[-1]
+        earliest_payment_date = parse(earliest_payment.created)
+        return earliest_payment_date > self.last_runmoment
+
     def load_for_account(self, account_id: int) -> List:
         """
         Get the payments of an account
         """
-        # Max allowed count is 200
         payments = []
-        page_count = 200
+        page_count = self.PAYMENTS_PER_PAGE
         pagination = Pagination()
         pagination.count = page_count
 
         # For first query, only param is the count param
         params = pagination.url_params_count_only
-        should_continue = True
         # Loop over pages
-        while should_continue:
+        while True:
             query_result = endpoint.Payment.list(
                 monetary_account_id=account_id, params=params
             )
             # Convert to dict
             current_payments = [json.loads(pay.to_json()) for pay in query_result.value]
             payments.extend(current_payments)
-            should_continue = query_result.pagination.has_previous_page()
-            if should_continue:
+            if self._should_continue(query_result):
                 # Use previous_page since ordering is new to old
                 params = query_result.pagination.url_params_previous_page
+            else:
+                break
         self.logger.info(f"Loaded {len(payments)} payments for account {account_id}")
         return payments
 
-    @cache(ttl=60 * 60 * 24)
     def get_bunq_account_ids(self) -> List:
         """
         Get a list of all bunq account ids
