@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 from logging import LoggerAdapter
 from typing import List
 
@@ -7,7 +8,11 @@ from bunq import ApiEnvironmentType, Pagination
 from bunq.sdk.context.api_context import ApiContext
 from bunq.sdk.context.bunq_context import BunqContext
 from bunq.sdk.model.generated import endpoint
-from bunq.sdk.model.generated.endpoint import BunqResponsePaymentList, Payment
+from bunq.sdk.model.generated.endpoint import (
+    BunqResponsePaymentList,
+    MonetaryAccountBank,
+    Payment,
+)
 from dateutil.parser import parse
 from kink import inject
 
@@ -17,25 +22,33 @@ from bunq_ynab_connect.helpers.config import BUNQ_CONFIG_FILE
 from bunq_ynab_connect.helpers.general import cache, get_public_ip
 
 
-class BunqExtractor(AbstractExtractor):
+@inject
+class BunqClient:
     """
     Extractor for bunq payments.
     Loads all payments from all accounts.
 
     Attributes:
+        storage: The storage to use
+        logger: The logger to use
         PAYMENTS_PER_PAGE: The amount of payments to load per page
     """
 
+    storage: AbstractStorage
+    logger: LoggerAdapter
     PAYMENTS_PER_PAGE = 10
 
     @inject
     def __init__(self, storage: AbstractStorage, logger: LoggerAdapter) -> None:
-        super().__init__("bunq_transactions", storage, logger)
+        self.storage = storage
+        self.logger = logger
         self._load_api_context()
 
     def _load_api_context(self):
         """
         Initialize context, ran on init
+        - Check if bunq config file exists, if not, create it
+        - Create ApiContext from bunq config file
         """
         self._check_api_context()
         context = ApiContext.restore(BUNQ_CONFIG_FILE)
@@ -70,22 +83,41 @@ class BunqExtractor(AbstractExtractor):
         else:
             self.logger.info("Found bunq config file")
 
-    def _should_continue(self, payment_list_response: BunqResponsePaymentList) -> bool:
+    def _should_continue_loading_payments(
+        self,
+        payment_list_response: BunqResponsePaymentList,
+        last_runmoment: datetime = None,
+    ) -> bool:
         """
         Check if should load more payments:
         - If there is no previous page, return False
         - If the earliest payment is older than the last runmoment, return False
+
+        Args:
+            payment_list_response: The response from the bunq API
+            last_runmoment: The last runmoment, used to determine if we should load more payments.
+                If not provided, all payments will be loaded.
         """
         if not payment_list_response.pagination.has_previous_page():
             return False
+        if not last_runmoment:
+            return True
         earliest_payment = payment_list_response.value[-1]
         earliest_payment_date = parse(earliest_payment.created)
-        return earliest_payment_date > self.last_runmoment
+        return earliest_payment_date > last_runmoment
 
-    def load_for_account(self, account_id: int) -> List:
+    def get_payments_for_account(
+        self, account: MonetaryAccountBank, last_runmoment: datetime = None
+    ) -> List[Payment]:
         """
-        Get the payments of an account
+        Get the payments of an account.
+
+        Args:
+            account: The account to get the payments for
+            last_runmoment: The last runmoment, used to determine if we should load more payments.
+                If not provided, all payments will be loaded.
         """
+        account_id = account.id_
         payments = []
         page_count = self.PAYMENTS_PER_PAGE
         pagination = Pagination()
@@ -101,7 +133,7 @@ class BunqExtractor(AbstractExtractor):
             # Convert to dict
             current_payments = [json.loads(pay.to_json()) for pay in query_result.value]
             payments.extend(current_payments)
-            if self._should_continue(query_result):
+            if self._should_continue_loading_payments(query_result, last_runmoment):
                 # Use previous_page since ordering is new to old
                 params = query_result.pagination.url_params_previous_page
             else:
@@ -109,26 +141,15 @@ class BunqExtractor(AbstractExtractor):
         self.logger.info(f"Loaded {len(payments)} payments for account {account_id}")
         return payments
 
-    def get_account_ids(self) -> List:
+    def get_accounts(self) -> List[MonetaryAccountBank]:
         """
-        Get a list of all bunq account ids
+        Get a list of all Bunq accounts
         """
         try:
-            accounts = endpoint.MonetaryAccount.list().value
+            response = endpoint.MonetaryAccount.list().value
+            accounts = [a.get_referenced_object() for a in response]
+            self.logger.info(f"Loaded {len(accounts)} bunq accounts")
+            return accounts
         except Exception as e:
-            self.logger.error(f"Could not get bunq accounts: {e}")
-            raise Exception(f"Could not get bunq accounts: {e}")
-        ids = [a.get_referenced_object().id_ for a in accounts]
-        self.logger.info(f"Loaded {len(ids)} bunq accounts")
-        return ids
-
-    def load(self) -> List:
-        """
-        Load the data from the source.
-        Loads all payments from all accounts
-        """
-        account_ids = self.get_account_ids()
-        payments = []
-        for id in account_ids:
-            payments.extend(self.load_for_account(id))
-        return payments
+            self.logger.error(f"Could not load bunq accounts: {e}")
+            raise Exception(f"Could not load bunq accounts: {e}")

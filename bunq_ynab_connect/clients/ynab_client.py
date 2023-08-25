@@ -15,8 +15,13 @@ from bunq_ynab_connect.data.data_extractors.abstract_extractor import AbstractEx
 class YnabClient:
     """
     Client for the YNAB API.
+
+    Attributes:
+        logger: The logger to use
+        client: The YNAB API client
     """
 
+    logger: LoggerAdapter
     client: ApiClient
 
     def __init__(self, logger: LoggerAdapter):
@@ -48,6 +53,7 @@ class YnabClient:
         try:
             response = api.get_accounts(budget_id)
             accounts = response.data.accounts
+            self.logger.info(f"Loaded {len(accounts)} accounts for budget {budget_id}")
             return accounts
         except Exception as e:
             self.logger.error(f"Could not get accounts for budget {budget_id}: {e}")
@@ -61,6 +67,7 @@ class YnabClient:
         try:
             response = api.get_budgets()
             budgets = response.data.budgets
+            self.logger.info(f"Loaded {len(budgets)} budgets")
             return budgets
         except Exception as e:
             self.logger.error(f"Could not get budgets: {e}")

@@ -1,5 +1,5 @@
 {
-    "name": "bunq_transactions",
+    "name": "bunq_payments",
     "key_col": "id",
     "timestamp_col": "updated",
     "type": "source_table"

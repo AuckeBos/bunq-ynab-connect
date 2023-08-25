@@ -127,12 +127,14 @@ class AbstractStorage(ABC):
         Get the last timestamp from the runmoments table. This is used to determine the window of data
         to load. Return 2020-01-01 if there is no timestamp in the runmoments table.
         """
-        result = self.find_one("runmoments", [("source", "eq", source)])
-        return (
-            datetime.fromisoformat(result["timestamp"])
-            if result
+        last_runmoment = self.find_one("runmoments", [("source", "eq", source)])
+        result = (
+            datetime.fromisoformat(last_runmoment["timestamp"])
+            if last_runmoment
             else datetime(2020, 1, 1)
         )
+        self.logger.info(f"Retrieved last runmoment of {source} as {result}")
+        return result
 
     def set_last_runmoment(self, source: str, timestamp: datetime) -> None:
         """
