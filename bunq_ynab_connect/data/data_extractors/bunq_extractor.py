@@ -109,11 +109,15 @@ class BunqExtractor(AbstractExtractor):
         self.logger.info(f"Loaded {len(payments)} payments for account {account_id}")
         return payments
 
-    def get_bunq_account_ids(self) -> List:
+    def get_account_ids(self) -> List:
         """
         Get a list of all bunq account ids
         """
-        accounts = endpoint.MonetaryAccount.list().value
+        try:
+            accounts = endpoint.MonetaryAccount.list().value
+        except Exception as e:
+            self.logger.error(f"Could not get bunq accounts: {e}")
+            raise Exception(f"Could not get bunq accounts: {e}")
         ids = [a.get_referenced_object().id_ for a in accounts]
         self.logger.info(f"Loaded {len(ids)} bunq accounts")
         return ids
@@ -123,7 +127,7 @@ class BunqExtractor(AbstractExtractor):
         Load the data from the source.
         Loads all payments from all accounts
         """
-        account_ids = self.get_bunq_account_ids()
+        account_ids = self.get_account_ids()
         payments = []
         for id in account_ids:
             payments.extend(self.load_for_account(id))

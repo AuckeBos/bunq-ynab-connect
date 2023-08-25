@@ -8,7 +8,9 @@ from dotenv import find_dotenv, load_dotenv
 from kink import di
 from pymongo import MongoClient
 from pymongo.database import Database
+from ynab.models.account import Account
 
+from bunq_ynab_connect.clients.ynab_client import YnabClient
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.data.storage.mongo_storage import MongoStorage
 from bunq_ynab_connect.helpers.config import CACHE_DIR, LOGS_DIR, LOGS_FILE
@@ -56,3 +58,29 @@ def bootstrap_di():
 
     # Set the MongoStorage as the default storage
     di[AbstractStorage] = lambda _di: MongoStorage()
+
+
+def monkey_patch_ynab():
+    """
+    Some ynab classes have bugs. Override the functions with those bugs here,
+    to prevent exceptions.
+
+    Some classes have som bugged attributes.
+    In an API response, they sometimes get a value which 'is not allowed'.
+    In such cases, an exception would occur if the class is instantiated. To
+    prevent this, we override the set() functions of those properties. The new
+    function definition simply sets the value, skipping the 'raise exception if
+    value is None' part.
+
+    """
+
+    bugged_attributes = ["type"]
+
+    # Fix Account
+    bugged_attributes = ["type"]
+    for attribute in bugged_attributes:
+
+        def fixed_setter(self, value):
+            setattr(self, f"_{attribute}", value)
+
+        setattr(Account, attribute, fixed_setter)

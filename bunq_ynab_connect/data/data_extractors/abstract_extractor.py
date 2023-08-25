@@ -1,8 +1,9 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from datetime import datetime
 from logging import LoggerAdapter
 from typing import Iterable
 
+import pandas as pd
 from kink import inject
 
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
@@ -18,6 +19,7 @@ class AbstractExtractor(ABC):
         logger: The logger to log to
         last_runmoment: The last runmoment of the extractor
         runmoment: The current runmoment of the extractor
+        IS_FULL_LOAD: Whether the extractor is a full load extractor
     """
 
     destination: str
@@ -25,6 +27,8 @@ class AbstractExtractor(ABC):
     logger: LoggerAdapter
     last_runmoment: datetime
     runmoment: datetime
+
+    IS_FULL_LOAD = False
 
     @inject
     def __init__(
@@ -34,6 +38,7 @@ class AbstractExtractor(ABC):
         self.storage = storage
         self.logger = logger
 
+    @abstractmethod
     def load(self) -> Iterable:
         """
         Load the data from the source.
@@ -52,6 +57,10 @@ class AbstractExtractor(ABC):
         self.logger.info(f"Extracting {self.destination}")
         self.last_runmoment = self.storage.get_last_runmoment(self.destination)
         data = self.load()
-        self.storage.upsert(data, self.destination)
+        if self.IS_FULL_LOAD:
+            data_pd = pd.DataFrame.from_records(data)
+            self.storage.overwrite(data_pd, self.destination)
+        else:
+            self.storage.upsert(data, self.destination)
         self.logger.info(f"Extracted {len(data)} items from {self.destination}")
         self.storage.set_last_runmoment(self.destination, self.runmoment)

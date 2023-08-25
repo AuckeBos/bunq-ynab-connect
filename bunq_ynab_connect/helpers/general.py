@@ -1,5 +1,5 @@
 import shelve
-from datetime import datetime
+from datetime import date, datetime
 from functools import wraps
 from logging import LoggerAdapter
 from time import time
@@ -55,3 +55,7 @@ def cache(logger: LoggerAdapter, ttl: int = None):
         return wrapper
 
     return decorator
+
+
+def date_to_datetime(_date: date) -> datetime:
+    return datetime(_date.year, _date.month, _date.day)
