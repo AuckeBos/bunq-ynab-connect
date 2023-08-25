@@ -22,13 +22,10 @@ class BunqPaymentExtractor(AbstractExtractor):
     Loads all payments from all accounts.
 
     Attributes:
-        PAYMENTS_PER_PAGE: The amount of payments to load per page
-        After each page, the last payment is checked to see if it is older than the last runmoment
-        If it is older, we are done loading payments
+        client: The bunq client to use to get the payments
     """
 
     client: BunqClient
-    PAYMENTS_PER_PAGE = 10
 
     @inject
     def __init__(

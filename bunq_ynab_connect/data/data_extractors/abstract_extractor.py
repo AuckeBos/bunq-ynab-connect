@@ -50,7 +50,7 @@ class AbstractExtractor(ABC):
         Extract the data from the bunq API, and save it in self.data.
         - Set current runmoment and load last runmoment
         - Load data from bunq API
-        - Save data to storage
+        - Save data to storage. Upsert or ovewrite depending on IS_FULL_LOAD
         - Set last runmoment
         """
         self.runmoment = datetime.now()

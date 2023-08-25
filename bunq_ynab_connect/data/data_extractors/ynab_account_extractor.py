@@ -12,6 +12,15 @@ from bunq_ynab_connect.models.ynab.ynab_budget import YnabBudget
 
 
 class YnabAccountExtractor(AbstractExtractor):
+    """
+    A FullLoadExtractor that extracts all accounts from YNAB.
+    Is FullLoad since the accounts do not have an update date.
+
+    Attributes:
+        client: The YNAB client to use to get the accounts
+        IS_FULL_LOAD: Whether the extractor is a full load extractor
+    """
+
     client: YnabClient
     IS_FULL_LOAD = True
 
@@ -23,11 +32,18 @@ class YnabAccountExtractor(AbstractExtractor):
         self.client = client
 
     def get_budgets(self) -> Iterable[YnabBudget]:
+        """
+        Load the budgets. Assume the BudgetExtractor has already run.
+        """
         budgets_dicts = self.storage.get("ynab_budgets")
         budgets = [YnabBudget(**b) for b in budgets_dicts]
         return budgets
 
     def load(self) -> List[dict]:
+        """
+        Load the data from the source.
+        Loads all accounts from all budgets
+        """
         budgets = self.get_budgets()
         accounts = []
         for b in budgets:

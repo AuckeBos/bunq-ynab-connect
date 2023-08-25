@@ -12,6 +12,10 @@ from bunq_ynab_connect.models.ynab.ynab_budget import YnabBudget
 
 
 class YnabBudgetExtractor(AbstractExtractor):
+    """
+    Extractor for YNAB budgets.
+    """
+
     client: YnabClient
 
     @inject
@@ -22,6 +26,10 @@ class YnabBudgetExtractor(AbstractExtractor):
         self.client = client
 
     def load(self) -> List[dict]:
+        """
+        Use the YNAB client to get the budgets.
+        Use custom YnabBudget model to convert to dict.
+        """
         budgets = self.client.get_budgets()
 
         budgets = [YnabBudget(**b.to_dict()) for b in budgets]
