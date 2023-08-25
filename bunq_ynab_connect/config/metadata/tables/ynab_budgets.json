@@ -1,0 +1,6 @@
+{
+    "name": "ynab_budgets",
+    "key_col": "id",
+    "timestamp_col": "last_modified_on",
+    "type": "source_table"
+}

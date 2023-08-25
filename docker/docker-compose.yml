@@ -1,0 +1,34 @@
+version: '3.7'
+services:
+  mongodb:
+    image: mongo:4.2.0
+    container_name: bunqynab_mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    ports:
+      - 27017:27017
+    volumes:
+      - bunq_ynab_connect_data:/data/db
+    restart: unless-stopped
+  mongo-express:
+    image: mongo-express:latest
+    container_name: bunqynab_mongo_ui
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_AUTH_USERNAME: ${MONGO_USER}
+      ME_CONFIG_MONGODB_AUTH_PASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_USER}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_MONGODB_SERVER: mongodb
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
+volumes:
+  bunq_ynab_connect_data:
+
+networks:
+  default:
+    name: bunq-ynab-network

@@ -1,0 +1,6 @@
+{
+    "name": "runmoments",
+    "key_col": "source",
+    "timestamp_col": "timestamp",
+    "type": "config_table"
+}
