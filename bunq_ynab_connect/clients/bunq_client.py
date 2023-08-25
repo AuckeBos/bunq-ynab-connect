@@ -36,7 +36,7 @@ class BunqClient:
 
     storage: AbstractStorage
     logger: LoggerAdapter
-    PAYMENTS_PER_PAGE = 10
+    PAYMENTS_PER_PAGE = 50
 
     @inject
     def __init__(self, storage: AbstractStorage, logger: LoggerAdapter) -> None:

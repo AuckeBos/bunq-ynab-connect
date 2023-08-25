@@ -42,11 +42,15 @@ services:
       - 4200:4200
 
   prefect-agent:
-    image: index.docker.io/auckebos/bunq-ynab-connect:latest
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile  
     container_name: bunqynab_prefect_agent
     restart: unless-stopped
     env_file:
       - ../.env
+    volumes:
+      - ../bunq_ynab_connect:/home/bunqynab/bunq_ynab_connect
     depends_on:
       - prefect-server
 

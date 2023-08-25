@@ -160,5 +160,5 @@ cython_debug/
 #.idea/
 
 
-bunq_ynab_connect/config/bunq.cfg
+config/bunq.cfg
 cache
