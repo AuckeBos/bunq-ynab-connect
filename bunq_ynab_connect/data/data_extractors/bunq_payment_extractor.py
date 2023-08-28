@@ -1,3 +1,4 @@
+import json
 from logging import LoggerAdapter
 from typing import List
 
@@ -5,7 +6,11 @@ from bunq import ApiEnvironmentType, Pagination
 from bunq.sdk.context.api_context import ApiContext
 from bunq.sdk.context.bunq_context import BunqContext
 from bunq.sdk.model.generated import endpoint
-from bunq.sdk.model.generated.endpoint import BunqResponsePaymentList, Payment
+from bunq.sdk.model.generated.endpoint import (
+    BunqResponsePaymentList,
+    MonetaryAccountBank,
+    Payment,
+)
 from dateutil.parser import parse
 from kink import inject
 
@@ -34,15 +39,30 @@ class BunqPaymentExtractor(AbstractExtractor):
         super().__init__("bunq_payments", storage, logger)
         self.client = client
 
+    def load_accounts(self) -> List[MonetaryAccountBank]:
+        """
+        Load the accounts. Assume the AccountExtractor has already run.
+        Load from storage. Then exclude some columns and convert to MonetaryAccountBank
+        """
+        cols_to_exclude = ["_id", "updated_at"]
+        accounts_dict = self.storage.get("bunq_accounts")
+        accounts_dict = [
+            {k: v for k, v in a.items() if not k in cols_to_exclude}
+            for a in accounts_dict
+        ]
+        accounts = [MonetaryAccountBank.from_json(json.dumps(a)) for a in accounts_dict]
+        return accounts
+
     def load(self) -> List:
         """
         Load the data from the source.
         Loads all payments from all accounts
         """
-        accounts = self.client.get_accounts()
+        accounts = self.load_accounts()
         payments = []
         for account in accounts:
             payments.extend(
                 self.client.get_payments_for_account(account, self.last_runmoment)
             )
-        return payments
+        payments_dict = [json.loads(pay.to_json()) for pay in payments]
+        return payments_dict

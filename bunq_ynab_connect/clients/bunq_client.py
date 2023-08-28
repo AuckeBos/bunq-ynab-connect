@@ -1,4 +1,3 @@
-import json
 import os
 from datetime import datetime
 from logging import LoggerAdapter
@@ -131,7 +130,7 @@ class BunqClient:
                 monetary_account_id=account_id, params=params
             )
             # Convert to dict
-            current_payments = [json.loads(pay.to_json()) for pay in query_result.value]
+            current_payments = query_result.value
             payments.extend(current_payments)
             if self._should_continue_loading_payments(query_result, last_runmoment):
                 # Use previous_page since ordering is new to old

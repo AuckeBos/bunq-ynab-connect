@@ -1,5 +1,8 @@
 import click
 
+from bunq_ynab_connect.data.data_extractors.bunq_account_extractor import (
+    BunqAccountExtractor,
+)
 from bunq_ynab_connect.data.data_extractors.bunq_payment_extractor import (
     BunqPaymentExtractor,
 )
@@ -27,6 +30,7 @@ def extract():
     Run all extractors.
     """
     extractors = [
+        BunqAccountExtractor(),
         BunqPaymentExtractor(),
         YnabBudgetExtractor(),
         YnabAccountExtractor(),
@@ -41,7 +45,7 @@ def test():
     """
     Testing function
     """
-    extractor = YnabTransactionExtractor()
+    extractor = BunqPaymentExtractor()
     extractor.extract()
 
 
