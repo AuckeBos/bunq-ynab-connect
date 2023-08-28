@@ -26,7 +26,12 @@ def extract():
     """
     Run all extractors.
     """
-    extractors = [BunqPaymentExtractor(), YnabBudgetExtractor(), YnabAccountExtractor()]
+    extractors = [
+        BunqPaymentExtractor(),
+        YnabBudgetExtractor(),
+        YnabAccountExtractor(),
+        YnabTransactionExtractor(),
+    ]
     for extractor in extractors:
         extractor.extract()
 

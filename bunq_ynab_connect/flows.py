@@ -14,6 +14,9 @@ from bunq_ynab_connect.data.data_extractors.ynab_account_extractor import (
 from bunq_ynab_connect.data.data_extractors.ynab_budget_extractor import (
     YnabBudgetExtractor,
 )
+from bunq_ynab_connect.data.data_extractors.ynab_transaction_extractor import (
+    YnabTransactionExtractor,
+)
 
 
 @task(task_run_name="{extractor_class.__name__}.extract()")
@@ -32,3 +35,4 @@ def extract():
     extract_one.submit(BunqPaymentExtractor)
     extract_one(YnabBudgetExtractor)
     extract_one(YnabAccountExtractor)
+    extract_one(YnabTransactionExtractor)
