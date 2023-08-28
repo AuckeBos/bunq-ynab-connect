@@ -1,6 +1,6 @@
 # Docker
 ## Compose up:
-docker-compose --env-file .env -f docker/docker-compose.yml -p bunqynab  up
+docker-compose -f docker/docker-compose.yml --env-file ./.docker-env -p bunqynab up
 
 ## Build:
 docker build -t auckebos/bunq-ynab-connect -f docker/Dockerfile .

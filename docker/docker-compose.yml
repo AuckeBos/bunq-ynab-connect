@@ -50,6 +50,14 @@ services:
     depends_on:
       - prefect-server
 
+  watchtower:
+    image: containrrr/watchtower
+    container_name: bunqynab_watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 3600 prefect-agent
+    restart: unless-stopped
+    
 volumes:
   bunq_ynab_connect_data:
   bunq_ynab_connect_prefect:
