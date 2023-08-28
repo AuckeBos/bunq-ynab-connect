@@ -13,7 +13,7 @@ from ynab.models.account import Account
 from bunq_ynab_connect.clients.ynab_client import YnabClient
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.data.storage.mongo_storage import MongoStorage
-from bunq_ynab_connect.helpers.config import CACHE_DIR, LOGS_DIR, LOGS_FILE
+from bunq_ynab_connect.helpers.config import CACHE_DIR, CONFIG_DIR, LOGS_DIR, LOGS_FILE
 
 
 def _load_env():
@@ -39,7 +39,8 @@ def bootstrap_di():
     """
     Inject dependencies into the dependency injection container.
     """
-    os.makedirs(CACHE_DIR, exist_ok=True)
+    for dir in [LOGS_DIR, CACHE_DIR, CONFIG_DIR]:
+        os.makedirs(dir, exist_ok=True)
     # Env
     _load_env()
 
