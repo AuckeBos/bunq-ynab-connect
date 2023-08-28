@@ -1,0 +1,24 @@
+name: bunq-ynab-connect
+prefect-version: 2.11.4
+
+build: null
+
+push: null
+
+# This deployment only works on an agent that runs on a docker container with image auckebos/bunq-ynab-connect:latest
+pull:
+- prefect.deployments.steps.set_working_directory:
+    directory: /home/bunqynab/bunq_ynab_connect
+
+deployments:
+- name: extract
+  version: 2023.08.28.1
+  description: Extract Bunq & Ynab data
+  schedule:
+    cron: "00 06-23 * * *"
+    timezone: Europe/Amsterdam
+  entrypoint: flows:extract
+  parameters: {}
+  work_pool:
+    name: docker-pool
+    work_queue_name: default

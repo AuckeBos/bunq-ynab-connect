@@ -15,4 +15,4 @@ docker build -t auckebos/bunq-ynab-connect -f docker/Dockerfile .
 autoflake --in-place --remove-unused-variables --recursive .
 
 ## Compse up on dev
-docker-compose -f docker/development.yml --env-file ./.env -p bunqynab  up
+docker-compose -f docker/development.yml --env-file ./.docker-env -p bunqynab --build  up

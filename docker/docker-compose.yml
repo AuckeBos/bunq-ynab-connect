@@ -46,7 +46,7 @@ services:
     container_name: bunqynab_prefect_agent
     restart: unless-stopped
     env_file:
-      - ../.env
+      - ../.docker-env
     depends_on:
       - prefect-server
 
