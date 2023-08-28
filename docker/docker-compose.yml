@@ -7,7 +7,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     ports:
-      - 27017:27017
+      - 27017
     volumes:
       - bunq_ynab_connect_data:/data/db
     restart: unless-stopped
@@ -15,7 +15,7 @@ services:
     image: mongo-express:latest
     container_name: bunqynab_mongo_ui
     ports:
-      - 8081:8081
+      - 12001:8081
     environment:
       ME_CONFIG_MONGODB_AUTH_USERNAME: ${MONGO_USER}
       ME_CONFIG_MONGODB_AUTH_PASSWORD: ${MONGO_PASSWORD}
@@ -39,7 +39,7 @@ services:
       # PREFECT_UI_URL to match the external hostname/IP used to load the  UI in your web browser.      
       - PREFECT_API_URL=${PREFECT_API_URL_FOR_SERVER}
     ports:
-      - 4200:4200
+      - 12002:4200
 
   prefect-agent:
     image: index.docker.io/auckebos/bunq-ynab-connect:latest
