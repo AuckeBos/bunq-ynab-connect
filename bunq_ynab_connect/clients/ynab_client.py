@@ -72,3 +72,11 @@ class YnabClient:
         except Exception as e:
             self.logger.error(f"Could not get budgets: {e}")
             raise Exception(f"Could not get budgets: {e}")
+
+    # def get_transactions_for_account(self, ac) -> List[TransactionDetail]:
+    #     """
+    #     Get an array of all the transactions of an account
+    #     """
+    #     api = ynab.TransactionsApi(self.client)
+    #     return api.get_transactions_by_account(account.budget_id,
+    #                                            account.id).data.transactions

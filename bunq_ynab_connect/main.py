@@ -33,7 +33,9 @@ def test():
     """
     Testing function
     """
-    print("Ran test()")
+    extractors = [YnabBudgetExtractor(), YnabAccountExtractor()]
+    for extractor in extractors:
+        extractor.extract()
 
 
 @cli.command
