@@ -9,6 +9,9 @@ from bunq_ynab_connect.data.data_extractors.ynab_account_extractor import (
 from bunq_ynab_connect.data.data_extractors.ynab_budget_extractor import (
     YnabBudgetExtractor,
 )
+from bunq_ynab_connect.data.data_extractors.ynab_transaction_extractor import (
+    YnabTransactionExtractor,
+)
 
 
 @click.group
@@ -33,9 +36,8 @@ def test():
     """
     Testing function
     """
-    extractors = [YnabBudgetExtractor(), YnabAccountExtractor()]
-    for extractor in extractors:
-        extractor.extract()
+    extractor = YnabTransactionExtractor()
+    extractor.extract()
 
 
 @cli.command
@@ -45,3 +47,7 @@ def help():
     """
     ctx = click.Context(cli)
     click.echo(ctx.get_help())
+
+
+if __name__ == "__main__":
+    test()
