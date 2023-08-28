@@ -32,6 +32,3 @@ def extract():
     extract_one.submit(BunqPaymentExtractor)
     extract_one(YnabBudgetExtractor)
     extract_one(YnabAccountExtractor)
-
-
-extract()

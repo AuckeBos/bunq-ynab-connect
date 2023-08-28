@@ -42,11 +42,13 @@ services:
       - 4200:4200
 
   prefect-agent:
-    build:
-      context: ../
-      dockerfile: docker/Dockerfile  
+    image: prefecthq/prefect:2.11.3-python3.8
+    # build:
+      # context: ../
+      # dockerfile: docker/Dockerfile  
     container_name: bunqynab_prefect_agent
     restart: unless-stopped
+    entrypoint: ["/opt/prefect/entrypoint.sh", "prefect", "worker", "start", "-p", "bunqynab-pool"]    
     env_file:
       - ../.env
     volumes:

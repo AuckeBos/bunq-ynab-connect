@@ -1,0 +1,42 @@
+# Welcome to your prefect.yaml file! You can you this file for storing and managing
+# configuration for deploying your flows. We recommend committing this file to source
+# control along with your flow code.
+
+# Generic metadata about this project
+name: bunq-ynab-connect
+prefect-version: 2.11.4
+
+# build section allows you to manage and build docker images
+build: null
+
+# push section allows you to manage if and how this project is uploaded to remote locations
+push: null
+
+# pull section allows you to provide instructions for cloning this project in remote locations
+pull:
+- prefect.deployments.steps.git_clone:
+    id: clone
+    repository: https://github.com/AuckeBos/bunq-ynab-connect.git
+    branch: setup-orchestration
+- prefect.deployments.steps.run_shell_script:
+    id: install-poetry
+    directory: bunq-ynab-connect
+    script: |
+      pip install poetry
+      poetry config virtualenvs.create false
+      poetry install --no-dev --no-interaction --no-ansi
+
+# the deployments section allows you to provide configuration for deploying flows
+deployments:
+- name: extract
+  version: 2023.08.28.1
+  tags: []
+  description: Extract Bunq & Ynab data
+  schedule: {}
+  flow_name: ""
+  entrypoint: bunq_ynab_connect/flows.py:extract
+  parameters: {}
+  work_pool:
+    name: bunqynab-pool
+    work_queue_name: default
+    job_variables: {}
