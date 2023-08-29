@@ -1,0 +1,6 @@
+{
+    "name": "bunq_accounts",
+    "key_col": "id",
+    "timestamp_col": "",
+    "type": "source_table"
+}

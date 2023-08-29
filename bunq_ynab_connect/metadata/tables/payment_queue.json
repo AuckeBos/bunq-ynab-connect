@@ -1,0 +1,6 @@
+{
+    "name": "payment_queue",
+    "key_col": "payment_id",
+    "timestamp_col": "updated_at",
+    "type": "queue"
+}

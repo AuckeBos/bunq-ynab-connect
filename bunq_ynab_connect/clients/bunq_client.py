@@ -1,4 +1,3 @@
-import json
 import os
 from datetime import datetime
 from logging import LoggerAdapter
@@ -80,8 +79,6 @@ class BunqClient:
                 self.logger.error(f"Could not create _bunq config: {e}")
                 raise Exception(f"Could not create _bunq config: {e}")
             self.logger.info("Created bunq config file")
-        else:
-            self.logger.info("Found bunq config file")
 
     def _should_continue_loading_payments(
         self,
@@ -131,14 +128,20 @@ class BunqClient:
                 monetary_account_id=account_id, params=params
             )
             # Convert to dict
-            current_payments = [json.loads(pay.to_json()) for pay in query_result.value]
+            current_payments = query_result.value
             payments.extend(current_payments)
             if self._should_continue_loading_payments(query_result, last_runmoment):
                 # Use previous_page since ordering is new to old
                 params = query_result.pagination.url_params_previous_page
             else:
                 break
-        self.logger.info(f"Loaded {len(payments)} payments for account {account_id}")
+        # Remove payments after last runmoment
+        if last_runmoment:
+            payments = [p for p in payments if parse(p.created) > last_runmoment]
+        if len(payments) > 0:
+            self.logger.info(
+                f"Loaded {len(payments)} payments for account {account_id}"
+            )
         return payments
 
     def get_accounts(self) -> List[MonetaryAccountBank]:

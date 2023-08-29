@@ -41,7 +41,7 @@ def test_insert_and_find_one(mongo_storage):
     data = [{"key": 1, "value": "one"}, {"key": 2, "value": "two"}]
 
     # Act
-    mongo_storage.insert(data, table_name)
+    mongo_storage.insert(table_name, data)
     result = mongo_storage.find_one(table_name, [("key", "eq", 2)])
 
     # Assert
@@ -61,7 +61,7 @@ def test_upsert_and_find(mongo_storage):
     ]
 
     # Act
-    mongo_storage.upsert(data, table_name)
+    mongo_storage.upsert(table_name, data)
     result = mongo_storage.find(table_name, [("key", "in", [1, 2])], ["key"], False)
 
     # Assert
@@ -76,11 +76,11 @@ def test_upsert_does_update(mongo_storage):
     data = [{"key": 1, "value": "one"}, {"key": 3, "value": "two"}]
 
     # Act
-    mongo_storage.insert(data, table_name)
+    mongo_storage.insert(table_name, data)
     data = [
         {"key": 1, "value": "three"},
     ]
-    mongo_storage.upsert(data, table_name)
+    mongo_storage.upsert(table_name, data)
     result = mongo_storage.find(table_name, [("key", "ne", 3)], ["key"], False)
 
     # Assert
@@ -132,7 +132,7 @@ def test_insert_and_get(mongo_storage):
     ]
 
     # Act
-    mongo_storage.insert(data, table_name)
+    mongo_storage.insert(table_name, data)
     result = mongo_storage.get(table_name)
 
     # Assert
@@ -147,7 +147,7 @@ def test_inserted_at_is_added(mongo_storage):
     ]
 
     # Act
-    mongo_storage.insert(data, table_name)
+    mongo_storage.insert(table_name, data)
     result = mongo_storage.get(table_name)
 
     # Assert
@@ -163,9 +163,9 @@ def test_updated_at_is_updated(mongo_storage):
     ]
 
     # Act
-    mongo_storage.upsert(data, table_name)
+    mongo_storage.upsert(table_name, data)
     old_updated_at = mongo_storage.get(table_name)[0]["updated_at"]
-    mongo_storage.upsert(data, table_name)
+    mongo_storage.upsert(table_name, data)
     new_updated_at = mongo_storage.get(table_name)[0]["updated_at"]
 
     # Assert

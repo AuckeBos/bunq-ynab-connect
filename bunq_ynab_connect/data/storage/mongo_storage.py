@@ -66,7 +66,7 @@ class MongoStorage(AbstractStorage):
             result = result.sort(sort)
         return list(result)
 
-    def _upsert(self, data: List, table: str, key_col: str, timestamp_col: str) -> None:
+    def _upsert(self, table: str, data: List, key_col: str, timestamp_col: str) -> None:
         """
         Upsert each item. For now, simply loop over them and insert each one separately.
         Also add an updated_at column.
@@ -77,7 +77,7 @@ class MongoStorage(AbstractStorage):
         for row in data:
             table.update_one({key_col: row[key_col]}, {"$set": row}, upsert=True)
 
-    def _insert(self, data: List, table: str) -> None:
+    def _insert(self, table: str, data: List) -> None:
         """
         Insert all items in the data list.
         Also add an inserted_at column.
@@ -86,14 +86,40 @@ class MongoStorage(AbstractStorage):
             table = self.database[table]
             table.insert_many(data)
 
-    def _overwrite(self, data: pd.DataFrame, table: str) -> None:
+    def _overwrite(self, table: str, data: pd.DataFrame) -> None:
         """
         Overwrite the full contents of a table with the data.
         """
         with self.client.start_session() as session:
             with session.start_transaction():
                 self.database[table].drop()
-                self._insert(data.to_dict("records"), table)
+                self._insert(table, data.to_dict("records"))
+
+    def delete(self, table: str, query: List[Tuple] = None) -> None:
+        """
+        Delete rows in a table that match the query.
+
+        Parameters:
+            table: The name of the table to query.
+            query: A list of queries. Each query is a tuple of (column, operator, value). The operator is one of the
+                following: eq, gt, gte, in, lt, lte, ne, nin. Implementations should convert this to the
+                appropriate query.
+        """
+        query = self.convert_query(query)
+        self.database[table].delete_many(query)
+
+    def count(self, table: str, query: List[Tuple] = None) -> int:
+        """
+        Count the number of rows in a table that match the query.
+
+        Parameters:
+            table: The name of the table to query.
+            query: A list of queries. Each query is a tuple of (column, operator, value). The operator is one of the
+                following: eq, gt, gte, in, lt, lte, ne, nin. Implementations should convert this to the
+                appropriate query.
+        """
+        query = self.convert_query(query)
+        return self.database[table].count_documents(query)
 
     def test_connection(self) -> None:
         """

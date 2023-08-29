@@ -1,14 +1,16 @@
 import os
+from datetime import datetime
 from logging import LoggerAdapter
 from typing import List
 
 import ynab
 from kink import inject
-from ynab import ApiClient
+from ynab import ApiClient, TransactionDetail
 from ynab.models.account import Account
 from ynab.models.budget_summary import BudgetSummary
 
 from bunq_ynab_connect.data.data_extractors.abstract_extractor import AbstractExtractor
+from bunq_ynab_connect.models.ynab.ynab_account import YnabAccount
 
 
 @inject
@@ -72,3 +74,46 @@ class YnabClient:
         except Exception as e:
             self.logger.error(f"Could not get budgets: {e}")
             raise Exception(f"Could not get budgets: {e}")
+
+    def get_transactions_for_account(
+        self, account: YnabAccount, last_runmoment: datetime = None
+    ) -> List[TransactionDetail]:
+        """
+        Load the transactions for an account.
+
+        Args:
+            account: The account to load the transactions for
+            last_runmoment: Only load transactions since this date
+        """
+        api = ynab.TransactionsApi(self.client)
+        result = api.get_transactions_by_account(
+            account.budget_id, account.id, since_date=last_runmoment.date()
+        ).data.transactions
+        self.logger.info(
+            f"Loaded {len(result)} transactions for account {account.name} since {last_runmoment}"
+        )
+        return result
+
+    def create_transaction(
+        self, transaction: TransactionDetail, budget_id: str
+    ) -> None:
+        """
+        Add a transaction to an account.
+
+        Args:
+            transaction: The transaction to add
+            budget_id: The budget id to add the transaction to
+        """
+        api = ynab.TransactionsApi(self.client)
+        try:
+            api.create_transaction(budget_id, data={"transaction": transaction})
+            self.logger.info(
+                f"Added transaction {transaction.memo} to account {transaction.account_id}"
+            )
+        except Exception as e:
+            self.logger.error(
+                f"Could not add transaction {transaction} to budget {budget_id}: {e}"
+            )
+            raise Exception(
+                f"Could not add transaction {transaction} to budget {budget_id}: {e}"
+            )

@@ -22,3 +22,19 @@ deployments:
   work_pool:
     name: docker-pool
     work_queue_name: default
+- name: sync
+  version: 2023.08.29.1
+  description: Sync new transactions to Ynab
+  entrypoint: flows:sync_payments
+  parameters: {}
+  work_pool:
+    name: docker-pool
+    work_queue_name: default
+- name: sync_one_payment
+  version: 2023.08.29.1
+  description: Sync one payment by id to Ynab
+  entrypoint: flows:sync_payment
+  parameters: {}
+  work_pool:
+    name: docker-pool
+    work_queue_name: default    
