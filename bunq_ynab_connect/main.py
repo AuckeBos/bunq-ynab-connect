@@ -15,6 +15,7 @@ from bunq_ynab_connect.data.data_extractors.ynab_budget_extractor import (
 from bunq_ynab_connect.data.data_extractors.ynab_transaction_extractor import (
     YnabTransactionExtractor,
 )
+from bunq_ynab_connect.sync_bunq_to_ynab.payment_syncer import PaymentSyncer
 
 
 @click.group
@@ -45,8 +46,8 @@ def test():
     """
     Testing function
     """
-    extractor = BunqPaymentExtractor()
-    extractor.extract()
+    syncer = PaymentSyncer()
+    syncer.sync()
 
 
 @cli.command

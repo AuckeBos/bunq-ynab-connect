@@ -21,16 +21,12 @@ class BunqAccount(BaseModel):
     display_name: Optional[str]
     id: Optional[int]
     monetary_account_profile: Optional[dict]
-    overdraft_limit: Optional[dict]
     public_uuid: Optional[str]
     setting: Optional[dict]
     status: Optional[str]
     sub_status: Optional[str]
     updated: Optional[str]
     user_id: Optional[int]
-    all_co_owner: Optional[list]
-    savings_goal: Optional[list]
-    savings_goal_progress: Optional[list]
 
     @property
     def iban(self) -> Optional[str]:
@@ -39,6 +35,6 @@ class BunqAccount(BaseModel):
         It is one of the aliases of the account.
         """
         for a in self.alias:
-            if a.type_ == "IBAN":
-                return a.value
+            if a["type"] == "IBAN":
+                return a["value"]
         return None

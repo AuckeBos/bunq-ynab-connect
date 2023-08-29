@@ -1,4 +1,3 @@
-from ast import Dict
 from logging import LoggerAdapter
 
 from bunq.sdk.model.generated.endpoint import (
@@ -25,7 +24,7 @@ class BunqAccountToYnabAccountMapper:
         self.storage = storage
         self.logger = logger
 
-    def map(self) -> Dict[str, YnabAccount]:
+    def map(self) -> dict[str, YnabAccount]:
         """
         Map the Bunq accounts to the YNAB accounts.
 
@@ -37,7 +36,7 @@ class BunqAccountToYnabAccountMapper:
         bunq_iban_to_ynab_account = {}
         for bunq_account in bunq_accounts:
             for ynab_account in ynab_accounts:
-                if ynab_account.notes == bunq_account.iban:
+                if ynab_account.note == bunq_account.iban:
                     bunq_iban_to_ynab_account[bunq_account.id] = ynab_account
                     break
         return bunq_iban_to_ynab_account

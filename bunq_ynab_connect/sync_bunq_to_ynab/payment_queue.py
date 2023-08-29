@@ -46,7 +46,7 @@ class PaymentQueue:
         """
         Remove a payment from the queue. Called when the payment has been processed.
         """
-        self.storage.delete(self.TABLE_NAME, {"payment_id": payment_id})
+        self.storage.delete(self.TABLE_NAME, [("payment_id", "eq", payment_id)])
 
     def __bool__(self):
         """

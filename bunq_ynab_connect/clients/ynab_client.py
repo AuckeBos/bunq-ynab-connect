@@ -106,7 +106,7 @@ class YnabClient:
         """
         api = ynab.TransactionsApi(self.client)
         try:
-            api.create_transaction(budget_id, data=transaction)
+            api.create_transaction(budget_id, data={"transaction": transaction})
             self.logger.info(
                 f"Added transaction {transaction.memo} to account {transaction.account_id}"
             )
