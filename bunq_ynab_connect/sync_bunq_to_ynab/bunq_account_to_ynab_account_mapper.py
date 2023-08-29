@@ -24,7 +24,7 @@ class BunqAccountToYnabAccountMapper:
         self.storage = storage
         self.logger = logger
 
-    def map(self) -> dict[str, YnabAccount]:
+    def map(self) -> dict:
         """
         Map the Bunq accounts to the YNAB accounts.
 

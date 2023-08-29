@@ -37,7 +37,8 @@ services:
       - PREFECT_SERVER_API_HOST=${PREFECT_SERVER_API_HOST}
       # If you want to access Prefect Server from anywhere other than the Docker host machine, you will need to change
       # PREFECT_UI_URL to match the external hostname/IP used to load the  UI in your web browser.      
-      - PREFECT_API_URL=${PREFECT_API_URL_FOR_SERVER}
+      # - PREFECT_UI_URL=${PREFECT_UI_URL}
+      - PREFECT_API_URL=${PREFECT_API_URL}
     ports:
       - 12002:4200
 

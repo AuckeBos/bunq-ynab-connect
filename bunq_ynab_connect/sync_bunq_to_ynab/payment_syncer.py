@@ -46,7 +46,7 @@ class PaymentSyncer:
     client: YnabClient
     mapper: BunqAccountToYnabAccountMapper
     queue: PaymentQueue
-    account_map: dict[str, YnabAccount]
+    account_map: dict
 
     @inject
     def __init__(
@@ -136,7 +136,7 @@ class PaymentSyncer:
 
         self.client.create_transaction(transaction, account.budget_id)
 
-    def sync_payment(self, payment_id: str):
+    def sync_payment(self, payment_id: int):
         """
         Sync a payment from Bunq to YNAB.
         - Load the payment from the database

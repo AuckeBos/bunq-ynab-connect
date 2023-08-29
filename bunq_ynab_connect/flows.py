@@ -1,4 +1,3 @@
-from ast import List
 from logging import LoggerAdapter
 
 from kink import di
@@ -25,7 +24,7 @@ from bunq_ynab_connect.sync_bunq_to_ynab.payment_syncer import PaymentSyncer
 
 
 @task()
-def run_extractors(extractor_classes: List[AbstractExtractor.__class__]):
+def run_extractors(extractor_classes: list):
     """
     Run the provided extractors serially
     """
@@ -54,3 +53,12 @@ def sync_payments():
     """
     syncer = PaymentSyncer()
     syncer.sync()
+
+
+@flow
+def sync_payment(payment_id: int):
+    """
+    Sync a single payment from bunq to YNAB.
+    """
+    syncer = PaymentSyncer()
+    syncer.sync_payment(payment_id)

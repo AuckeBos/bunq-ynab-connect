@@ -50,16 +50,26 @@ def sync_payments():
     syncer.sync()
 
 
-@cli.command
+@cli.command()
+@click.argument("payment_id", type=int)
+def sync_payment(payment_id: int):
+    """
+    Sync a single payment from bunq to YNAB.
+    """
+    syncer = PaymentSyncer()
+    syncer.sync_payment(payment_id)
+
+
+@cli.command()
 def test():
     """
     Testing function
     """
     syncer = PaymentSyncer()
-    syncer.sync()
+    syncer.sync_payment(1198854105)
 
 
-@cli.command
+@cli.command()
 def help():
     """
     Show the help message.
