@@ -1,9 +1,15 @@
+import json
 from abc import ABC, abstractmethod
 from datetime import datetime
 from logging import LoggerAdapter
-from typing import Any, List, Optional, Tuple
+from typing import Any, Callable, List, Optional, Tuple
 
 import pandas as pd
+from bunq.sdk.model.generated.endpoint import (
+    BunqResponsePaymentList,
+    MonetaryAccountBank,
+    Payment,
+)
 from kink import inject
 from prefect.logging.loggers import PrefectLogAdapter
 
@@ -19,10 +25,15 @@ class AbstractStorage(ABC):
     Attributes:
         metadata: The metadata class. Used to get information about the tables.
         logger: The logger to use to log messages.
+        RUNMOMENT_START: The default start date for the runmoments table.
+        METADATA_COLUMNS: The columns that are created in this class,
+            and should be excluded when converting a dict to a model.
     """
 
     metadata: Metadata
     logger: LoggerAdapter
+    RUNMOMENT_START = datetime(2020, 1, 1)
+    METADATA_COLUMNS = ["_id", "updated_at"]
 
     def __init__(self, metadata: Metadata, logger: LoggerAdapter) -> None:
         self.metadata = metadata
@@ -131,7 +142,7 @@ class AbstractStorage(ABC):
         result = (
             datetime.fromisoformat(last_runmoment["timestamp"])
             if last_runmoment
-            else datetime(2020, 1, 1)
+            else self.RUNMOMENT_START
         )
         self.logger.info(f"Retrieved last runmoment of {source} as {result}")
         return result
@@ -153,3 +164,24 @@ class AbstractStorage(ABC):
         end = datetime.now()
         self.logger.info(f"Retrieved window for {source} as {start} - {end}")
         return start, end
+
+    def get_as_entity(self, table: str, fn: Callable, as_json: bool = False):
+        """
+        Get the data from a table as an entity.
+
+        Parameters:
+            table: The name of the table to query.
+            fn: The function to use to convert the data to an entity.
+            as_json: Whether the dict should be provided as json string to the function.
+                Else the dict is provided as kwargs.
+        """
+        rows_as_dict = self.get(table)
+        rows_as_dict = [
+            {k: v for k, v in d.items() if not k in self.METADATA_COLUMNS}
+            for d in rows_as_dict
+        ]
+        if as_json:
+            rows_as_entity = [fn(json.dumps(d)) for d in rows_as_dict]
+        else:
+            rows_as_entity = [fn(**d) for d in rows_as_dict]
+        return rows_as_entity

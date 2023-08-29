@@ -39,26 +39,14 @@ class BunqPaymentExtractor(AbstractExtractor):
         super().__init__("bunq_payments", storage, logger)
         self.client = client
 
-    def load_accounts(self) -> List[MonetaryAccountBank]:
-        """
-        Load the accounts. Assume the AccountExtractor has already run.
-        Load from storage. Then exclude some columns and convert to MonetaryAccountBank
-        """
-        cols_to_exclude = ["_id", "updated_at"]
-        accounts_dict = self.storage.get("bunq_accounts")
-        accounts_dict = [
-            {k: v for k, v in a.items() if not k in cols_to_exclude}
-            for a in accounts_dict
-        ]
-        accounts = [MonetaryAccountBank.from_json(json.dumps(a)) for a in accounts_dict]
-        return accounts
-
     def load(self) -> List:
         """
         Load the data from the source.
         Loads all payments from all accounts
         """
-        accounts = self.load_accounts()
+        accounts = self.storage.get_as_entity(
+            "bunq_accounts", MonetaryAccountBank.from_json, True
+        )
         payments = []
         for account in accounts:
             payments.extend(
