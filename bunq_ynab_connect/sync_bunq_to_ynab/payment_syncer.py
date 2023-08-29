@@ -1,3 +1,4 @@
+import os
 from logging import LoggerAdapter
 
 from bunq.sdk.model.generated.endpoint import (
@@ -6,6 +7,7 @@ from bunq.sdk.model.generated.endpoint import (
     Payment,
 )
 from bunq.sdk.model.generated.object_ import MonetaryAccountReference
+from dateutil import parser
 from kink import inject
 from ynab import TransactionDetail
 from ynab.configuration import Configuration
@@ -62,6 +64,24 @@ class PaymentSyncer:
         self.queue = queue
         self.account_map = {}  # Set in sync
 
+    def sanity_check_payment(self, payment: Payment) -> bool:
+        """
+        Do a sanity check on the payment. Payment should not be synced if the check fails.
+        Check:
+        - The 'date' should be larger than the START_SYNC_DATE from the env
+            If the START_SYNC_DATE is not set, we raise an exception. In that case, we
+            don't want to sync any payment, since we could overflow YNAB with old transactions.
+        """
+        min_date = os.getenv("START_SYNC_DATE")
+        if min_date is None:
+            raise ValueError("START_SYNC_DATE is not set. Not syncing any payments")
+
+        if parser.parse(payment.created) < parser.parse(min_date):
+            self.logger.warning(
+                f"Payment {payment.id} is older than {min_date}. Not syncing"
+            )
+            return False
+
     def payment_to_transaction(
         self, payment: Payment, account: YnabAccount
     ) -> TransactionDetail:
@@ -97,6 +117,25 @@ class PaymentSyncer:
         )
         return transaction
 
+    def create_transaction(self, payment: Payment, account: YnabAccount):
+        """
+        Create a YNAB transaction from a Bunq payment and create it in YNAB.
+        If the payment fails the sanity check, do not create the transaction.
+
+        Args:
+            payment: The Bunq payment
+            account: The YNAB account to which the payment belongs
+
+        """
+        transaction = self.payment_to_transaction(payment, account)
+        if not self.sanity_check_payment(payment):
+            self.logger.warning(
+                f"Payment {payment.id} failed sanity check. Not creating transaction"
+            )
+            return
+
+        self.client.create_transaction(transaction, account.budget_id)
+
     def sync_payment(self, payment_id: str):
         """
         Sync a payment from Bunq to YNAB.
@@ -119,8 +158,7 @@ class PaymentSyncer:
             )
             return
         ynab_account: YnabAccount = self.account_map[account_id]
-        transaction = self.payment_to_transaction(payment, ynab_account)
-        self.client.create_transaction(transaction, ynab_account.budget_id)
+        self.create_transaction(payment, ynab_account)
 
     def sync(self):
         """

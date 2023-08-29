@@ -59,7 +59,7 @@ class AbstractExtractor(ABC):
         data = self.load()
         if self.IS_FULL_LOAD:
             data_pd = pd.DataFrame.from_records(data)
-            self.storage.overwrite(data_pd, self.destination)
+            self.storage.overwrite(self.destination, data_pd)
         else:
             self.storage.upsert(self.destination, data)
         self.logger.info(f"Extracted {len(data)} items from {self.destination}")

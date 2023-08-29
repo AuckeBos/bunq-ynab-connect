@@ -77,7 +77,7 @@ class MongoStorage(AbstractStorage):
         for row in data:
             table.update_one({key_col: row[key_col]}, {"$set": row}, upsert=True)
 
-    def _insert(self, data: List, table: str) -> None:
+    def _insert(self, table: str, data: List) -> None:
         """
         Insert all items in the data list.
         Also add an inserted_at column.
@@ -86,7 +86,7 @@ class MongoStorage(AbstractStorage):
             table = self.database[table]
             table.insert_many(data)
 
-    def _overwrite(self, data: pd.DataFrame, table: str) -> None:
+    def _overwrite(self, table: str, data: pd.DataFrame) -> None:
         """
         Overwrite the full contents of a table with the data.
         """

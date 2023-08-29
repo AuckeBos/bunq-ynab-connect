@@ -55,7 +55,7 @@ class AbstractStorage(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _overwrite(self, data: pd.DataFrame, table: str) -> None:
+    def _overwrite(self, table: str, data: pd.DataFrame) -> None:
         """
         Overwrite the full contents of a table with the data.
         """
@@ -127,11 +127,11 @@ class AbstractStorage(ABC):
             result = pd.DataFrame(result)
         return result
 
-    def overwrite(self, data: pd.DataFrame, table: str) -> None:
+    def overwrite(self, table: str, data: pd.DataFrame) -> None:
         """
         Overwrite the full contents of a table with a dataframe.
         """
-        self._overwrite(data, table)
+        self._overwrite(table, data)
 
     def upsert(self, table_name: str, data: List) -> None:
         """
