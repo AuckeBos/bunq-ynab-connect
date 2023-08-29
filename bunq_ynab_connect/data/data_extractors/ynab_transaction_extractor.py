@@ -27,20 +27,12 @@ class YnabTransactionExtractor(AbstractExtractor):
         super().__init__("ynab_transactions", storage, logger)
         self.client = client
 
-    def get_accounts(self) -> Iterable[YnabAccount]:
-        """
-        Load the budgets. Assume the AccountExtractor has already run.
-        """
-        budgets_dicts = self.storage.get("ynab_accounts")
-        budgets = [YnabAccount(**b) for b in budgets_dicts]
-        return budgets
-
     def load(self) -> List[dict]:
         """
         Use the YNAB client to get the transactions.
         Use custom YnabTransaction model to convert to dict, to convert dates to datetime.
         """
-        accounts = self.get_accounts()
+        accounts = self.storage.get_as_entity("ynab_accounts", YnabAccount, False)
         transactions = []
         for a in accounts:
             transactions_for_account = self.client.get_transactions_for_account(

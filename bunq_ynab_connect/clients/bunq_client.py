@@ -35,7 +35,7 @@ class BunqClient:
 
     storage: AbstractStorage
     logger: LoggerAdapter
-    PAYMENTS_PER_PAGE = 50
+    PAYMENTS_PER_PAGE = 10
 
     @inject
     def __init__(self, storage: AbstractStorage, logger: LoggerAdapter) -> None:
@@ -79,8 +79,6 @@ class BunqClient:
                 self.logger.error(f"Could not create _bunq config: {e}")
                 raise Exception(f"Could not create _bunq config: {e}")
             self.logger.info("Created bunq config file")
-        else:
-            self.logger.info("Found bunq config file")
 
     def _should_continue_loading_payments(
         self,
@@ -137,7 +135,13 @@ class BunqClient:
                 params = query_result.pagination.url_params_previous_page
             else:
                 break
-        self.logger.info(f"Loaded {len(payments)} payments for account {account_id}")
+        # Remove payments after last runmoment
+        if last_runmoment:
+            payments = [p for p in payments if parse(p.created) > last_runmoment]
+        if len(payments) > 0:
+            self.logger.info(
+                f"Loaded {len(payments)} payments for account {account_id}"
+            )
         return payments
 
     def get_accounts(self) -> List[MonetaryAccountBank]:

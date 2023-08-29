@@ -93,3 +93,27 @@ class YnabClient:
             f"Loaded {len(result)} transactions for account {account.name} since {last_runmoment}"
         )
         return result
+
+    def create_transaction(
+        self, transaction: TransactionDetail, budget_id: str
+    ) -> None:
+        """
+        Add a transaction to an account.
+
+        Args:
+            transaction: The transaction to add
+            budget_id: The budget id to add the transaction to
+        """
+        api = ynab.TransactionsApi(self.client)
+        try:
+            api.create_transaction(budget_id, data=transaction)
+            self.logger.info(
+                f"Added transaction {transaction.memo} to account {transaction.account_id}"
+            )
+        except Exception as e:
+            self.logger.error(
+                f"Could not add transaction {transaction} to budget {budget_id}: {e}"
+            )
+            raise Exception(
+                f"Could not add transaction {transaction} to budget {budget_id}: {e}"
+            )

@@ -61,6 +61,6 @@ class AbstractExtractor(ABC):
             data_pd = pd.DataFrame.from_records(data)
             self.storage.overwrite(data_pd, self.destination)
         else:
-            self.storage.upsert(data, self.destination)
+            self.storage.upsert(self.destination, data)
         self.logger.info(f"Extracted {len(data)} items from {self.destination}")
         self.storage.set_last_runmoment(self.destination, self.runmoment)
