@@ -21,6 +21,7 @@ from bunq_ynab_connect.data.data_extractors.ynab_budget_extractor import (
 from bunq_ynab_connect.data.data_extractors.ynab_transaction_extractor import (
     YnabTransactionExtractor,
 )
+from bunq_ynab_connect.sync_bunq_to_ynab.payment_syncer import PaymentSyncer
 
 
 @task()
@@ -44,3 +45,12 @@ def extract():
     run_extractors.submit(
         YnabBudgetExtractor, YnabAccountExtractor, YnabTransactionExtractor
     )
+
+
+@flow
+def sync_payments():
+    """
+    Sync payments from bunq to YNAB.
+    """
+    syncer = PaymentSyncer()
+    syncer.sync()
