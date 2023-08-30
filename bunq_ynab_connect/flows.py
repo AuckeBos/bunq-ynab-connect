@@ -1,5 +1,3 @@
-from logging import LoggerAdapter
-
 from kink import di
 from prefect import flow, get_run_logger, task
 from prefect.task_runners import ConcurrentTaskRunner
@@ -39,7 +37,6 @@ def extract():
     Run all extractors.
     Run Bunq and YNAB extractors in parallel.
     """
-    di[LoggerAdapter] = get_run_logger()
     run_extractors.submit([BunqAccountExtractor, BunqPaymentExtractor])
     run_extractors.submit(
         [YnabBudgetExtractor, YnabAccountExtractor, YnabTransactionExtractor]
