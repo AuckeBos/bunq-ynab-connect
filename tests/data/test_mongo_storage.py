@@ -22,7 +22,8 @@ def metadata():
 
 
 @pytest.fixture
-def mongo_storage(mongo, metadata):
+def mongo_storage(monkeypatch, mongo, metadata):
+    monkeypatch.setattr(MongoStorage, "set_indexes", Mock())
     storage = MongoStorage(mongo, mongo["test_database"], metadata)
     storage.metadata.get_table.return_value = TableMetadata(
         name="test_table", key_col="key", timestamp_col="timestamp", type="test_table"
