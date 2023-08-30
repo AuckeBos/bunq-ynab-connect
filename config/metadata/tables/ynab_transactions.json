@@ -1,6 +1,0 @@
-{
-    "name": "ynab_transactions",
-    "key_col": "id",
-    "timestamp_col": "date",
-    "type": "source_table"
-}
