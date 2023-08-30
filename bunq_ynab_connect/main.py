@@ -65,8 +65,7 @@ def test():
     """
     Testing function
     """
-    syncer = PaymentSyncer()
-    syncer.sync_payment(1198854105)
+    print("test")
 
 
 @cli.command()
