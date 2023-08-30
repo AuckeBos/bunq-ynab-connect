@@ -89,9 +89,10 @@ class YnabClient:
         result = api.get_transactions_by_account(
             account.budget_id, account.id, since_date=last_runmoment.date()
         ).data.transactions
-        self.logger.info(
-            f"Loaded {len(result)} transactions for account {account.name} since {last_runmoment}"
-        )
+        if len(result):
+            self.logger.info(
+                f"Loaded {len(result)} transactions for account {account.name} since {last_runmoment}"
+            )
         return result
 
     def create_transaction(

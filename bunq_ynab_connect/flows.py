@@ -40,16 +40,16 @@ def extract():
     Run Bunq and YNAB extractors in parallel.
     """
     di[LoggerAdapter] = get_run_logger()
-    run_extractors.submit(BunqAccountExtractor, BunqPaymentExtractor)
+    run_extractors.submit([BunqAccountExtractor, BunqPaymentExtractor])
     run_extractors.submit(
-        YnabBudgetExtractor, YnabAccountExtractor, YnabTransactionExtractor
+        [YnabBudgetExtractor, YnabAccountExtractor, YnabTransactionExtractor]
     )
 
 
 @flow
-def sync_payments():
+def sync_payment_queue():
     """
-    Sync payments from bunq to YNAB.
+    Sync all payements in the payment queue.
     """
     syncer = PaymentSyncer()
     syncer.sync()
@@ -62,3 +62,12 @@ def sync_payment(payment_id: int):
     """
     syncer = PaymentSyncer()
     syncer.sync_payment(payment_id)
+
+
+@flow
+def sync():
+    """
+    Run all extractors and sync payments.
+    """
+    extract()
+    sync_payment_queue()

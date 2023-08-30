@@ -11,29 +11,40 @@ pull:
     directory: /home/bunqynab/bunq_ynab_connect
 
 deployments:
-- name: extract
-  version: 2023.08.28.1
-  description: Extract Bunq & Ynab data
+- name: sync
+  version: 2023.08.30.1
+  description: Extract all data and sync to Ynab
   schedule:
     cron: "00 06-23 * * *"
     timezone: Europe/Amsterdam
+  entrypoint: flows:sync
+  parameters: {}
+  work_pool:
+    name: docker-pool
+    work_queue_name: default
+- name: extract
+  version: 2023.08.28.1
+  description: Extract Bunq & Ynab data
   entrypoint: flows:extract
+  schedule: {}
   parameters: {}
   work_pool:
     name: docker-pool
     work_queue_name: default
-- name: sync
+- name: sync_payment_queue
   version: 2023.08.29.1
-  description: Sync new transactions to Ynab
-  entrypoint: flows:sync_payments
+  description: Sync the whole payment queue Ynab
+  entrypoint: flows:sync_payment_queue
+  schedule: {}
   parameters: {}
   work_pool:
     name: docker-pool
     work_queue_name: default
-- name: sync_one_payment
+- name: sync_payment
   version: 2023.08.29.1
   description: Sync one payment by id to Ynab
   entrypoint: flows:sync_payment
+  schedule: {}
   parameters: {}
   work_pool:
     name: docker-pool
