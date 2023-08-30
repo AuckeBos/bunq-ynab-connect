@@ -129,9 +129,6 @@ class PaymentSyncer:
         """
         transaction = self.payment_to_transaction(payment, account)
         if not self.sanity_check_payment(payment):
-            self.logger.warning(
-                f"Payment {payment.id} failed sanity check. Not creating transaction"
-            )
             return
 
         self.client.create_transaction(transaction, account.budget_id)

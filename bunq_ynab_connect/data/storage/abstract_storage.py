@@ -142,6 +142,18 @@ class AbstractStorage(ABC):
         table = self.metadata.get_table(table_name)
         self._upsert(table_name, data, table.key_col, table.timestamp_col)
 
+    def insert_if_not_exists(self, table_name: str, data: List) -> None:
+        """
+        Check if the data already exists in the table. If not, insert it.
+        """
+        table = self.metadata.get_table(table_name)
+        data = [
+            d
+            for d in data
+            if not self.find_one(table_name, [(table.key_col, "eq", d[table.key_col])])
+        ]
+        self.insert(table_name, data)
+
     def insert(self, table: str, data: List) -> None:
         """
         Add inserted_at, and then call _insert.
@@ -150,6 +162,9 @@ class AbstractStorage(ABC):
             table: The name of the table to insert into.
 
         """
+        if not data:
+            self.logger.info(f"No data to insert into {table}")
+            return
         inserted_at = now().isoformat()
         data = map(lambda x: {**x, "inserted_at": inserted_at}, data)
         self._insert(table, data)

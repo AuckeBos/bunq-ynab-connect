@@ -135,3 +135,14 @@ class MongoStorage(AbstractStorage):
         """
         Set indexes on the tables.
         """
+        unique_indices = {
+            "bunq_accounts": ["id"],
+            "bunq_payments": ["id"],
+            "payment_queue": ["payment_id"],
+            "ynab_accounts": ["id"],
+            "ynab_budgets": ["id"],
+            "ynab_transactions": ["id"],
+        }
+
+        for table, columns in unique_indices.items():
+            self.database[table].create_index(columns, unique=True)

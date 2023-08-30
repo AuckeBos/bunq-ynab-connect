@@ -5,6 +5,7 @@ from typing import Generator
 from kink import inject
 
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
+from bunq_ynab_connect.helpers.general import now
 
 
 @inject
@@ -34,31 +35,42 @@ class PaymentQueue:
 
     def get_payment_id(self) -> str:
         """
-        Get the payment id of the first payment in the queue.
+        Get the payment id of the first non-synced payment in the queue.
         Order is determined by the updated_at column (first in, first out)
         """
-        payment = self.storage.find_one(self.TABLE_NAME, {}, "updated_at")
+        payment = self.storage.find_one(
+            self.TABLE_NAME, {("synced_at", "eq", None)}, "updated_at"
+        )
         if payment is None:
             raise IndexError("No payments in queue")
         return payment["payment_id"]
 
-    def remove_payment(self, payment_id: str):
+    def mark_as_synced(self, payment_id: str):
         """
-        Remove a payment from the queue. Called when the payment has been processed.
+        Mark a payment as synced.
         """
-        self.storage.delete(self.TABLE_NAME, [("payment_id", "eq", payment_id)])
+        data = {
+            "payment_id": payment_id,
+            "synced_at": now(),
+        }
+        self.storage.upsert(self.TABLE_NAME, [data])
 
     def __bool__(self):
         """
         To support the usage of the queue in a while loop.
         """
-        return self.storage.count(self.TABLE_NAME) > 0
+        return self.storage.count(self.TABLE_NAME, {("synced_at", "eq", None)}) > 0
 
     def add(self, payment_id: str):
         """
-        Add a payment to the queue.
+        Add a payment to the queue (if it doesn't already exist)
         """
-        self.storage.upsert(self.TABLE_NAME, [{"payment_id": payment_id}])
+
+        data = {
+            "payment_id": payment_id,
+            "synced_at": None,
+        }
+        self.storage.insert_if_not_exists(self.TABLE_NAME, [data])
 
     @contextmanager
     def pop(self) -> Generator[str, None, None]:
@@ -70,7 +82,7 @@ class PaymentQueue:
         payment_id = self.get_payment_id()
         try:
             yield payment_id
-            self.remove_payment(payment_id)
+            self.mark_as_synced(payment_id)
         except Exception as e:
             self.logger.error(f"Error processing payment {payment_id}: {e}")
             raise e

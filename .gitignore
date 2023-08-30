@@ -164,3 +164,4 @@ config/bunq.cfg
 cache
 .docker-env
 .prefect
+.vscode
