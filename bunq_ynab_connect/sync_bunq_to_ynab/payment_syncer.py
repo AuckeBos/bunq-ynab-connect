@@ -44,7 +44,6 @@ class PaymentSyncer:
     logger: LoggerAdapter
     storage: AbstractStorage
     client: YnabClient
-    mapper: BunqAccountToYnabAccountMapper
     queue: PaymentQueue
     account_map: dict
 
@@ -62,7 +61,7 @@ class PaymentSyncer:
         self.client = client
         self.mapper = mapper
         self.queue = queue
-        self.account_map = {}  # Set in sync
+        self.account_map = mapper.map()
 
     def sanity_check_payment(self, payment: Payment) -> bool:
         """
@@ -81,6 +80,7 @@ class PaymentSyncer:
                 f"Payment {payment.id} is older than {min_date}. Not syncing"
             )
             return False
+        return True
 
     def payment_to_transaction(
         self, payment: Payment, account: YnabAccount
@@ -161,7 +161,6 @@ class PaymentSyncer:
         """
         Sync all payments in the queue from Bunq to YNAB.
         """
-        self.account_map = self.mapper.map()
         counter = 0
         while self.queue:
             with self.queue.pop() as payment_id:
