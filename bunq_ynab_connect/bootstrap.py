@@ -3,9 +3,11 @@ Initialize the dependency injection container and inject dependencies.
 """
 import logging
 import os
+import sys
 
 from dotenv import find_dotenv, load_dotenv
 from kink import di
+from prefect import get_run_logger
 from pymongo import MongoClient
 from pymongo.database import Database
 from ynab.models.account import Account
@@ -22,15 +24,22 @@ def _load_env():
 
 def _get_logger(name: str):
     """
-    Get a logger with a file handler.
+    Get the logger.
+    If we can get the prefect logger (we are running in a prefect flow), use it
+    If not, create a new logger.
     """
-    logger = logging.getLogger(name)
-    log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    os.makedirs(LOGS_DIR, exist_ok=True)
-    fhandler = logging.FileHandler(filename=LOGS_FILE, mode="a")
-    formatter = logging.Formatter(log_fmt)
-    fhandler.setFormatter(formatter)
-    logger.addHandler(fhandler)
+    try:
+        logger = get_run_logger()
+    except:
+        logger = logging.getLogger(name)
+        log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        os.makedirs(LOGS_DIR, exist_ok=True)
+        fhandler = logging.FileHandler(filename=LOGS_FILE, mode="a")
+        stdout_handler = logging.StreamHandler(sys.stdout)
+        formatter = logging.Formatter(log_fmt)
+        fhandler.setFormatter(formatter)
+        logger.addHandler(fhandler)
+        logger.addHandler(stdout_handler)
     logger.setLevel(logging.DEBUG)
     return logger
 
