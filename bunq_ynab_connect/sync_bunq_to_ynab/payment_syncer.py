@@ -13,12 +13,12 @@ from ynab import TransactionDetail
 from ynab.configuration import Configuration
 
 from bunq_ynab_connect.clients.ynab_client import YnabClient
+from bunq_ynab_connect.data.bunq_account_to_ynab_account_mapper import (
+    BunqAccountToYnabAccountMapper,
+)
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.models.ynab.bunq_payment import BunqPayment
 from bunq_ynab_connect.models.ynab.ynab_account import YnabAccount
-from bunq_ynab_connect.sync_bunq_to_ynab.bunq_account_to_ynab_account_mapper import (
-    BunqAccountToYnabAccountMapper,
-)
 from bunq_ynab_connect.sync_bunq_to_ynab.payment_queue import PaymentQueue
 
 
