@@ -1,5 +1,12 @@
 import click
 
+from bunq_ynab_connect.classification.datasets.matched_transactions_dataset import (
+    MatchedTransactionsDataset,
+)
+from bunq_ynab_connect.classification.experiments.classifier_selection_experiment import (
+    ClassifierSelectionExperiment,
+)
+from bunq_ynab_connect.classification.feature_store import FeatureStore
 from bunq_ynab_connect.data.data_extractors.bunq_account_extractor import (
     BunqAccountExtractor,
 )
@@ -65,7 +72,8 @@ def test():
     """
     Testing function
     """
-    print("test")
+    experiment = ClassifierSelectionExperiment()
+    experiment.run()
 
 
 @cli.command()

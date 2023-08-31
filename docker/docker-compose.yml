@@ -58,6 +58,16 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --interval 3600 bunqynab_prefect_agent
     restart: unless-stopped
+
+  mlflow:
+      image: ghcr.io/mlflow/mlflow:v2.6.0
+      container_name: bunqynab_mlflow
+      ports:
+          - "12003:5000"
+      volumes:
+          - ../mlflow:/mlflow
+      command: mlflow server --backend-store-uri sqlite:////mlflow/mlflow.db --default-artifact-root /mlflow/artifacts --host 0.0.0.0
+      restart: unless-stopped    
     
 volumes:
   bunq_ynab_connect_data:
