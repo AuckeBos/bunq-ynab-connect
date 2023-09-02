@@ -1,4 +1,5 @@
 import click
+from kink import inject
 
 from bunq_ynab_connect.classification.datasets.matched_transactions_dataset import (
     MatchedTransactionsDataset,
@@ -22,6 +23,7 @@ from bunq_ynab_connect.data.data_extractors.ynab_budget_extractor import (
 from bunq_ynab_connect.data.data_extractors.ynab_transaction_extractor import (
     YnabTransactionExtractor,
 )
+from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.sync_bunq_to_ynab.payment_syncer import PaymentSyncer
 
 
@@ -68,12 +70,15 @@ def sync_payment(payment_id: int):
 
 
 @cli.command()
-def test():
+@inject
+def test(storage: AbstractStorage):
     """
     Testing function
     """
-    experiment = ClassifierSelectionExperiment()
-    experiment.run()
+    budget_ids = storage.get_budget_ids()
+    for budget_id in budget_ids:
+        experiment = ClassifierSelectionExperiment(budget_id=budget_id)
+        experiment.run()
 
 
 @cli.command()

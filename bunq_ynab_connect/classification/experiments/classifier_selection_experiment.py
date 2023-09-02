@@ -62,11 +62,9 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
         Run the experiment for a single classifier.
         """
         X, y = np.array(X), np.array(y)
-        label_encoder = LabelEncoder()
-        label_encoder.fit([transaction.category_name for transaction in y])
 
         scores = []
-        classifier = Classifier(model, label_encoder=label_encoder)
+        classifier = Classifier(model, label_encoder=self.label_encoder)
         k_fold = KFold(
             n_splits=self.N_FOLDS, shuffle=True, random_state=self.RANDOM_STATE
         )
