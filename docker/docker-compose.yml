@@ -66,7 +66,7 @@ services:
           - "12003:5000"
       volumes:
           - ../mlflow:/mlflow
-      command: mlflow server --backend-store-uri sqlite:////mlflow/mlflow.db --default-artifact-root /mlflow/artifacts --host 0.0.0.0
+      command: mlflow server --backend-store-uri sqlite:////mlflow/mlflow.db --host 0.0.0.0 --artifacts-destination /mlflow/artifacts
       restart: unless-stopped    
     
 volumes:

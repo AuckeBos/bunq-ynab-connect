@@ -1,5 +1,6 @@
-from typing import List
+from typing import Iterable
 
+import numpy as np
 from sklearn.base import ClassifierMixin
 from sklearn.calibration import LabelEncoder
 from sklearn.metrics import cohen_kappa_score
@@ -13,17 +14,19 @@ from bunq_ynab_connect.models.ynab.ynab_transaction import YnabTransaction
 class Classifier(ClassifierMixin):
     model: ClassifierMixin
     feature_extractor: FeatureExtractor
-    label_encoder: OneHotEncoder
+    label_encoder: LabelEncoder
+    SCORE_NAME = "cohen_kappa"
 
-    def __init__(self, model: ClassifierMixin, **kwargs):
+    def __init__(self, model: ClassifierMixin, label_encoder: LabelEncoder):
         self.model = model
+        self.label_encoder = label_encoder
         self.feature_extractor = FeatureExtractor()
-        self.label_encoder = OneHotEncoder(handle_unknown="ignore")
 
-    def fit(self, X: List[BunqPayment], y: List[YnabTransaction]):
+    def fit(self, X: Iterable[BunqPayment], y: Iterable[YnabTransaction]):
+        X = self.feature_extractor.fit_transform(X)
+        y = [transaction.category_name for transaction in y]
+        y = self.label_encoder.transform(y)
         self.model.fit(X, y)
-        self.feature_extractor.fit(X)
-        self.label_encoder.fit([transaction.category_name for transaction in y])
         return self
 
     def predict(self, X):
@@ -32,6 +35,8 @@ class Classifier(ClassifierMixin):
 
     def score(self, X, y):
         X = self.feature_extractor.transform(X)
+        y = [transaction.category_name for transaction in y]
+        y = self.label_encoder.transform(y)
         y_pred = self.model.predict(X)
         cohens_kappa = cohen_kappa_score(y, y_pred)
         return cohens_kappa

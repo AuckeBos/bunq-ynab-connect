@@ -43,7 +43,7 @@ class FeatureExtractor(BaseEstimator, TransformerMixin):
             lowercase=True,
         )
         encoder.fit(descriptions)
-        self.feature_names = [*self.COLUMNS, *encoder.get_feature_names()]
+        self.feature_names = [*self.COLUMNS, *encoder.get_feature_names_out()]
         self.encoder = encoder
         return self
 
@@ -67,7 +67,8 @@ class FeatureExtractor(BaseEstimator, TransformerMixin):
             ]
         )
         descriptions = self.encoder.transform(data[:, 0]).toarray()
+        data = np.array(data[:, 1:], dtype=np.float64)
 
         # Convert the data to a numpy array
-        data = np.hstack((descriptions, data[:, 1:]))
+        data = np.hstack((data, descriptions))
         return data
