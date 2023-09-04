@@ -50,6 +50,8 @@ services:
     restart: unless-stopped
     env_file:
       - ../.docker-env
+    ports:
+      - "12004:8787"
     volumes:
       - ../bunq_ynab_connect:/home/bunqynab/bunq_ynab_connect
       - ../config:/home/bunqynab/config
@@ -68,9 +70,9 @@ services:
       image: ghcr.io/mlflow/mlflow:v2.6.0
       container_name: bunqynab_mlflow
       ports:
-          - "12003:5000"
+        - "12003:5000"
       volumes:
-          - ../mlflow:/mlflow
+        - ../mlflow:/mlflow
       command: mlflow server --backend-store-uri sqlite:////mlflow/mlflow.db --host 0.0.0.0 --artifacts-destination /mlflow/artifacts
       restart: unless-stopped
 

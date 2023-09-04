@@ -1,7 +1,11 @@
 from kink import di
 from prefect import flow, get_run_logger, task
 from prefect.task_runners import ConcurrentTaskRunner
+from prefect_dask.task_runners import DaskTaskRunner
 
+from bunq_ynab_connect.classification.experiments.classifier_selection_experiment import (
+    ClassifierSelectionExperiment,
+)
 from bunq_ynab_connect.data.data_extractors.abstract_extractor import AbstractExtractor
 from bunq_ynab_connect.data.data_extractors.bunq_account_extractor import (
     BunqAccountExtractor,
@@ -18,6 +22,7 @@ from bunq_ynab_connect.data.data_extractors.ynab_budget_extractor import (
 from bunq_ynab_connect.data.data_extractors.ynab_transaction_extractor import (
     YnabTransactionExtractor,
 )
+from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.sync_bunq_to_ynab.payment_syncer import PaymentSyncer
 
 
@@ -68,3 +73,23 @@ def sync():
     """
     extract()
     sync_payment_queue()
+
+
+@task
+def train_for_budget(budget_id: str):
+    """
+    Train the classifier for a single budget.
+    """
+    experiment = ClassifierSelectionExperiment(budget_id=budget_id)
+    experiment.run()
+
+
+@flow(task_runner=DaskTaskRunner())
+def train():
+    """
+    Train one classifier for each budget
+    """
+    storage = di[AbstractStorage]
+    budget_ids = storage.get_budget_ids()
+    for budget_id in budget_ids:
+        train_for_budget.submit(budget_id)

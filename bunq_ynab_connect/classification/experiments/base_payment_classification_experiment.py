@@ -1,3 +1,5 @@
+import os
+import tempfile
 from abc import abstractmethod
 from logging import LoggerAdapter
 from typing import List
@@ -10,6 +12,7 @@ import mlflow
 from bunq_ynab_connect.classification.feature_extractor import FeatureExtractor
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.models.ynab.bunq_payment import BunqPayment
+from bunq_ynab_connect.models.ynab.matched_transaction import MatchedTransaction
 from bunq_ynab_connect.models.ynab.ynab_transaction import YnabTransaction
 
 
@@ -34,6 +37,7 @@ class BasePaymentClassificationExperiment:
     logger: LoggerAdapter
     run_id: str
     label_encoder: LabelEncoder
+    ids: List[str]
 
     @inject
     def __init__(self, storage: AbstractStorage, logger: LoggerAdapter, budget_id: str):
@@ -42,7 +46,20 @@ class BasePaymentClassificationExperiment:
         self.budget_id = budget_id
         self.label_encoder = LabelEncoder()
 
-    def load_data(self):
+    def log_transactions(self, transactions: List[MatchedTransaction], name: str):
+        """
+        Log the training data to mlflow
+        """
+        with tempfile.TemporaryDirectory() as dir:
+            filename = f"{name}.txt"
+            path = os.path.join(dir, filename)
+            with open(path, "w") as file:
+                ids = [t.match_id for t in transactions]
+                file.write("\n".join(ids))
+            mlflow.log_artifact(path)
+            mlflow.log_text(str(len(ids)), f"len_{name}.txt")
+
+    def load_data(self) -> List[MatchedTransaction]:
         """
         Load the dataset:
         - Load all matched transactions
@@ -53,15 +70,13 @@ class BasePaymentClassificationExperiment:
             X: List of BunqPayments
             y: List of YnabTransactions
         """
-
-        dataset = self.storage.find("matched_transactions")
-        X = np.array([BunqPayment(**row["bunq_payment"]) for row in dataset])
-        y = np.array([YnabTransaction(**row["ynab_transaction"]) for row in dataset])
-        ids = [i for i in range(len(y)) if y[i].id == self.budget_id]
-        # Todo: Set always empty
-        X, y = X[ids], y[ids]
-        self.label_encoder.fit([transaction.category_name for transaction in y])
-        return X, y
+        transactions = self.storage.find(
+            "matched_transactions",
+            [("ynab_transaction.budget_id", "eq", self.budget_id)],
+        )
+        transactions = self.storage.rows_to_entities(transactions, MatchedTransaction)
+        self.label_encoder.fit([t.ynab_transaction.category_name for t in transactions])
+        return transactions
 
     def run(self):
         """
@@ -70,24 +85,25 @@ class BasePaymentClassificationExperiment:
         - Enable autolog
         - Start run and _run
         """
-        X, y = self.load_data()
+        transactions = self.load_data()
         experiment_name = f"{self.__class__.__name__} [{self.budget_id}]"
-        if not len(y):
+        if not len(transactions):
             self.logger.info(
                 f"Skipping experiment {experiment_name}, because no dataset was found"
             )
             return
         mlflow.sklearn.autolog()
         self.logger.info(f"Running experiment {experiment_name}")
-        self.logger.info(f"Dataset has size {len(X)}")
+        self.logger.info(f"Dataset has size {len(transactions)}")
         mlflow.set_experiment(experiment_name)
         with mlflow.start_run() as run:
+            self.log_transactions(transactions, "full_set_ids")
             mlflow.set_tag("budget", self.budget_id)
             self.run_id = run.info.run_id
-            return self._run(X, y)
+            return self._run(transactions)
 
     @abstractmethod
-    def _run(self, X: List[BunqPayment], y: List[YnabTransaction]):
+    def _run(self, transactions: List[MatchedTransaction]):
         """
         Run the actual experiment on the full set
         """

@@ -19,6 +19,7 @@ from bunq_ynab_connect.classification.experiments.base_payment_classification_ex
     BasePaymentClassificationExperiment,
 )
 from bunq_ynab_connect.models.ynab.bunq_payment import BunqPayment
+from bunq_ynab_connect.models.ynab.matched_transaction import MatchedTransaction
 from bunq_ynab_connect.models.ynab.ynab_transaction import YnabTransaction
 
 
@@ -32,18 +33,16 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
     RANDOM_STATE = 42
 
     CLASSIFIERS = [
-        KNeighborsClassifier(n_neighbors=3),
         DecisionTreeClassifier(),
         LogisticRegression(max_iter=1000),
         RandomForestClassifier(),
         GradientBoostingClassifier(),
-        SVC(),
         GaussianNB(),
         MLPClassifier(max_iter=1000),
         ExplainableBoostingClassifier(),
     ]
 
-    def _run(self, X: List[BunqPayment], y: List[YnabTransaction]):
+    def _run(self, transactions: List[MatchedTransaction]):
         """
         Run the experiment.
         """
@@ -52,30 +51,33 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
             with mlflow.start_run(
                 run_name=classifier.__class__.__name__, nested=True
             ) as run:
-                self.run_classifier(classifier, X, y)
+                self.run_classifier(classifier, transactions)
         return results
 
     def run_classifier(
-        self, model: ClassifierMixin, X: List[BunqPayment], y: List[YnabTransaction]
+        self, model: ClassifierMixin, transactions: List[MatchedTransaction]
     ):
         """
         Run the experiment for a single classifier.
         """
-        X, y = np.array(X), np.array(y)
+        transactions = np.array(transactions)
 
         scores = []
         classifier = Classifier(model, label_encoder=self.label_encoder)
         k_fold = KFold(
             n_splits=self.N_FOLDS, shuffle=True, random_state=self.RANDOM_STATE
         )
-        for i, (train_index, test_index) in enumerate(k_fold.split(X, y)):
-            X_train, X_test = X[train_index], X[test_index]
-            y_train, y_test = y[train_index], y[test_index]
+        for i, (train_index, test_index) in enumerate(k_fold.split(transactions)):
+            train_transactions = transactions[train_index]
+            test_transactions = transactions[test_index]
+            X_train = [t.bunq_payment for t in train_transactions]
+            X_test = [t.bunq_payment for t in test_transactions]
+            y_train = [t.ynab_transaction for t in train_transactions]
+            y_test = [t.ynab_transaction for t in test_transactions]
+            self.log_transactions(train_transactions, "train_ids")
+            self.log_transactions(test_transactions, "test_ids")
             classifier.fit(X_train, y_train)
             scores.append(classifier.score(X_test, y_test))
-            self.logger.info(
-                f"Fold {i + 1} for {model.__class__.__name__}: {scores[-1]}"
-            )
         mlflow.log_text(str(scores), "scores.txt")
         avg_score = np.mean(scores)
         mlflow.log_metric(Classifier.SCORE_NAME, avg_score)

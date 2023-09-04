@@ -48,4 +48,13 @@ deployments:
   parameters: {}
   work_pool:
     name: docker-pool
-    work_queue_name: default    
+    work_queue_name: default
+- name: train
+  version: 2023.09.04.1
+  description: Train one classifier for each budget
+  entrypoint: flows:train
+  schedule: {}
+  parameters: {}
+  work_pool:
+    name: docker-pool
+    work_queue_name: default        

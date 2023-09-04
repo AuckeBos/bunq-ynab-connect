@@ -46,6 +46,8 @@ services:
     image: index.docker.io/auckebos/bunq-ynab-connect:latest
     container_name: bunqynab_prefect_agent
     restart: unless-stopped
+    ports:
+      - "12004:8787"    
     env_file:
       - ../.docker-env
     depends_on:
@@ -63,9 +65,9 @@ services:
       image: ghcr.io/mlflow/mlflow:v2.6.0
       container_name: bunqynab_mlflow
       ports:
-          - "12003:5000"
+        - "12003:5000"
       volumes:
-          - ../mlflow:/mlflow
+        - ../mlflow:/mlflow
       command: mlflow server --backend-store-uri sqlite:////mlflow/mlflow.db --host 0.0.0.0 --artifacts-destination /mlflow/artifacts
       restart: unless-stopped    
     
