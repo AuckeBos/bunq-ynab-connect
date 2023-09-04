@@ -100,7 +100,7 @@ class BasePaymentClassificationExperiment:
             self.log_transactions(transactions, "full_set_ids")
             mlflow.set_tag("budget", self.budget_id)
             self.run_id = run.info.run_id
-            return self._run(transactions)
+            self._run(transactions)
 
     @abstractmethod
     def _run(self, transactions: List[MatchedTransaction]):

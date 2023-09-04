@@ -34,7 +34,6 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
 
     CLASSIFIERS = [
         DecisionTreeClassifier(),
-        LogisticRegression(max_iter=1000),
         RandomForestClassifier(),
         GradientBoostingClassifier(),
         GaussianNB(),
@@ -60,22 +59,17 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
         """
         Run the experiment for a single classifier.
         """
-        transactions = np.array(transactions)
+        X = np.array([t.bunq_payment for t in transactions])
+        y = np.array([t.ynab_transaction for t in transactions])
 
         scores = []
         classifier = Classifier(model, label_encoder=self.label_encoder)
         k_fold = KFold(
             n_splits=self.N_FOLDS, shuffle=True, random_state=self.RANDOM_STATE
         )
-        for i, (train_index, test_index) in enumerate(k_fold.split(transactions)):
-            train_transactions = transactions[train_index]
-            test_transactions = transactions[test_index]
-            X_train = [t.bunq_payment for t in train_transactions]
-            X_test = [t.bunq_payment for t in test_transactions]
-            y_train = [t.ynab_transaction for t in train_transactions]
-            y_test = [t.ynab_transaction for t in test_transactions]
-            self.log_transactions(train_transactions, "train_ids")
-            self.log_transactions(test_transactions, "test_ids")
+        for i, (train_index, test_index) in enumerate(k_fold.split(X)):
+            X_train, X_test = X[train_index], X[test_index]
+            y_train, y_test = y[train_index], y[test_index]
             classifier.fit(X_train, y_train)
             scores.append(classifier.score(X_test, y_test))
         mlflow.log_text(str(scores), "scores.txt")
