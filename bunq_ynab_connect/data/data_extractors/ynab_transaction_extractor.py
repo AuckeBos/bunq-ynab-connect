@@ -39,7 +39,11 @@ class YnabTransactionExtractor(AbstractExtractor):
                 a, self.last_runmoment
             )
             transactions_for_account = [
-                YnabTransaction(**a.to_dict()).dict() for a in transactions_for_account
+                YnabTransaction(
+                    **t.to_dict(),
+                    budget_id=a.budget_id,
+                ).dict()
+                for t in transactions_for_account
             ]
             transactions.extend(transactions_for_account)
         return transactions

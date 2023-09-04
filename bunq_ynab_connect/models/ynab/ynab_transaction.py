@@ -14,6 +14,7 @@ class YnabTransaction(BaseModel):
     """
 
     id: Optional[str]
+    budget_id: Optional[str]
     date: Optional[datetime]
     amount: Optional[int]
     memo: Optional[str]
