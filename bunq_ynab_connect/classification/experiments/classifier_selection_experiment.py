@@ -6,7 +6,7 @@ from sklearn.base import ClassifierMixin
 from sklearn.calibration import LabelEncoder
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import KFold, cross_val_score
+from sklearn.model_selection import KFold, StratifiedKFold, cross_val_score
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
@@ -61,17 +61,12 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
         """
         X = np.array([t.bunq_payment for t in transactions])
         y = np.array([t.ynab_transaction for t in transactions])
-
-        scores = []
-        classifier = Classifier(model, label_encoder=self.label_encoder)
-        k_fold = KFold(
+        y = self.label_encoder.fit_transform(y)
+        classifier = self.create_pipeline(model)
+        k_fold = StratifiedKFold(
             n_splits=self.N_FOLDS, shuffle=True, random_state=self.RANDOM_STATE
         )
-        for i, (train_index, test_index) in enumerate(k_fold.split(X)):
-            X_train, X_test = X[train_index], X[test_index]
-            y_train, y_test = y[train_index], y[test_index]
-            classifier.fit(X_train, y_train)
-            scores.append(classifier.score(X_test, y_test))
+        scores = cross_val_score(classifier, X, y, cv=k_fold, n_jobs=-1)
         mlflow.log_text(str(scores), "scores.txt")
         avg_score = np.mean(scores)
         mlflow.log_metric(Classifier.SCORE_NAME, avg_score)
