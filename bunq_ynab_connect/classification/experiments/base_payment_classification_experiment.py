@@ -64,12 +64,11 @@ class BasePaymentClassificationExperiment:
     def load_data(self) -> List[MatchedTransaction]:
         """
         Load the dataset:
-        - Load all matched transactions
-        - Filter those for the current budget
+        - Load all matched transactions for the given budget
+        - Convert them to MatchedTransaction entities
 
         Returns:
-            X: List of BunqPayments
-            y: List of YnabTransactions
+            List of MatchedTransaction entities
         """
         transactions = self.storage.find(
             "matched_transactions",
@@ -77,6 +76,21 @@ class BasePaymentClassificationExperiment:
         )
         transactions = self.storage.rows_to_entities(transactions, MatchedTransaction)
         return transactions
+
+    def transactions_to_xy(
+        self, transactions: List[MatchedTransaction]
+    ) -> (np.array, np.array):
+        """
+        Convert a list of MatchedTransactions to X and y
+
+        Returns:
+            X: Array of bunq payments
+            y: Array of categories as integers
+        """
+        X = np.array([t.bunq_payment for t in transactions])
+        y = np.array([t.ynab_transaction for t in transactions])
+        y = self.label_encoder.fit_transform(y)
+        return X, y
 
     def run(self):
         """
@@ -92,15 +106,16 @@ class BasePaymentClassificationExperiment:
                 f"Skipping experiment {experiment_name}, because no dataset was found"
             )
             return
-        mlflow.sklearn.autolog()
+        X, y = self.transactions_to_xy(transactions)
         self.logger.info(f"Running experiment {experiment_name}")
         self.logger.info(f"Dataset has size {len(transactions)}")
         mlflow.set_experiment(experiment_name)
+        mlflow.sklearn.autolog()
         with mlflow.start_run() as run:
             self.log_transactions(transactions, "full_set_ids")
             mlflow.set_tag("budget", self.budget_id)
             self.run_id = run.info.run_id
-            self._run(transactions)
+            self._run(X, y)
 
     def create_pipeline(self, classifier: ClassifierMixin) -> Pipeline:
         """
@@ -116,7 +131,7 @@ class BasePaymentClassificationExperiment:
         return pipeline
 
     @abstractmethod
-    def _run(self, transactions: List[MatchedTransaction]):
+    def _run(self, X: np.array, y: np.array):
         """
         Run the actual experiment on the full set
         """

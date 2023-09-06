@@ -1,5 +1,4 @@
 from logging import LoggerAdapter
-from typing import List
 
 import numpy as np
 from interpret.glassbox import ExplainableBoostingClassifier
@@ -90,7 +89,7 @@ class ClassifierTuningExperiment(BasePaymentClassificationExperiment):
         super().__init__(budget_id, storage, logger)
         self.clf = clf
 
-    def _run(self, transactions: List[MatchedTransaction]):
+    def _run(self, X: np.ndarray, y: np.ndarray):
         """
         Run the experiment.
         """
@@ -99,9 +98,6 @@ class ClassifierTuningExperiment(BasePaymentClassificationExperiment):
             for key, value in self.HYPERPARAMETER_SPACES[self.clf.__name__].items()
         }
         classifier = self.clf()
-        X = np.array([t.bunq_payment for t in transactions])
-        y = np.array([t.ynab_transaction for t in transactions])
-        y = self.label_encoder.fit_transform(y)
         pipeline = self.create_pipeline(classifier)
         grid_search = GridSearchCV(
             pipeline, space, cv=self.N_FOLDS, scoring=make_scorer(cohen_kappa_score)

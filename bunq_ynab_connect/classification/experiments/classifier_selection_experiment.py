@@ -1,5 +1,3 @@
-from typing import List
-
 import numpy as np
 from interpret.glassbox import ExplainableBoostingClassifier
 from sklearn.base import ClassifierMixin
@@ -41,7 +39,7 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
         ExplainableBoostingClassifier(),
     ]
 
-    def _run(self, transactions: List[MatchedTransaction]):
+    def _run(self, X: np.ndarray, y: np.ndarray):
         """
         Run the experiment.
         """
@@ -50,18 +48,13 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
             with mlflow.start_run(
                 run_name=classifier.__class__.__name__, nested=True
             ) as run:
-                self.run_classifier(classifier, transactions)
+                self.run_classifier(classifier, X, y)
         return results
 
-    def run_classifier(
-        self, model: ClassifierMixin, transactions: List[MatchedTransaction]
-    ):
+    def run_classifier(self, model: ClassifierMixin, X: np.ndarray, y: np.ndarray):
         """
         Run the experiment for a single classifier.
         """
-        X = np.array([t.bunq_payment for t in transactions])
-        y = np.array([t.ynab_transaction for t in transactions])
-        y = self.label_encoder.fit_transform(y)
         classifier = self.create_pipeline(model)
         k_fold = StratifiedKFold(
             n_splits=self.N_FOLDS, shuffle=True, random_state=self.RANDOM_STATE
