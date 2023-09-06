@@ -100,7 +100,7 @@ class BasePaymentClassificationExperiment:
         - Start run and _run
         """
         transactions = self.load_data()
-        experiment_name = f"{self.__class__.__name__} [{self.budget_id}]"
+        experiment_name = self.get_experiment_name()
         if not len(transactions):
             self.logger.info(
                 f"Skipping experiment {experiment_name}, because no dataset was found"
@@ -129,6 +129,12 @@ class BasePaymentClassificationExperiment:
             ]
         )
         return pipeline
+
+    def get_experiment_name(self) -> str:
+        """
+        Get the name of the experiment
+        """
+        return f"{self.__class__.__name__} [{self.budget_id}]"
 
     @abstractmethod
     def _run(self, X: np.array, y: np.array):

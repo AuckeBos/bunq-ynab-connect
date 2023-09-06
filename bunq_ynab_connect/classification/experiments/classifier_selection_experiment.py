@@ -1,5 +1,8 @@
+from multiprocessing.pool import ThreadPool
+
 import numpy as np
 from interpret.glassbox import ExplainableBoostingClassifier
+from prefect import task
 from sklearn.base import ClassifierMixin
 from sklearn.calibration import LabelEncoder
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
@@ -43,13 +46,24 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
         """
         Run the experiment.
         """
-        results = []
-        for classifier in self.CLASSIFIERS:
+
+        def run_for_one_classifier(
+            self, classifier: ClassifierMixin, X: np.ndarray, y: np.ndarray
+        ):
+            mlflow.set_experiment(self.get_experiment_name())
+            # Todo: This nests inside other runs
             with mlflow.start_run(
-                run_name=classifier.__class__.__name__, nested=True
+                run_name=classifier.__class__.__name__,
+                nested=True,
+                tags={"mlflow.parentRunId": self.run_id},
             ) as run:
                 self.run_classifier(classifier, X, y)
-        return results
+
+        pool = ThreadPool(processes=4)
+        pool.map(
+            lambda classifier: run_for_one_classifier(self, classifier, X, y),
+            self.CLASSIFIERS,
+        )
 
     def run_classifier(self, model: ClassifierMixin, X: np.ndarray, y: np.ndarray):
         """
