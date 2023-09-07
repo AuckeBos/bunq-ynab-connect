@@ -31,13 +31,15 @@ class BasePaymentClassificationExperiment:
         budget_id: ID of the budget on which we are training a classifier
         storage: Storage to use for loading and saving data.
         logger: Logger to use for logging.
-        run_id: ID of the current run. Set upon run()
+        parent_run_id: ID of the current run. Set upon run()
+        ids: List of IDs of the matched transactions used for training
+        label_encoder: LabelEncoder used to encode the categories
     """
 
     budget_id: str
     storage: AbstractStorage
     logger: LoggerAdapter
-    run_id: str
+    parent_run_id: str
     ids: List[str]
     label_encoder: BudgetCategoryEncoder
 
@@ -114,7 +116,7 @@ class BasePaymentClassificationExperiment:
         with mlflow.start_run() as run:
             self.log_transactions(transactions, "full_set_ids")
             mlflow.set_tag("budget", self.budget_id)
-            self.run_id = run.info.run_id
+            self.parent_run_id = run.info.run_id
             self._run(X, y)
 
     def create_pipeline(self, classifier: ClassifierMixin) -> Pipeline:

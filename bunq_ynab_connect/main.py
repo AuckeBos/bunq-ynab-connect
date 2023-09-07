@@ -12,6 +12,7 @@ from bunq_ynab_connect.classification.experiments.classifier_tuning_experiment i
     ClassifierTuningExperiment,
 )
 from bunq_ynab_connect.classification.feature_store import FeatureStore
+from bunq_ynab_connect.classification.trainer import Trainer
 from bunq_ynab_connect.data.data_extractors.bunq_account_extractor import (
     BunqAccountExtractor,
 )
@@ -79,10 +80,8 @@ def test(storage: AbstractStorage):
     """
     Testing function
     """
-    experiment = ClassifierTuningExperiment(
-        budget_id="my-budget", clf=DecisionTreeClassifier()
-    )
-    experiment.run()
+    trainer = Trainer()
+    trainer.train("my-budget")
 
 
 @cli.command()

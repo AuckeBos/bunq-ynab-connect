@@ -38,7 +38,14 @@ from bunq_ynab_connect.models.ynab.ynab_transaction import YnabTransaction
 
 class ClassifierTuningExperiment(BasePaymentClassificationExperiment):
     """
-    Tun one classifier. Ran for the best classifier out of the ClassifierSelectionExperiment.
+    Tune one classifier. Ran for the best classifier out of the ClassifierSelectionExperiment.
+
+    Attributes:
+        N_FOLDS: Amount of folds to use for K-fold cross validation
+        HYPERPARAMETER_SPACES: Dictionary containing the hyperparameter spaces for each classifier
+        grid_search: GridSearchCV object used to find the best parameters
+        clf: Classifier to tune
+        threads: Amount of threads to use for parallelization. Defaults to -1 (All cores)
     """
 
     N_FOLDS = 3
@@ -77,33 +84,61 @@ class ClassifierTuningExperiment(BasePaymentClassificationExperiment):
     }
 
     clf: type[ClassifierMixin]
+    grid_search: GridSearchCV
+    threads: int
 
     @inject
     def __init__(
         self,
         budget_id: str,
-        clf: type[ClassifierMixin],
         storage: AbstractStorage,
         logger: LoggerAdapter,
+        *,
+        clf: type[ClassifierMixin],
+        threads: int = None,
     ):
         super().__init__(budget_id, storage, logger)
         self.clf = clf
+        if not threads:
+            threads = -1
+        self.threads = threads
 
     def _run(self, X: np.ndarray, y: np.ndarray):
         """
         Run the experiment.
         """
+        # Prefix the hyperparameter space with the classifier name.
         space = {
             f"classifier__{key}": value
             for key, value in self.HYPERPARAMETER_SPACES[self.clf.__name__].items()
         }
         classifier = self.clf()
         pipeline = self.create_pipeline(classifier)
-        grid_search = GridSearchCV(
-            pipeline, space, cv=self.N_FOLDS, scoring=make_scorer(cohen_kappa_score)
+        self.grid_search = GridSearchCV(
+            pipeline,
+            space,
+            cv=self.N_FOLDS,
+            scoring=make_scorer(cohen_kappa_score),
+            n_jobs=self.threads,
         )
-        grid_search.fit(X, y)
-        grid_search.best_estimator_
-        score = grid_search.best_score_
+        self.grid_search.fit(X, y)
+        score = self.grid_search.best_score_
         print(f"Score of best clf: {score}")
         mlflow.log_metric("cohens_kappa", score)
+
+    def get_best_parameters(self) -> dict[str, any]:
+        """
+        After running the experiment, get the best parameters.
+        """
+        if not self.grid_search:
+            raise Exception("Experiment not run yet")
+        best_params = self.grid_search.best_params_
+        # Remove prefix from the best parameters.
+        best_params = {
+            key.replace("classifier__", ""): value for key, value in best_params.items()
+        }
+        best_score = self.grid_search.best_score_
+        self.logger.info(
+            f"The best parameters are: {best_params}, with a score of {best_score}"
+        )
+        return best_params

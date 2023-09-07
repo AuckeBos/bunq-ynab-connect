@@ -6,6 +6,7 @@ from prefect_dask.task_runners import DaskTaskRunner
 from bunq_ynab_connect.classification.experiments.classifier_selection_experiment import (
     ClassifierSelectionExperiment,
 )
+from bunq_ynab_connect.classification.trainer import Trainer
 from bunq_ynab_connect.data.data_extractors.abstract_extractor import AbstractExtractor
 from bunq_ynab_connect.data.data_extractors.bunq_account_extractor import (
     BunqAccountExtractor,
@@ -78,10 +79,11 @@ def sync():
 @task
 def train_for_budget(budget_id: str):
     """
-    Train the classifier for a single budget.
+    Run the trainer for a single budget.
+    Set threads to 1, since we use prefect to parallelize the training.
     """
-    experiment = ClassifierSelectionExperiment(budget_id=budget_id)
-    experiment.run()
+    trainer = Trainer(budget_id)
+    trainer.train(threads=1)
 
 
 @flow(task_runner=DaskTaskRunner())
