@@ -54,7 +54,8 @@ deployments:
   description: Train one classifier for each budget
   entrypoint: flows:train
   schedule: {}
-  parameters: {}
+  parameters:
+    threads: 1
   work_pool:
     name: docker-pool
     work_queue_name: default        

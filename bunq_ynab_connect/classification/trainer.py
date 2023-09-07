@@ -25,27 +25,29 @@ class Trainer:
     Attributes
         EXPERIMENT_NAME: Name of the experiment
         logger: LoggerAdapter
+        budget_id: ID of the budget to train the classifier for
         theads: Number of threads to use for the experiments. Defaults to all
     """
 
     EXPERIMENT_NAME = "Full Training"
 
     logger: LoggerAdapter
+    budget_id: str
     theads: int
 
     @inject
-    def __init__(self, logger: LoggerAdapter, theads: int = None):
+    def __init__(self, logger: LoggerAdapter, budget_id: str, threads: int = None):
         self.logger = logger
-        self.theads = theads
+        self.budget_id = budget_id
+        self.theads = threads
 
     budget_id: str
 
-    def train(self, budget_id: str):
+    def train(self):
         """
         Select the best classifier and the best parameters for the given classifier.
         Then train the best classifier on the full dataset.
         """
-        self.budget_id = budget_id
         self.logger.info(f"Training for budget {self.budget_id}")
         classifier = self.select_best_classifier()
         if not classifier:

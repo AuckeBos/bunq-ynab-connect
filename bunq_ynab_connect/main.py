@@ -80,8 +80,8 @@ def test(storage: AbstractStorage):
     """
     Testing function
     """
-    trainer = Trainer()
-    trainer.train("my-budget")
+    trainer = Trainer(budget_id="my-budget")
+    trainer.train()
 
 
 @cli.command()

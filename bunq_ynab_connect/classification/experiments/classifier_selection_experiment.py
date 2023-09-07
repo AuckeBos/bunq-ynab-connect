@@ -1,6 +1,5 @@
 import multiprocessing
 from logging import LoggerAdapter
-from multiprocessing.pool import ThreadPool
 
 import numpy as np
 from interpret.glassbox import ExplainableBoostingClassifier
@@ -38,7 +37,7 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
         N_FOLDS: Amount of folds to use for K-fold cross validation
         RANDOM_STATE: Random state to use for K-fold cross validation
         run_id: ID of the current run. Set upon run()
-        threads: Amount of threads to use for parallelization. Defaults to CPU cores - 1
+        threads: Not used
         CLASSIFIERS: List of classifiers to test
     """
 
@@ -72,37 +71,12 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
 
     def _run(self, X: np.ndarray, y: np.ndarray):
         """
-        Run the experiment. Use a Thread Pool to run the classifiers in parallel.
-        The amount of threads is the amount of CPU cores minus 1.
+        Run the experiment.
         """
 
-        def run_for_one_classifier(
-            self, classifier: ClassifierMixin, X: np.ndarray, y: np.ndarray
-        ):
-            """
-            Run the experiment for a single classifier.
-            Use the client instead of mlflow, to prevent threading issues and non-closed runs.
-            """
-            client = MlflowClient()
-            experiment_id = client.get_experiment_by_name(
-                self.get_experiment_name()
-            ).experiment_id
-            run = client.create_run(
-                experiment_id=experiment_id,
-                tags={"mlflow.parentRunId": self.parent_run_id},
-                run_name=classifier.__class__.__name__,
-            )
-            self.run_id = run.info.run_id
-            try:
+        for classifier in self.CLASSIFIERS:
+            with mlflow.start_run(run_name=classifier.__class__.__name__, nested=True):
                 self.run_classifier(classifier, X, y)
-            finally:
-                client.set_terminated(self.run_id)
-
-        pool = ThreadPool(processes=self.threads)
-        pool.map(
-            lambda classifier: run_for_one_classifier(self, classifier, X, y),
-            self.CLASSIFIERS,
-        )
 
     def run_classifier(self, model: ClassifierMixin, X: np.ndarray, y: np.ndarray):
         """
@@ -113,16 +87,16 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
 
         Use the client to log, to prevent issues due to threading.
         """
-        client = MlflowClient()
-        client.set_tag(self.run_id, "classifier", model.__class__.__name__)
+        mlflow.set_tag("classifier", model.__class__.__name__)
         classifier = self.create_pipeline(model)
         k_fold = StratifiedKFold(
             n_splits=self.N_FOLDS, shuffle=True, random_state=self.RANDOM_STATE
         )
         scores = cross_val_score(classifier, X, y, cv=k_fold, n_jobs=-1)
-        client.log_text(self.run_id, str(scores), "scores.txt")
+        mlflow.log_text(str(scores), "scores.txt")
         avg_score = np.mean(scores)
-        client.log_metric(self.run_id, Classifier.SCORE_NAME, avg_score)
+        mlflow.log_metric(Classifier.SCORE_NAME, avg_score)
+        mlflow.sklearn.log_model(classifier, "model")
         return avg_score
 
     def get_best_classifier(self) -> ClassifierMixin:
