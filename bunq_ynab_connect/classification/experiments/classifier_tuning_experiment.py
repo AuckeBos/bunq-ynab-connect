@@ -1,4 +1,5 @@
 from logging import LoggerAdapter
+from typing import Any
 
 import numpy as np
 from interpret.glassbox import ExplainableBoostingClassifier
@@ -83,7 +84,7 @@ class ClassifierTuningExperiment(BasePaymentClassificationExperiment):
         },
     }
 
-    clf: type[ClassifierMixin]
+    clf: Any
     grid_search: GridSearchCV
     threads: int
 
@@ -94,10 +95,11 @@ class ClassifierTuningExperiment(BasePaymentClassificationExperiment):
         storage: AbstractStorage,
         logger: LoggerAdapter,
         *,
-        clf: type[ClassifierMixin],
+        clf: Any,
         threads: int = None,
     ):
         super().__init__(budget_id, storage, logger)
+        self.grid_search = None
         self.clf = clf
         if not threads:
             threads = -1
@@ -126,12 +128,12 @@ class ClassifierTuningExperiment(BasePaymentClassificationExperiment):
         print(f"Score of best clf: {score}")
         mlflow.log_metric("cohens_kappa", score)
 
-    def get_best_parameters(self) -> dict[str, any]:
+    def get_best_parameters(self) -> dict:
         """
         After running the experiment, get the best parameters.
         """
         if not self.grid_search:
-            raise Exception("Experiment not run yet")
+            return None
         best_params = self.grid_search.best_params_
         # Remove prefix from the best parameters.
         best_params = {

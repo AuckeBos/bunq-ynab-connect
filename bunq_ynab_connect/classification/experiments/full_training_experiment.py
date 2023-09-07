@@ -1,4 +1,5 @@
 from logging import LoggerAdapter
+from typing import Any
 
 import numpy as np
 from interpret.glassbox import ExplainableBoostingClassifier
@@ -51,8 +52,8 @@ class FullTrainingExperiment(BasePaymentClassificationExperiment):
         storage: AbstractStorage,
         logger: LoggerAdapter,
         *,
-        clf: type[ClassifierMixin],
-        parameters: dict[str, any],
+        clf: Any,
+        parameters: dict
     ):
         super().__init__(budget_id, storage, logger)
         self.model = clf(**parameters)

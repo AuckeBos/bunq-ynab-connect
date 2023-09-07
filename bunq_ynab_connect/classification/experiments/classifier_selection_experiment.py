@@ -65,6 +65,7 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
         threads: int = None,
     ):
         super().__init__(budget_id, storage, logger)
+        self.parent_run_id = None
         if not threads:
             threads = multiprocessing.cpu_count() - 1
         self.threads = threads
@@ -129,7 +130,7 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
         Select the best classifier based on the score.
         """
         if not self.parent_run_id:
-            raise Exception("Experiment has not been run yet")
+            return None
         client = MlflowClient()
         experiment_id = client.get_experiment_by_name(
             self.get_experiment_name()

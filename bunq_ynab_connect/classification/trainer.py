@@ -48,6 +48,9 @@ class Trainer:
         self.budget_id = budget_id
         self.logger.info(f"Training for budget {self.budget_id}")
         classifier = self.select_best_classifier()
+        if not classifier:
+            self.logger.info("No classifier selected, training failed")
+            return
         parameters = self.select_best_parameters(classifier)
         self.train_classifier(classifier, parameters)
 
@@ -61,7 +64,7 @@ class Trainer:
         experiment.run()
         return experiment.get_best_classifier()
 
-    def select_best_parameters(self, classifier) -> dict[str, any]:
+    def select_best_parameters(self, classifier) -> dict:
         """
         Run the ClassifierTuningExperiment to select the best parameters for the given classifier.
         """
