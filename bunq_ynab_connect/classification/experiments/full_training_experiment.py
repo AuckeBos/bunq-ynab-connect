@@ -27,11 +27,13 @@ from bunq_ynab_connect.classification.budget_category_encoder import (
     BudgetCategoryEncoder,
 )
 from bunq_ynab_connect.classification.classifier import Classifier
+from bunq_ynab_connect.classification.deployable_model import DeployableModel
 from bunq_ynab_connect.classification.experiments.base_payment_classification_experiment import (
     BasePaymentClassificationExperiment,
 )
 from bunq_ynab_connect.classification.feature_extractor import FeatureExtractor
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
+from bunq_ynab_connect.helpers.general import object_to_mlflow
 from bunq_ynab_connect.models.ynab.bunq_payment import BunqPayment
 from bunq_ynab_connect.models.ynab.matched_transaction import MatchedTransaction
 from bunq_ynab_connect.models.ynab.ynab_transaction import YnabTransaction
@@ -62,4 +64,17 @@ class FullTrainingExperiment(BasePaymentClassificationExperiment):
         classifier = self.create_pipeline(self.model)
         classifier.fit(X, y)
         mlflow.sklearn.log_model(classifier, "model")
+        object_to_mlflow(self.label_encoder, "label_encoder")
+
+        artifact_uri = mlflow.active_run().info.artifact_uri
+        artifacts = {
+            "model_path": artifact_uri + "/model",
+            "label_encoder_path": artifact_uri + "/label_encoder",
+        }
+        mlflow.pyfunc.log_model(
+            artifact_path="deployable_model",
+            python_model=DeployableModel(),
+            artifacts=artifacts,
+        )
+
         self.logger.info("Finished training")
