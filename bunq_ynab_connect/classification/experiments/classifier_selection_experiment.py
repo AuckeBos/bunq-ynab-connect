@@ -95,7 +95,7 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
         scores = cross_val_score(classifier, X, y, cv=k_fold, n_jobs=-1)
         mlflow.log_text(str(scores), "scores.txt")
         avg_score = np.mean(scores)
-        mlflow.log_metric(Classifier.SCORE_NAME, avg_score)
+        mlflow.log_metric("cohen_kappa", avg_score)
         mlflow.sklearn.log_model(classifier, "model")
         return avg_score
 
