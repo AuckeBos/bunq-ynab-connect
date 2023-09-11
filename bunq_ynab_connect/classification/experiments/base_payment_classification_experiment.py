@@ -99,6 +99,7 @@ class BasePaymentClassificationExperiment:
         Run the experiment:
         - Load data
         - Enable autolog
+            Skip logging of models, because this takes a lot of space
         - Start run and _run
         """
         transactions = self.load_data()
@@ -112,9 +113,10 @@ class BasePaymentClassificationExperiment:
         self.logger.info(f"Running experiment {experiment_name}")
         self.logger.info(f"Dataset has size {len(transactions)}")
         mlflow.set_experiment(experiment_name)
-        mlflow.sklearn.autolog()
+        mlflow.sklearn.autolog(log_models=False)
         with mlflow.start_run() as run:
             self.log_transactions(transactions, "full_set_ids")
+
             mlflow.set_tag("budget", self.budget_id)
             self.parent_run_id = run.info.run_id
             self._run(X, y)
