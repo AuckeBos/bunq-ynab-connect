@@ -12,6 +12,7 @@ from sklearn.metrics import cohen_kappa_score, make_scorer
 from sklearn.model_selection import (
     GridSearchCV,
     KFold,
+    StratifiedKFold,
     cross_val_score,
     train_test_split,
 )
@@ -27,7 +28,9 @@ from bunq_ynab_connect.classification.budget_category_encoder import (
     BudgetCategoryEncoder,
 )
 from bunq_ynab_connect.classification.classifier import Classifier
-from bunq_ynab_connect.classification.deployable_model import DeployableModel
+from bunq_ynab_connect.classification.deployable_mlflow_model import (
+    DeployableMlflowModel,
+)
 from bunq_ynab_connect.classification.experiments.base_payment_classification_experiment import (
     BasePaymentClassificationExperiment,
 )
@@ -46,6 +49,7 @@ class FullTrainingExperiment(BasePaymentClassificationExperiment):
     """
 
     model: ClassifierMixin
+    RANDOM_STATE = 42
 
     @inject
     def __init__(
@@ -62,7 +66,19 @@ class FullTrainingExperiment(BasePaymentClassificationExperiment):
 
     def _run(self, X: np.ndarray, y: np.ndarray):
         classifier = self.create_pipeline(self.model)
-        classifier.fit(X, y)
+
+        train_idx, test_idx = next(
+            StratifiedKFold(
+                n_splits=5, shuffle=True, random_state=self.RANDOM_STATE
+            ).split(X, y)
+        )
+        X_train, X_test = X[train_idx], X[test_idx]
+        y_train, y_test = y[train_idx], y[test_idx]
+
+        classifier.fit(X_train, y_train)
+        y_pred = classifier.predict(X_test)
+        score = cohen_kappa_score(y_test, y_pred)
+        mlflow.log_metric("cohen_kappa", score)
         mlflow.sklearn.log_model(classifier, "model")
         object_to_mlflow(self.label_encoder, "label_encoder")
 
@@ -73,7 +89,7 @@ class FullTrainingExperiment(BasePaymentClassificationExperiment):
         }
         mlflow.pyfunc.log_model(
             artifact_path="deployable_model",
-            python_model=DeployableModel(),
+            python_model=DeployableMlflowModel(),
             artifacts=artifacts,
         )
 

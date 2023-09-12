@@ -10,7 +10,7 @@ from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.models.ynab.bunq_payment import BunqPayment
 
 
-class DeployableModel(PythonModel):
+class DeployableMlflowModel(PythonModel):
     """
     A PyFunc model that we can deploy.
     It loads the model and label encoder from the mlflow artifacts.
@@ -40,6 +40,7 @@ class DeployableModel(PythonModel):
         self.log_predictions(payments, predictions)
         return self.label_encoder.inverse_transform(predictions)
 
+    # Todo: Do this async
     def log_predictions(self, payments: list, predictions: list):
         """
         Log the predictions in the database.

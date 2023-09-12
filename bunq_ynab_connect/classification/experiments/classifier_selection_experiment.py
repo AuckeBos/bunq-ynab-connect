@@ -10,6 +10,7 @@ from sklearn.base import ClassifierMixin
 from sklearn.calibration import LabelEncoder
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import cohen_kappa_score, make_scorer
 from sklearn.model_selection import KFold, StratifiedKFold, cross_val_score
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
@@ -92,7 +93,14 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
         k_fold = StratifiedKFold(
             n_splits=self.N_FOLDS, shuffle=True, random_state=self.RANDOM_STATE
         )
-        scores = cross_val_score(classifier, X, y, cv=k_fold, n_jobs=-1)
+        scores = cross_val_score(
+            classifier,
+            X,
+            y,
+            cv=k_fold,
+            n_jobs=-1,
+            scoring=make_scorer(cohen_kappa_score),
+        )
         mlflow.log_text(str(scores), "scores.txt")
         avg_score = np.mean(scores)
         mlflow.log_metric("cohen_kappa", avg_score)
