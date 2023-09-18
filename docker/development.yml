@@ -55,8 +55,11 @@ services:
     volumes:
       - ../bunq_ynab_connect:/home/bunqynab/bunq_ynab_connect
       - ../config:/home/bunqynab/config
+      # Docker sock needed to be able to restart the mlserver container
+      - /var/run/docker.sock:/var/run/docker.sock       
     depends_on:
       - prefect-server
+    command: "/bin/sh -c /home/bunqynab/entrypoint.sh"
 
   watchtower:
     image: containrrr/watchtower
@@ -75,6 +78,19 @@ services:
         - ../mlflow:/mlflow
       command: mlflow server --backend-store-uri sqlite:////mlflow/mlflow.db --host 0.0.0.0 --artifacts-destination /mlflow/artifacts
       restart: unless-stopped
+    
+  mlserver:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile  
+    container_name: bunqynab_mlserver
+    env_file:
+      - ../.docker-env
+    ports:
+      - "12005:8080"
+    volumes:
+      - ../config:/home/bunqynab/config
+    command: "mlserver start /home/bunqynab/config/mlserver"
 
 volumes:
   bunq_ynab_connect_data:

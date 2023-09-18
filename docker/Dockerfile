@@ -29,4 +29,3 @@ RUN poetry install --no-interaction --no-ansi --only-root
 
 USER $USERNAME
 ENV USERNAME=bunqynab
-ENTRYPOINT ["/bin/sh", "-c", "/home/bunqynab/entrypoint.sh"]

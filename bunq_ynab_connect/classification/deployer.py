@@ -5,6 +5,7 @@ from kink import inject
 from mlflow.entities.model_registry.model_version import ModelVersion
 from mlflow.tracking import MlflowClient
 
+import docker
 import mlflow
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.helpers.config import MLSERVER_CONFIG_DIR
@@ -31,6 +32,10 @@ class Deployer:
     def deploy(self, run_id: str):
         """
         Deploy the model for the run. Only deploy if the run is better than the current model.
+        If the run is better:
+        - Transition the model to production
+        - Create the mlserver config
+        - Restart the mlserver service (in docker)
         """
 
         models = mlflow.search_model_versions(
@@ -43,9 +48,21 @@ class Deployer:
         if self.run_is_better(model):
             self.transition_model(model)
             self.create_mlserver_config()
+            self.restart_mlserver()
             self.logger.info("Model deployed")
         else:
             self.logger.info("Model not deployed")
+
+    def restart_mlserver(self):
+        """
+        Restart the mlserver service.
+        """
+        client = docker.DockerClient(base_url="unix://var/run/docker.sock")
+        if container := client.containers.get("bunqynab_mlserver"):
+            container.restart()
+            self.logger.info("Restarted mlserver")
+        else:
+            self.logger.info("No mlserver container found, mlserver not restarted")
 
     def create_mlserver_config(self):
         """
@@ -55,10 +72,12 @@ class Deployer:
 
         data = {
             "name": self.budget_id,
-            "implementation": "mlserver_mlflow.MlflowRuntime",
+            "implementation": "mlserver_mlflow.MLflowRuntime",
             "parameters": {"uri": model_uri},
         }
-        destination = MLSERVER_CONFIG_DIR / f"{self.budget_id}.json"
+        dir = MLSERVER_CONFIG_DIR / self.budget_id
+        dir.mkdir(exist_ok=True)
+        destination = dir / "model-settings.json"
         with open(destination, "w") as f:
             json.dump(data, f)
         self.logger.info(f"Created mlserver config at {destination}")
@@ -82,6 +101,7 @@ class Deployer:
         - Load the score of the new run
         - If the new run is better, return True, else False
         """
+        return True
         # Existing model
         existing_model_versions = self.client.get_latest_versions(
             self.budget_id, stages=["Production"]

@@ -160,7 +160,7 @@ cython_debug/
 #.idea/
 
 
-config/bunq.cfg
+config/
 cache
 .docker-env
 .prefect
