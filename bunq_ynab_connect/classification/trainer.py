@@ -43,18 +43,21 @@ class Trainer:
 
     budget_id: str
 
-    def train(self):
+    def train(self) -> str:
         """
         Select the best classifier and the best parameters for the given classifier.
         Then train the best classifier on the full dataset.
+
+        Returns
+            The run ID of the FullTrainingExperiment
         """
         self.logger.info(f"Training for budget {self.budget_id}")
         classifier = self.select_best_classifier()
         if not classifier:
             self.logger.info("No classifier selected, training failed")
-            return
+            return None
         parameters = self.select_best_parameters(classifier)
-        self.train_classifier(classifier, parameters)
+        return self.train_classifier(classifier, parameters)
 
     def select_best_classifier(self) -> ClassifierMixin:
         """
@@ -76,11 +79,15 @@ class Trainer:
         experiment.run()
         return experiment.get_best_parameters()
 
-    def train_classifier(self, classifier, parameters):
+    def train_classifier(self, classifier, parameters) -> str:
         """
         Run the FullTrainingExperiment to train the classifier on the full dataset.
+
+        Returns
+            The run ID of the experiment
         """
         experiment = FullTrainingExperiment(
             budget_id=self.budget_id, clf=classifier, parameters=parameters
         )
         experiment.run()
+        return experiment.parent_run_id

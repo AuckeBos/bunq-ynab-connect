@@ -41,6 +41,7 @@ class DeployableMlflowModel(PythonModel):
         return self.label_encoder.inverse_transform(predictions)
 
     # Todo: Do this async
+    # Todo: Add model version identifier
     def log_predictions(self, payments: list, predictions: list):
         """
         Log the predictions in the database.

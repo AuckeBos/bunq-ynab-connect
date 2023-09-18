@@ -3,6 +3,7 @@ from prefect import flow, get_run_logger, task
 from prefect.task_runners import ConcurrentTaskRunner
 from prefect_dask.task_runners import DaskTaskRunner
 
+from bunq_ynab_connect.classification.deployer import Deployer
 from bunq_ynab_connect.classification.experiments.classifier_selection_experiment import (
     ClassifierSelectionExperiment,
 )
@@ -81,9 +82,13 @@ def train_for_budget(budget_id: str, threads: int = 1):
     """
     Run the trainer for a single budget.
     Set threads to 1, since we use prefect to parallelize the training.
+    Deploy the model after training.
     """
     trainer = Trainer(budget_id=budget_id, threads=threads)
-    trainer.train()
+    run_id = trainer.train()
+    if run_id:
+        deployer = Deployer(budget_id=budget_id)
+        deployer.deploy(run_id)
 
 
 @flow(task_runner=DaskTaskRunner())

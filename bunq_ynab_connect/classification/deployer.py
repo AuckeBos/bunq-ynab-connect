@@ -101,7 +101,6 @@ class Deployer:
         - Load the score of the new run
         - If the new run is better, return True, else False
         """
-        return True
         # Existing model
         existing_model_versions = self.client.get_latest_versions(
             self.budget_id, stages=["Production"]
