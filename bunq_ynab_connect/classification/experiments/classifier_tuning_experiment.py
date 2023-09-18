@@ -53,14 +53,11 @@ class ClassifierTuningExperiment(BasePaymentClassificationExperiment):
 
     HYPERPARAMETER_SPACES = {
         DecisionTreeClassifier().__class__.__name__: {
-            "criterion": ["gini", "entropy", "log_loss"],
-            "splitter": ["best", "random"],
             "max_depth": [3, 5, 10, 20, 50, None],
         },
         RandomForestClassifier().__class__.__name__: {
             "n_estimators": [100, 1000, 2500],
-            "criterion": ["gini", "entropy", "log_loss"],
-            "max_depth": [5, 10, 20, 50, 250, None],
+            "max_depth": [5, 10, 20, 50],
         },
         GradientBoostingClassifier().__class__.__name__: {
             "learning_rate": [0.01, 0.1, 0.5],
@@ -71,15 +68,13 @@ class ClassifierTuningExperiment(BasePaymentClassificationExperiment):
         MLPClassifier().__class__.__name__: {
             "max_iter": [1000],
             "activation": ["tanh", "relu"],
-            "solver": ["lbfgs", "sgd"],
+            "solver": ["sgd"],
             "alpha": [0.01, 0.1, 1],
-            "learning_rate": ["contant", "adaptive"],
-            "learning_rate_init": [0.01, 0.001, 0.0001],
+            "learning_rate": ["adaptive"],
+            "learning_rate_init": [0.001],
         },
         ExplainableBoostingClassifier().__class__.__name__: {
             "max_bins": [128, 256, 512],
-            "outer_bags": [4, 8, 16],
-            "inner_bags": [0, 4, 8],
             "learning_rate": [0.01, 0.1, 0.5],
         },
     }

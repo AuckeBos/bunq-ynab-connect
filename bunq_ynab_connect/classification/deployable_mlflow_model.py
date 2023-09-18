@@ -1,5 +1,6 @@
 import pickle
 
+import pandas as pd
 from kink import di
 from mlflow.pyfunc import PythonModel
 from sklearn.base import ClassifierMixin

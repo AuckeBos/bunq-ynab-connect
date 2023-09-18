@@ -30,7 +30,7 @@ class Deployer:
 
     def deploy(self, run_id: str):
         """
-        Deploy the model for the run.
+        Deploy the model for the run. Only deploy if the run is better than the current model.
         """
 
         models = mlflow.search_model_versions(
@@ -42,15 +42,16 @@ class Deployer:
         model: ModelVersion = models[0]
         if self.run_is_better(model):
             self.transition_model(model)
-            self.create_mlserver_config(model)
+            self.create_mlserver_config()
             self.logger.info("Model deployed")
         else:
             self.logger.info("Model not deployed")
 
-    def create_mlserver_config(self, model: ModelVersion):
-        run = mlflow.get_run(model.run_id)
-        artifact_uri = run.info.artifact_uri
-        model_uri = artifact_uri + "/deployable_model"
+    def create_mlserver_config(self):
+        """
+        Create the config file for mlserver, such that it can serve the model.
+        """
+        model_uri = f"models:/{self.budget_id}/Production"
 
         data = {
             "name": self.budget_id,

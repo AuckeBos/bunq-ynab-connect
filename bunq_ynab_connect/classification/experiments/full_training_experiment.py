@@ -66,6 +66,10 @@ class FullTrainingExperiment(BasePaymentClassificationExperiment):
         self.model = clf(**parameters)
 
     def _run(self, X: np.ndarray, y: np.ndarray):
+        """
+        Split the data once. Train the classifier on the training data and evaluate on the test data.
+        Log the model as a DeployableMlflowModel.
+        """
         classifier = self.create_pipeline(self.model)
 
         train_idx, test_idx = next(
@@ -88,7 +92,7 @@ class FullTrainingExperiment(BasePaymentClassificationExperiment):
             "model_path": artifact_uri + "/model",
             "label_encoder_path": artifact_uri + "/label_encoder",
         }
-        input_example = np.array([X_train[0]])
+        input_example = [X_train[0]]
         mlflow.pyfunc.log_model(
             artifact_path="deployable_model",
             python_model=DeployableMlflowModel(),
