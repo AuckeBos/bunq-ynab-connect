@@ -4,6 +4,7 @@ from typing import Any
 import numpy as np
 from interpret.glassbox import ExplainableBoostingClassifier
 from kink import inject
+from mlflow.models import infer_signature
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.calibration import LabelEncoder
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
@@ -87,10 +88,13 @@ class FullTrainingExperiment(BasePaymentClassificationExperiment):
             "model_path": artifact_uri + "/model",
             "label_encoder_path": artifact_uri + "/label_encoder",
         }
+        input_example = np.array([X_train[0]])
         mlflow.pyfunc.log_model(
             artifact_path="deployable_model",
             python_model=DeployableMlflowModel(),
             artifacts=artifacts,
+            input_example=input_example,
+            registered_model_name=self.budget_id,
         )
 
         self.logger.info("Finished training")

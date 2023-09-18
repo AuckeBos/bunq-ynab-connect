@@ -29,13 +29,14 @@ class FeatureExtractor(BaseEstimator, TransformerMixin):
 
     feature_names: List[str] = None
 
-    def fit(self, X: List[BunqPayment], y=None) -> "FeatureExtractor":
+    def fit(self, X: List[dict], y=None) -> "FeatureExtractor":
         """
         Fit the feature extractor on a list of bunq payments.
         - Fit the TFIDF encoder on the description column.
         - Store the feature names
 
         """
+        X = [BunqPayment(**x) for x in X]
         # Fit TFIDF encoder on the description column
         descriptions = [x.description for x in X]
         encoder = TfidfVectorizer(
@@ -53,6 +54,7 @@ class FeatureExtractor(BaseEstimator, TransformerMixin):
         - Add self.COLUMNS as array.
         - Transform the description column with the TFIDF encoder.
         """
+        X = [BunqPayment(**x) for x in X]
         data = np.array(
             [
                 [

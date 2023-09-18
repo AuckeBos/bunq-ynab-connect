@@ -34,10 +34,9 @@ class DeployableMlflowModel(PythonModel):
         Predict, and log the predictions in the database.
         """
         data = model_input.to_dict("records")
-        payments = [BunqPayment(**p) for p in data]
-        predictions = self.model.predict(payments)
+        predictions = self.model.predict(data)
         predictions = predictions.tolist()
-        self.log_predictions(payments, predictions)
+        self.log_predictions(data, predictions)
         return self.label_encoder.inverse_transform(predictions)
 
     # Todo: Do this async
@@ -47,8 +46,8 @@ class DeployableMlflowModel(PythonModel):
         """
         data = [
             {
-                "payment_id": payment.id,
-                "input": payment.dict(),
+                "payment_id": payment["id"],
+                "input": payment,
                 "prediction": prediction,
             }
             for payment, prediction in zip(payments, predictions)

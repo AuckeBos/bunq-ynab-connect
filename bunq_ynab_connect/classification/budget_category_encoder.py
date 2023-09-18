@@ -20,13 +20,13 @@ class BudgetCategoryEncoder(BaseEstimator, TransformerMixin):
     def __init__(self):
         self.encoder = LabelEncoder()
 
-    def fit(self, y: List[YnabTransaction]):
-        categories = [transaction.category_name for transaction in y]
+    def fit(self, y: List[dict]):
+        categories = [transaction["category_name"] for transaction in y]
         self.encoder.fit(categories)
         return self
 
-    def transform(self, y: List[YnabTransaction]):
-        categories = [transaction.category_name for transaction in y]
+    def transform(self, y: List[dict]):
+        categories = [transaction["category_name"] for transaction in y]
         return self.encoder.transform(categories)
 
     def inverse_transform(self, y):

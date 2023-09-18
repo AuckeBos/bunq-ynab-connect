@@ -95,8 +95,7 @@ class Deployer:
         # New run
         new_run = mlflow.get_run(new_model.run_id)
         new_score = new_run.data.metrics["cohen_kappa"]
-        # todo: >= to >
-        if new_score >= existing_score:
+        if new_score > existing_score:
             self.logger.info(f"New model is better: {new_score} > {existing_score}")
             return True
         else:
