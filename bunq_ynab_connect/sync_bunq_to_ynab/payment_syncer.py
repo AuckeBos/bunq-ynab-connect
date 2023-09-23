@@ -63,7 +63,7 @@ class PaymentSyncer:
         self.queue = queue
         self.account_map = mapper.map()
 
-    def sanity_check_payment(self, payment: Payment) -> bool:
+    def sanity_check_payment(self, payment: BunqPayment) -> bool:
         """
         Do a sanity check on the payment. Payment should not be synced if the check fails.
         Check:
@@ -75,7 +75,7 @@ class PaymentSyncer:
         if min_date is None:
             raise ValueError("START_SYNC_DATE is not set. Not syncing any payments")
 
-        if parser.parse(payment.created) < parser.parse(min_date):
+        if payment.created < parser.parse(min_date):
             self.logger.warning(
                 f"Payment {payment.id} is older than {min_date}. Not syncing"
             )

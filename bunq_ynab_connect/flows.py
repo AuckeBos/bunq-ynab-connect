@@ -77,7 +77,7 @@ def sync():
     sync_payment_queue()
 
 
-@task(task_run_name="train_for_budget{budget_id}")
+@task(task_run_name="train_for_budget_{budget_id}")
 def train_for_budget(budget_id: str, threads: int = 1):
     """
     Run the trainer for a single budget.
