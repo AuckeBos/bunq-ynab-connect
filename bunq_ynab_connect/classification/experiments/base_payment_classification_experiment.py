@@ -16,9 +16,9 @@ from bunq_ynab_connect.classification.budget_category_encoder import (
 )
 from bunq_ynab_connect.classification.feature_extractor import FeatureExtractor
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
-from bunq_ynab_connect.models.ynab.bunq_payment import BunqPayment
-from bunq_ynab_connect.models.ynab.matched_transaction import MatchedTransaction
-from bunq_ynab_connect.models.ynab.ynab_transaction import YnabTransaction
+from bunq_ynab_connect.models.bunq_payment import BunqPayment
+from bunq_ynab_connect.models.matched_transaction import MatchedTransaction
+from bunq_ynab_connect.models.ynab_transaction import YnabTransaction
 
 
 class BasePaymentClassificationExperiment:

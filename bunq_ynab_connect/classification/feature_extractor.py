@@ -6,7 +6,7 @@ from pandas import DataFrame
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from bunq_ynab_connect.models.ynab.bunq_payment import BunqPayment
+from bunq_ynab_connect.models.bunq_payment import BunqPayment
 
 
 class FeatureExtractor(BaseEstimator, TransformerMixin):

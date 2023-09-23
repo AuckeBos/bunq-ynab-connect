@@ -7,8 +7,8 @@ from sklearn.metrics import cohen_kappa_score
 from sklearn.preprocessing import OneHotEncoder
 
 from bunq_ynab_connect.classification.feature_extractor import FeatureExtractor
-from bunq_ynab_connect.models.ynab.bunq_payment import BunqPayment
-from bunq_ynab_connect.models.ynab.ynab_transaction import YnabTransaction
+from bunq_ynab_connect.models.bunq_payment import BunqPayment
+from bunq_ynab_connect.models.ynab_transaction import YnabTransaction
 
 
 class Classifier(ClassifierMixin):

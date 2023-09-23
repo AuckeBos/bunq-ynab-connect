@@ -24,9 +24,9 @@ from bunq_ynab_connect.classification.experiments.base_payment_classification_ex
     BasePaymentClassificationExperiment,
 )
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
-from bunq_ynab_connect.models.ynab.bunq_payment import BunqPayment
-from bunq_ynab_connect.models.ynab.matched_transaction import MatchedTransaction
-from bunq_ynab_connect.models.ynab.ynab_transaction import YnabTransaction
+from bunq_ynab_connect.models.bunq_payment import BunqPayment
+from bunq_ynab_connect.models.matched_transaction import MatchedTransaction
+from bunq_ynab_connect.models.ynab_transaction import YnabTransaction
 
 
 class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):

@@ -5,8 +5,8 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.calibration import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 
-from bunq_ynab_connect.models.ynab.bunq_payment import BunqPayment
-from bunq_ynab_connect.models.ynab.ynab_transaction import YnabTransaction
+from bunq_ynab_connect.models.bunq_payment import BunqPayment
+from bunq_ynab_connect.models.ynab_transaction import YnabTransaction
 
 
 class BudgetCategoryEncoder(BaseEstimator, TransformerMixin):

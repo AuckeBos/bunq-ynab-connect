@@ -8,7 +8,7 @@ from sklearn.calibration import LabelEncoder
 
 import mlflow
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
-from bunq_ynab_connect.models.ynab.bunq_payment import BunqPayment
+from bunq_ynab_connect.models.bunq_payment import BunqPayment
 
 
 class DeployableMlflowModel(PythonModel):

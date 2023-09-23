@@ -10,7 +10,7 @@ from ynab.models.account import Account
 from ynab.models.budget_summary import BudgetSummary
 
 from bunq_ynab_connect.data.data_extractors.abstract_extractor import AbstractExtractor
-from bunq_ynab_connect.models.ynab.ynab_account import YnabAccount
+from bunq_ynab_connect.models.ynab_account import YnabAccount
 
 
 @inject

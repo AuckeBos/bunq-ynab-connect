@@ -9,8 +9,8 @@ from ynab import ApiClient
 from bunq_ynab_connect.clients.ynab_client import YnabClient
 from bunq_ynab_connect.data.data_extractors.abstract_extractor import AbstractExtractor
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
-from bunq_ynab_connect.models.ynab.ynab_account import YnabAccount
-from bunq_ynab_connect.models.ynab.ynab_transaction import YnabTransaction
+from bunq_ynab_connect.models.ynab_account import YnabAccount
+from bunq_ynab_connect.models.ynab_transaction import YnabTransaction
 
 
 class YnabTransactionExtractor(AbstractExtractor):

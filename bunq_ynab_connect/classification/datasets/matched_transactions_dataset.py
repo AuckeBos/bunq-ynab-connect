@@ -7,10 +7,10 @@ from bunq_ynab_connect.data.bunq_account_to_ynab_account_mapper import (
     BunqAccountToYnabAccountMapper,
 )
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
-from bunq_ynab_connect.models.ynab.bunq_account import BunqAccount
-from bunq_ynab_connect.models.ynab.bunq_payment import BunqPayment
-from bunq_ynab_connect.models.ynab.ynab_account import YnabAccount
-from bunq_ynab_connect.models.ynab.ynab_transaction import YnabTransaction
+from bunq_ynab_connect.models.bunq_account import BunqAccount
+from bunq_ynab_connect.models.bunq_payment import BunqPayment
+from bunq_ynab_connect.models.ynab_account import YnabAccount
+from bunq_ynab_connect.models.ynab_transaction import YnabTransaction
 
 
 class MatchedTransactionsDataset(AbstractDataset):
