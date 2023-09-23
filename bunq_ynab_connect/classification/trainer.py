@@ -26,20 +26,17 @@ class Trainer:
         EXPERIMENT_NAME: Name of the experiment
         logger: LoggerAdapter
         budget_id: ID of the budget to train the classifier for
-        theads: Number of threads to use for the experiments. Defaults to all
     """
 
     EXPERIMENT_NAME = "Full Training"
 
     logger: LoggerAdapter
     budget_id: str
-    theads: int
 
     @inject
-    def __init__(self, logger: LoggerAdapter, budget_id: str, threads: int = None):
+    def __init__(self, logger: LoggerAdapter, budget_id: str):
         self.logger = logger
         self.budget_id = budget_id
-        self.theads = threads
 
     budget_id: str
 
@@ -63,9 +60,7 @@ class Trainer:
         """
         Run the ClassifierSelectionExperiment to select the best classifier.
         """
-        experiment = ClassifierSelectionExperiment(
-            budget_id=self.budget_id, threads=self.theads
-        )
+        experiment = ClassifierSelectionExperiment(budget_id=self.budget_id)
         experiment.run()
         return experiment.get_best_classifier()
 
@@ -74,7 +69,7 @@ class Trainer:
         Run the ClassifierTuningExperiment to select the best parameters for the given classifier.
         """
         experiment = ClassifierTuningExperiment(
-            budget_id=self.budget_id, clf=classifier, threads=self.theads
+            budget_id=self.budget_id, clf=classifier
         )
         experiment.run()
         return experiment.get_best_parameters()

@@ -78,13 +78,12 @@ def sync():
 
 
 @task(task_run_name="train_for_budget_{budget_id}")
-def train_for_budget(budget_id: str, threads: int = 1):
+def train_for_budget(budget_id: str):
     """
     Run the trainer for a single budget.
-    Set threads to 1, since we use prefect to parallelize the training.
     Deploy the model after training.
     """
-    trainer = Trainer(budget_id=budget_id, threads=threads)
+    trainer = Trainer(budget_id=budget_id)
     run_id = trainer.train()
     if run_id:
         deployer = Deployer(budget_id=budget_id)
@@ -92,11 +91,11 @@ def train_for_budget(budget_id: str, threads: int = 1):
 
 
 @flow(task_runner=DaskTaskRunner())
-def train(threads: int = 1):
+def train():
     """
     Train one classifier for each budget
     """
     storage = di[AbstractStorage]
     budget_ids = storage.get_budget_ids()
     for budget_id in budget_ids:
-        train_for_budget.submit(budget_id, threads)
+        train_for_budget.submit(budget_id)

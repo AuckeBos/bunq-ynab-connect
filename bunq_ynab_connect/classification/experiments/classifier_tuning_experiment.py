@@ -26,7 +26,6 @@ import mlflow
 from bunq_ynab_connect.classification.budget_category_encoder import (
     BudgetCategoryEncoder,
 )
-from bunq_ynab_connect.classification.classifier import Classifier
 from bunq_ynab_connect.classification.experiments.base_payment_classification_experiment import (
     BasePaymentClassificationExperiment,
 )
@@ -46,23 +45,23 @@ class ClassifierTuningExperiment(BasePaymentClassificationExperiment):
         HYPERPARAMETER_SPACES: Dictionary containing the hyperparameter spaces for each classifier
         grid_search: GridSearchCV object used to find the best parameters
         clf: Classifier to tune
-        threads: Amount of threads to use for parallelization. Defaults to -1 (All cores)
     """
 
-    N_FOLDS = 3
+    N_FOLDS = 2
 
     HYPERPARAMETER_SPACES = {
         DecisionTreeClassifier().__class__.__name__: {
-            "max_depth": [3, 5, 10, 20, 50, None],
+            # "max_depth": [3, 5, 10, 20, 50, None],
+            "max_depth": [3, 5],
         },
         RandomForestClassifier().__class__.__name__: {
             "n_estimators": [100, 1000, 2500],
             "max_depth": [5, 10, 20, 50],
         },
         GradientBoostingClassifier().__class__.__name__: {
-            "learning_rate": [0.01, 0.1, 0.5],
+            # "learning_rate": [0.01, 0.1, 0.5],
             "n_estimators": [100, 1000, 2500],
-            "min_samples_split": [2, 5, 10],
+            # "min_samples_split": [2, 5, 10],
         },
         GaussianNB().__class__.__name__: {},
         MLPClassifier().__class__.__name__: {
@@ -81,7 +80,6 @@ class ClassifierTuningExperiment(BasePaymentClassificationExperiment):
 
     clf: Any
     grid_search: GridSearchCV
-    threads: int
 
     @inject
     def __init__(
@@ -91,14 +89,10 @@ class ClassifierTuningExperiment(BasePaymentClassificationExperiment):
         logger: LoggerAdapter,
         *,
         clf: Any,
-        threads: int = None,
     ):
         super().__init__(budget_id, storage, logger)
         self.grid_search = None
         self.clf = clf
-        if not threads:
-            threads = -1
-        self.threads = threads
 
     def _run(self, X: np.ndarray, y: np.ndarray):
         """
@@ -116,7 +110,7 @@ class ClassifierTuningExperiment(BasePaymentClassificationExperiment):
             space,
             cv=self.N_FOLDS,
             scoring=make_scorer(cohen_kappa_score),
-            n_jobs=self.threads,
+            n_jobs=-1,
         )
         self.grid_search.fit(X, y)
         score = self.grid_search.best_score_

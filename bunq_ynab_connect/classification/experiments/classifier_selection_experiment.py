@@ -1,4 +1,3 @@
-import multiprocessing
 from logging import LoggerAdapter
 
 import numpy as np
@@ -19,7 +18,6 @@ from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
 import mlflow
-from bunq_ynab_connect.classification.classifier import Classifier
 from bunq_ynab_connect.classification.experiments.base_payment_classification_experiment import (
     BasePaymentClassificationExperiment,
 )
@@ -38,22 +36,20 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
         N_FOLDS: Amount of folds to use for K-fold cross validation
         RANDOM_STATE: Random state to use for K-fold cross validation
         run_id: ID of the current run. Set upon run()
-        threads: Not used
         CLASSIFIERS: List of classifiers to test
     """
 
     N_FOLDS = 3
     RANDOM_STATE = 42
     run_id: str
-    threads: int
 
     CLASSIFIERS = [
         DecisionTreeClassifier(),
-        RandomForestClassifier(),
-        GradientBoostingClassifier(),
-        GaussianNB(),
-        MLPClassifier(max_iter=1000),
-        ExplainableBoostingClassifier(),
+        # RandomForestClassifier(),
+        # GradientBoostingClassifier(),
+        # GaussianNB(),
+        # MLPClassifier(max_iter=1000),
+        # ExplainableBoostingClassifier(),
     ]
 
     @inject
@@ -62,13 +58,9 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
         budget_id: str,
         storage: AbstractStorage,
         logger: LoggerAdapter,
-        threads: int = None,
     ):
         super().__init__(budget_id, storage, logger)
         self.parent_run_id = None
-        if not threads:
-            threads = multiprocessing.cpu_count() - 1
-        self.threads = threads
 
     def _run(self, X: np.ndarray, y: np.ndarray):
         """
@@ -86,7 +78,6 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
         - Use Kfold
         - Score and log the mean score
 
-        Use the client to log, to prevent issues due to threading.
         """
         mlflow.set_tag("classifier", model.__class__.__name__)
         classifier = self.create_pipeline(model)

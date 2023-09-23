@@ -3,7 +3,7 @@ LABEL maintainer="Aucke Bos"
 
 # Set user
 ARG USERNAME=bunqynab
-ARG UID=1000
+ARG UID=998
 ARG GID=$UID
 RUN apt update && \
     apt install -y sudo && \
@@ -12,6 +12,9 @@ RUN apt update && \
     echo 'bunqynab ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 RUN apt install -y gcc
 RUN chmod -R 755 /home/$USERNAME
+RUN groupadd -r docker
+RUN usermod -aG docker $USERNAME
+
 
 # Install poetry
 RUN pip install poetry

@@ -28,7 +28,6 @@ import mlflow
 from bunq_ynab_connect.classification.budget_category_encoder import (
     BudgetCategoryEncoder,
 )
-from bunq_ynab_connect.classification.classifier import Classifier
 from bunq_ynab_connect.classification.deployable_mlflow_model import (
     DeployableMlflowModel,
 )
