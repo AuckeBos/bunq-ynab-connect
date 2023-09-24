@@ -1,6 +1,9 @@
+import json
 import os
 from logging import LoggerAdapter
 
+import pandas as pd
+import requests
 from bunq.sdk.model.generated.endpoint import (
     BunqResponsePaymentList,
     MonetaryAccountBank,
@@ -9,6 +12,7 @@ from bunq.sdk.model.generated.endpoint import (
 from bunq.sdk.model.generated.object_ import MonetaryAccountReference
 from dateutil import parser
 from kink import inject
+from mlserver.codecs import PandasCodec
 from ynab import TransactionDetail
 from ynab.configuration import Configuration
 
@@ -35,6 +39,7 @@ class PaymentSyncer:
         mapper: The mapper to use to map Bunq accounts to YNAB accounts.
         queue: The queue to use to get the payments to sync.
         account_map: A map from Bunq account id to YNAB account.
+        prediction_base_url: The base url of the ML server to use to predict categories. Read from env.
 
     """
 
@@ -46,6 +51,7 @@ class PaymentSyncer:
     client: YnabClient
     queue: PaymentQueue
     account_map: dict
+    prediction_base_url: str
 
     @inject
     def __init__(
@@ -62,6 +68,7 @@ class PaymentSyncer:
         self.mapper = mapper
         self.queue = queue
         self.account_map = mapper.map()
+        self.prediction_base_url = f"{os.getenv('MLSERVER_URL')}/v2/models"
 
     def sanity_check_payment(self, payment: BunqPayment) -> bool:
         """
@@ -83,7 +90,7 @@ class PaymentSyncer:
         return True
 
     def payment_to_transaction(
-        self, payment: Payment, account: YnabAccount
+        self, payment: BunqPayment, account: YnabAccount
     ) -> TransactionDetail:
         """
         Create a YNAB transaction from a Bunq payment.
@@ -114,10 +121,47 @@ class PaymentSyncer:
             flag_color=self.FLAG_COLOR,
             approved=False,
             local_vars_configuration=configuration,
+            category_name=self.decide_category(payment, account),
         )
         return transaction
 
-    def create_transaction(self, payment: Payment, account: YnabAccount):
+    def decide_category(self, payment: BunqPayment, account: YnabAccount) -> str:
+        """
+        Decide the category of a payment. Use the ML server to predict the category.
+
+        - Build endpoint
+        - Convert payment to dict
+             Note: Cannot use payment.dict(), because datetime is not serializable.
+        - Use the PandasCodec to encode the request
+        - Send the request to the ML server
+        - Return the predicted category
+        - Upon any failure, log failure and return None.
+            In this case, Ynab will use the lastly used category for the payee.
+        """
+        try:
+            invalid_categories = ["Split (Multiple Categories)..."]
+            endpoint = f"{self.prediction_base_url}/{account.budget_id}/infer"
+            payment_as_dict = json.loads(payment.json())
+            request = PandasCodec.encode_request(
+                pd.DataFrame.from_dict([payment_as_dict])
+            )
+            response = requests.post(endpoint, json=request.dict())
+            if response.status_code != 200:
+                raise ValueError(f"Error in response: {response.text}")
+            prediction = response.json()["outputs"][0]["data"][0]
+            if prediction in invalid_categories:
+                raise ValueError(f"Invalid category predicted: {prediction}")
+            self.logger.info(
+                f"Predicted category {prediction} for payment {payment.id}"
+            )
+            return prediction
+        except Exception as e:
+            self.logger.error(
+                f"Could not predict category for payment {payment.id}: {e}. Falling back to None"
+            )
+            return None
+
+    def create_transaction(self, payment: BunqPayment, account: YnabAccount):
         """
         Create a YNAB transaction from a Bunq payment and create it in YNAB.
         If the payment fails the sanity check, do not create the transaction.
