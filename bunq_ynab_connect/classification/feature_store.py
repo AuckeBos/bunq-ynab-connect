@@ -2,6 +2,9 @@ from logging import LoggerAdapter
 
 from kink import inject
 
+from bunq_ynab_connect.classification.datasets.matched_transactions_dataset import (
+    MatchedTransactionsDataset,
+)
 from bunq_ynab_connect.data.metadata import Metadata
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 
@@ -33,3 +36,14 @@ class FeatureStore:
         metadata = self.metadata.get_table(dataset)
         query = [(metadata.key_col, "in", ids)]
         return self.storage.find(metadata.name, query)
+
+    def update(self):
+        """
+        Update the feature store.
+        Load all datasets and upsert them.
+        """
+        self.logger.info("Updating feature store")
+        datasets = [MatchedTransactionsDataset()]
+        for dataset in datasets:
+            dataset.update()
+        self.logger.info("Updated feature store")

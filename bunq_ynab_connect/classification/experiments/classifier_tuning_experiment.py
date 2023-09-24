@@ -47,21 +47,20 @@ class ClassifierTuningExperiment(BasePaymentClassificationExperiment):
         clf: Classifier to tune
     """
 
-    N_FOLDS = 2
+    N_FOLDS = 3
 
     HYPERPARAMETER_SPACES = {
         DecisionTreeClassifier().__class__.__name__: {
-            # "max_depth": [3, 5, 10, 20, 50, None],
-            "max_depth": [3, 5],
+            "max_depth": [3, 5, 10, 20, 50, None],
         },
         RandomForestClassifier().__class__.__name__: {
             "n_estimators": [100, 1000, 2500],
             "max_depth": [5, 10, 20, 50],
         },
         GradientBoostingClassifier().__class__.__name__: {
-            # "learning_rate": [0.01, 0.1, 0.5],
+            "learning_rate": [0.01, 0.1, 0.5],
             "n_estimators": [100, 1000, 2500],
-            # "min_samples_split": [2, 5, 10],
+            "min_samples_split": [2, 5, 10],
         },
         GaussianNB().__class__.__name__: {},
         MLPClassifier().__class__.__name__: {

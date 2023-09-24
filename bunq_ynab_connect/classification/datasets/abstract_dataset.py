@@ -50,3 +50,4 @@ class AbstractDataset:
             self.logger.info(f"Upserting {len(new_data)} rows in {self.NAME}")
             self.storage.upsert(self.NAME, new_data)
         self.storage.set_last_runmoment(self.NAME, new_last_runmoment)
+        self.logger.info(f"Updated dataset {self.NAME}")

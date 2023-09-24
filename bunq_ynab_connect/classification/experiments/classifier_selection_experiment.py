@@ -45,11 +45,11 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
 
     CLASSIFIERS = [
         DecisionTreeClassifier(),
-        # RandomForestClassifier(),
-        # GradientBoostingClassifier(),
-        # GaussianNB(),
-        # MLPClassifier(max_iter=1000),
-        # ExplainableBoostingClassifier(),
+        RandomForestClassifier(),
+        GradientBoostingClassifier(),
+        GaussianNB(),
+        MLPClassifier(max_iter=1000),
+        ExplainableBoostingClassifier(),
     ]
 
     @inject
