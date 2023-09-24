@@ -12,10 +12,8 @@ RUN apt update && \
     echo 'bunqynab ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 RUN apt install -y gcc
 RUN chmod -R 755 /home/$USERNAME
-
-
 # Install poetry
-RUN pip install poetry
+RUN pip install "poetry>=1.3.0,<1.4.0"
 RUN poetry config virtualenvs.create false 
 # Copy files
 COPY --chown=bunqynab:bunqynab ./pyproject.toml ./poetry.lock ./docker/*.sh ./README.md /home/bunqynab/
