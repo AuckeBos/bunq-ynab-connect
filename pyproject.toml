@@ -39,3 +39,6 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 bunqynab = "bunq_ynab_connect.main:cli"
+
+[tool.isort]
+profile = "black"
