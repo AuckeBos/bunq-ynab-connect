@@ -56,13 +56,19 @@ class Deployer:
     def restart_mlserver(self):
         """
         Restart the mlserver service.
+        Currently not working. When running inside an agent, it seems
+        we have no access to the docker socket, hence the restart fails.
+        Added restart_container to compose, to restart mlserver container daily
         """
-        client = docker.DockerClient(base_url="unix://var/run/docker.sock")
-        if container := client.containers.get("bunqynab_mlserver"):
-            container.restart()
-            self.logger.info("Restarted mlserver")
-        else:
-            self.logger.info("No mlserver container found, mlserver not restarted")
+        try:
+            client = docker.DockerClient(base_url="unix://var/run/docker.sock")
+            if container := client.containers.get("bunqynab_mlserver"):
+                container.restart()
+                self.logger.info("Restarted mlserver")
+            else:
+                self.logger.info("No mlserver container found, mlserver not restarted")
+        except Exception as e:
+            self.logger.error(f"Error restarting mlserver: {e}")
 
     def create_mlserver_config(self):
         """
