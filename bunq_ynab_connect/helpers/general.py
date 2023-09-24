@@ -1,14 +1,18 @@
+import pickle
 import shelve
 from datetime import date, datetime
 from functools import wraps
 from logging import LoggerAdapter
+from tempfile import TemporaryDirectory
 from time import time
+from typing import Any
 
 import pytz
 import requests
 from kink import inject
 
 from bunq_ynab_connect.helpers.config import CACHE_DIR
+from mlflow import log_artifact
 
 
 def now():
@@ -59,3 +63,23 @@ def cache(logger: LoggerAdapter, ttl: int = None):
 
 def date_to_datetime(_date: date) -> datetime:
     return datetime(_date.year, _date.month, _date.day)
+
+
+def object_to_mlflow(obj: Any, name: str) -> None:
+    """
+    Save an object to an artifact by:
+    - Saving the object to a temp pickle file
+    - Saving the temp pickle file as artifact in the current mlfow run
+    Parameters
+    ----------
+    obj: Any
+        The dict to save
+    name: str
+        The artefact name
+    """
+    with TemporaryDirectory() as temp_dir:
+        path = f"{temp_dir}/{name}"
+        with open(path, "wb") as tmp_file:
+            pickle.dump(obj, tmp_file)
+        log_artifact(path)
+        return path

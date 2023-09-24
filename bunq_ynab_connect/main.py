@@ -1,5 +1,18 @@
 import click
+from kink import inject
+from sklearn.tree import DecisionTreeClassifier
 
+from bunq_ynab_connect.classification.datasets.matched_transactions_dataset import (
+    MatchedTransactionsDataset,
+)
+from bunq_ynab_connect.classification.experiments.classifier_selection_experiment import (
+    ClassifierSelectionExperiment,
+)
+from bunq_ynab_connect.classification.experiments.classifier_tuning_experiment import (
+    ClassifierTuningExperiment,
+)
+from bunq_ynab_connect.classification.feature_store import FeatureStore
+from bunq_ynab_connect.classification.trainer import Trainer
 from bunq_ynab_connect.data.data_extractors.bunq_account_extractor import (
     BunqAccountExtractor,
 )
@@ -15,6 +28,7 @@ from bunq_ynab_connect.data.data_extractors.ynab_budget_extractor import (
 from bunq_ynab_connect.data.data_extractors.ynab_transaction_extractor import (
     YnabTransactionExtractor,
 )
+from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.sync_bunq_to_ynab.payment_syncer import PaymentSyncer
 
 
@@ -61,11 +75,13 @@ def sync_payment(payment_id: int):
 
 
 @cli.command()
-def test():
+@inject
+def test(storage: AbstractStorage):
     """
     Testing function
     """
-    print("test")
+    trainer = Trainer(budget_id="my-budget")
+    trainer.train()
 
 
 @cli.command()

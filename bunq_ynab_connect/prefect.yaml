@@ -1,5 +1,5 @@
 name: bunq-ynab-connect
-prefect-version: 2.11.4
+prefect-version: 2.13.2
 
 build: null
 
@@ -48,4 +48,12 @@ deployments:
   parameters: {}
   work_pool:
     name: docker-pool
-    work_queue_name: default    
+    work_queue_name: default
+- name: train
+  version: 2023.09.29.1
+  description: Train one classifier for each budget
+  entrypoint: flows:train
+  schedule: {}
+  work_pool:
+    name: docker-pool
+    work_queue_name: default        

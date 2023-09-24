@@ -1,0 +1,6 @@
+{
+    "name": "matched_transactions",
+    "key_col": "match_id",
+    "timestamp_col": "",
+    "type": "dataset"
+}

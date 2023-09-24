@@ -142,6 +142,7 @@ class MongoStorage(AbstractStorage):
             "ynab_accounts": ["id"],
             "ynab_budgets": ["id"],
             "ynab_transactions": ["id"],
+            "matched_transactions": ["match_id"],
         }
 
         for table, columns in unique_indices.items():

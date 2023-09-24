@@ -1,0 +1,6 @@
+{
+    "name": "payment_classifications",
+    "key_col": "payment_id",
+    "timestamp_col": "",
+    "type": "prediction"
+}

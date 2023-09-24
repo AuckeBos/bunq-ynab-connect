@@ -7,7 +7,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     ports:
-      - 27017
+      - 27017:27017
     volumes:
       - bunq_ynab_connect_data:/data/db
     restart: unless-stopped
@@ -27,7 +27,7 @@ services:
     restart: unless-stopped
 
   prefect-server:
-    image: prefecthq/prefect:2.11.3-python3.8
+    image: prefecthq/prefect:2.13.2-python3.8
     container_name: bunqynab_prefect_server
     restart: unless-stopped
     volumes:
@@ -46,10 +46,17 @@ services:
     image: index.docker.io/auckebos/bunq-ynab-connect:latest
     container_name: bunqynab_prefect_agent
     restart: unless-stopped
+    ports:
+      - "12004:8787"    
     env_file:
       - ../.docker-env
     depends_on:
       - prefect-server
+    volumes:
+      - ../config/mlserver:/home/bunqynab/config/mlserver
+      # Docker sock needed to be able to restart the mlserver container
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: "/bin/sh -c /home/bunqynab/entrypoint.sh"
 
   watchtower:
     image: containrrr/watchtower
@@ -58,6 +65,38 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --interval 3600 bunqynab_prefect_agent
     restart: unless-stopped
+
+  mlflow:
+      image: ghcr.io/mlflow/mlflow:v2.6.0
+      container_name: bunqynab_mlflow
+      ports:
+        - "12003:5000"
+      volumes:
+        - ../mlflow:/mlflow
+      command: mlflow server --backend-store-uri sqlite:////mlflow/mlflow.db --host 0.0.0.0 --artifacts-destination /mlflow/artifacts
+      restart: unless-stopped    
+
+  mlserver:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile  
+    container_name: bunqynab_mlserver
+    env_file:
+      - ../.docker-env
+    ports:
+      - "12005:8080"
+    volumes:
+      - ../config:/home/bunqynab/config
+    command: "mlserver start /home/bunqynab/config/mlserver"
+    
+  # Temporary solution to restart mlserver daily. Since Prefect agent has no access to the docker socket
+  mlserver_restarter:
+    image: docker:cli
+    volumes: 
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+    command: ["/bin/sh", "-c", "while true; do sleep 86400; docker restart bunqynab_mlserver; done"]
+    restart: unless-stopped    
     
 volumes:
   bunq_ynab_connect_data:

@@ -9,7 +9,3 @@ repos:
     - id: isort
       name: isort (python)
       args: ["--profile", "black"]
-- repo: https://github.com/PyCQA/autoflake
-  rev: v2.2.0
-  hooks:
-    -   id: autoflake      
