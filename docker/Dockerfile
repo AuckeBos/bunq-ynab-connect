@@ -10,6 +10,7 @@ RUN apt update && \
     addgroup --gid $GID bunqynab && \
     adduser --uid $UID --gid $GID --disabled-password --gecos "" bunqynab && \
     echo 'bunqynab ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+RUN apt-get install -y --no-install-recommends build-essential
 RUN apt install -y gcc
 RUN chmod -R 755 /home/$USERNAME
 # Install poetry

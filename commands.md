@@ -9,6 +9,7 @@ docker build -t auckebos/bunq-ynab-connect -f docker/Dockerfile .
 - docker buildx create --name bunq-ynab-connect-builder
 - docker buildx use bunq-ynab-connect-builder
 - docker buildx build --platform linux/amd64,linux/arm64 -t auckebos/bunq-ynab-connect --push -f docker/Dockerfile .
+- docker buildx build --platform linux/arm64 -t test2 .
 
 # Dev
 ## Remove unused imports:
