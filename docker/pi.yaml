@@ -1,0 +1,108 @@
+version: '3.7'
+services:
+  mongodb:
+    image: mongo:4.2.0
+    container_name: bunqynab_mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    ports:
+      - 12005:27017
+    volumes:
+      - bunq_ynab_connect_data:/data/db
+    restart: unless-stopped
+  mongo-express:
+    image: mongo-express:latest
+    container_name: bunqynab_mongo_ui
+    ports:
+      - 12001:8081
+    environment:
+      ME_CONFIG_MONGODB_AUTH_USERNAME: ${MONGO_USER}
+      ME_CONFIG_MONGODB_AUTH_PASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_USER}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_MONGODB_SERVER: mongodb
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
+  prefect-server:
+    image: prefecthq/prefect:2.13.2-python3.8
+    container_name: bunqynab_prefect_server
+    restart: unless-stopped
+    volumes:
+      - bunq_ynab_connect_prefect:/root/.prefect
+    entrypoint: ["/opt/prefect/entrypoint.sh", "prefect", "server", "start"]
+    environment:
+      - PREFECT_SERVER_API_HOST=${PREFECT_SERVER_API_HOST}
+      # If you want to access Prefect Server from anywhere other than the Docker host machine, you will need to change
+      # PREFECT_UI_URL and PREFECT_API_URL to match the external hostname/IP used to load the  UI in your web browser.      
+      - PREFECT_API_URL=${PREFECT_API_URL_FOR_SERVER}
+      - PREFECT_UI_URL=${PREFECT_API_URL_FOR_SERVER}
+    ports:
+      - 12002:4200
+
+  prefect-agent:
+    image: index.docker.io/auckebos/bunq-ynab-connect:latest
+    container_name: bunqynab_prefect_agent
+    restart: unless-stopped
+    ports:
+      - "12004:8787"    
+    env_file:
+      - stack.env
+    depends_on:
+      - prefect-server
+    volumes:
+      - ../config/mlserver:/home/bunqynab/config/mlserver
+      # Docker sock needed to be able to restart the mlserver container
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: "/bin/sh -c /home/bunqynab/entrypoint.sh"
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: bunqynab_watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 3600 bunqynab_prefect_agent
+    restart: unless-stopped
+
+  mlflow:
+      image: ghcr.io/mlflow/mlflow:v2.6.0
+      container_name: bunqynab_mlflow
+      ports:
+        - "12003:5000"
+      volumes:
+        - ../mlflow:/mlflow
+      command: mlflow server --backend-store-uri sqlite:////mlflow/mlflow.db --host 0.0.0.0 --artifacts-destination /mlflow/artifacts
+      restart: unless-stopped    
+
+  mlserver:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile  
+    container_name: bunqynab_mlserver
+    env_file:
+      - ../.docker-env
+    ports:
+      - "12005:8080"
+    volumes:
+      - ../config:/home/bunqynab/config
+    command: "mlserver start /home/bunqynab/config/mlserver"
+    
+  # Temporary solution to restart mlserver daily. Since Prefect agent has no access to the docker socket
+  mlserver_restarter:
+    image: docker:cli
+    volumes: 
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+    command: ["/bin/sh", "-c", "while true; do sleep 86400; docker restart bunqynab_mlserver; done"]
+    restart: unless-stopped    
+    
+volumes:
+  bunq_ynab_connect_data:
+  bunq_ynab_connect_prefect:
+
+networks:
+  default:
+    name: bunq-ynab-network
+    

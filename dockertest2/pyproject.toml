@@ -25,7 +25,10 @@ mlserver = "^1.3.5"
 virtualenv = "^20.23.1"
 mlserver-mlflow = "^1.3.5"
 gevent = "^23.7.0"
-yarl = "^1.9.4"
+
+# Exclude yarl from installation
+#[tool.poetry.dependencies.yarl]
+#version = "*"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.7.0"

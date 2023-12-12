@@ -1,4 +1,4 @@
-FROM python:3.8-slim
+FROM python:3.8
 LABEL maintainer="Aucke Bos"
 
 # Set user
@@ -23,7 +23,7 @@ RUN chown -R bunqynab:bunqynab /home/bunqynab
 
 # Install deps
 WORKDIR /home/bunqynab
-RUN poetry install --no-interaction --no-ansi --no-dev --no-root
+RUN poetry install --no-interaction --no-ansi --no-dev --no-root --without=yarl
 # Install own package
 COPY --chown=bunqynab:bunqynab ./bunq_ynab_connect /home/bunqynab/bunq_ynab_connect    
 RUN poetry install --no-interaction --no-ansi --only-root
