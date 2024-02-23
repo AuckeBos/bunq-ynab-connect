@@ -1,0 +1,42 @@
+{
+    "version": "2.0.0",
+    "linux": {
+        "options": {
+            "shell": {
+                "executable": "bash",
+                "args": [
+                    "--init-file",
+                    ".venv/bin/activate",
+                    "-ci",
+                ]
+            }
+        },
+    },    
+    "tasks": [
+        {
+            "label": "Docker up",
+            "type": "shell",
+            "command": "docker-compose -f docker/development.yml --env-file ./.docker-env -p bunqynab up",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Fix imports",
+            "type": "shell",
+            "command": "poetry run autoflake --in-place --remove-unused-variables --recursive .",
+            "options": {
+                "cwd": "${workspaceFolder}/bunq_ynab_connect"
+            },
+            "problemMatcher": []
+        },        {
+            "label": "Build: Docker",
+            "type": "shell",
+            "command": "docker buildx build --platform linux/arm64 -t test2 .",
+            "options": {
+                "cwd": "${workspaceFolder}/docker"
+            },
+            "problemMatcher": []
+        }
+    ]
+}
