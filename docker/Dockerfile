@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python:3.8-bookworm
 LABEL maintainer="Aucke Bos"
 
 # Set user
@@ -23,10 +23,12 @@ RUN chown -R bunqynab:bunqynab /home/bunqynab
 
 # Install deps
 WORKDIR /home/bunqynab
-RUN poetry install --no-interaction --no-ansi --no-dev --no-root --without=yarl
+RUN poetry export --without-hashes --format=requirements.txt > requirements.txt
+RUN pip install -r requirements.txt --use-deprecated=legacy-resolver
+# RUN poetry install --no-interaction --no-ansi --no-dev --no-root --verbose
 # Install own package
 COPY --chown=bunqynab:bunqynab ./bunq_ynab_connect /home/bunqynab/bunq_ynab_connect    
-RUN poetry install --no-interaction --no-ansi --only-root
+RUN poetry install --no-interaction --no-ansi --only-root --dry-run
 ENV USERNAME=bunqynab
 USER $USERNAME
 CMD ["/bin/bash", "./entrypoint.sh"]
