@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 from logging import LoggerAdapter
-from typing import List
+from typing import List, Union
 
 from bunq import ApiEnvironmentType, Pagination
 from bunq.sdk.context.api_context import ApiContext
@@ -9,7 +9,11 @@ from bunq.sdk.context.bunq_context import BunqContext
 from bunq.sdk.model.generated import endpoint
 from bunq.sdk.model.generated.endpoint import (
     BunqResponsePaymentList,
+    MonetaryAccount,
     MonetaryAccountBank,
+    MonetaryAccountJoint,
+    MonetaryAccountLight,
+    MonetaryAccountSavings,
     Payment,
 )
 from dateutil.parser import parse
@@ -144,7 +148,16 @@ class BunqClient:
             )
         return payments
 
-    def get_accounts(self) -> List[MonetaryAccountBank]:
+    def get_accounts(
+        self,
+    ) -> List[
+        Union[
+            MonetaryAccountLight,
+            MonetaryAccount,
+            MonetaryAccountSavings,
+            MonetaryAccountJoint,
+        ]
+    ]:
         """
         Get a list of all Bunq accounts
         """
