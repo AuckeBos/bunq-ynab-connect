@@ -1,4 +1,4 @@
-FROM python:3.8-slim
+FROM python:3.8-bookworm
 LABEL maintainer="Aucke Bos"
 
 # Set user
@@ -10,12 +10,11 @@ RUN apt update && \
     addgroup --gid $GID bunqynab && \
     adduser --uid $UID --gid $GID --disabled-password --gecos "" bunqynab && \
     echo 'bunqynab ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+RUN apt-get install -y --no-install-recommends build-essential
 RUN apt install -y gcc
 RUN chmod -R 755 /home/$USERNAME
-
-
 # Install poetry
-RUN pip install poetry
+RUN pip install "poetry>=1.3.0,<1.4.0"
 RUN poetry config virtualenvs.create false 
 # Copy files
 COPY --chown=bunqynab:bunqynab ./pyproject.toml ./poetry.lock ./docker/*.sh ./README.md /home/bunqynab/
@@ -24,7 +23,9 @@ RUN chown -R bunqynab:bunqynab /home/bunqynab
 
 # Install deps
 WORKDIR /home/bunqynab
-RUN poetry install --no-interaction --no-ansi --no-dev --no-root
+RUN poetry export --without-hashes --format=requirements.txt > requirements.txt
+RUN pip install -r requirements.txt --use-deprecated=legacy-resolver
+# RUN poetry install --no-interaction --no-ansi --no-dev --no-root --verbose
 # Install own package
 COPY --chown=bunqynab:bunqynab ./bunq_ynab_connect /home/bunqynab/bunq_ynab_connect    
 RUN poetry install --no-interaction --no-ansi --only-root

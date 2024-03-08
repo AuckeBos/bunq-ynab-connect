@@ -22,8 +22,10 @@ interpret = "^0.4.4"
 prefect-dask = "^0.2.5"
 bokeh = "2.4.3"
 mlserver = "^1.3.5"
-virtualenv = "^20.24.5"
+virtualenv = "^20.23.1"
 mlserver-mlflow = "^1.3.5"
+gevent = "^23.7.0"
+yarl = "^1.9.4"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.7.0"
@@ -42,3 +44,9 @@ bunqynab = "bunq_ynab_connect.main:cli"
 
 [tool.isort]
 profile = "black"
+
+[tool.pytest.ini_options]
+log_cli = true
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"

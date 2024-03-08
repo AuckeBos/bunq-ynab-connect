@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 from logging import LoggerAdapter
-from typing import List
+from typing import List, Union
 
 from bunq import ApiEnvironmentType, Pagination
 from bunq.sdk.context.api_context import ApiContext
@@ -9,8 +9,13 @@ from bunq.sdk.context.bunq_context import BunqContext
 from bunq.sdk.model.generated import endpoint
 from bunq.sdk.model.generated.endpoint import (
     BunqResponsePaymentList,
+    MonetaryAccount,
     MonetaryAccountBank,
+    MonetaryAccountJoint,
+    MonetaryAccountLight,
+    MonetaryAccountSavings,
     Payment,
+    BunqResponseMonetaryAccountList,
 )
 from dateutil.parser import parse
 from kink import inject
@@ -144,13 +149,27 @@ class BunqClient:
             )
         return payments
 
-    def get_accounts(self) -> List[MonetaryAccountBank]:
+    def get_accounts(
+        self,
+    ) -> List[
+        Union[
+            MonetaryAccountLight,
+            MonetaryAccount,
+            MonetaryAccountSavings,
+            MonetaryAccountJoint,
+        ]
+    ]:
         """
         Get a list of all Bunq accounts
         """
+        pagination = Pagination()
+        pagination.count = 100
+        params = pagination.url_params_count_only
         try:
-            response = endpoint.MonetaryAccount.list().value
-            accounts = [a.get_referenced_object() for a in response]
+            response: BunqResponseMonetaryAccountList = endpoint.MonetaryAccount.list(
+                params=params
+            )
+            accounts = [a.get_referenced_object() for a in response.value]
             self.logger.info(f"Loaded {len(accounts)} bunq accounts")
             return accounts
         except Exception as e:

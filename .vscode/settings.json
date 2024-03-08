@@ -1,0 +1,7 @@
+{
+    "python.testing.pytestArgs": [
+        "bunq_ynab_connect"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}
