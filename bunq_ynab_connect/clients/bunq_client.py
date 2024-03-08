@@ -15,7 +15,7 @@ from bunq.sdk.model.generated.endpoint import (
     MonetaryAccountLight,
     MonetaryAccountSavings,
     Payment,
-    BunqResponseMonetaryAccountList
+    BunqResponseMonetaryAccountList,
 )
 from dateutil.parser import parse
 from kink import inject
@@ -166,7 +166,9 @@ class BunqClient:
         pagination.count = 100
         params = pagination.url_params_count_only
         try:
-            response: BunqResponseMonetaryAccountList = endpoint.MonetaryAccount.list(params=params)
+            response: BunqResponseMonetaryAccountList = endpoint.MonetaryAccount.list(
+                params=params
+            )
             accounts = [a.get_referenced_object() for a in response.value]
             self.logger.info(f"Loaded {len(accounts)} bunq accounts")
             return accounts
