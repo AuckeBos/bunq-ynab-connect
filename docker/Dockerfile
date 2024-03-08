@@ -28,7 +28,7 @@ RUN pip install -r requirements.txt --use-deprecated=legacy-resolver
 # RUN poetry install --no-interaction --no-ansi --no-dev --no-root --verbose
 # Install own package
 COPY --chown=bunqynab:bunqynab ./bunq_ynab_connect /home/bunqynab/bunq_ynab_connect    
-RUN poetry install --no-interaction --no-ansi --only-root --dry-run
+RUN poetry install --no-interaction --no-ansi --only-root
 ENV USERNAME=bunqynab
 USER $USERNAME
 CMD ["/bin/bash", "./entrypoint.sh"]
