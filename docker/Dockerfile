@@ -14,7 +14,7 @@ RUN apt-get install -y --no-install-recommends build-essential
 RUN apt install -y gcc
 RUN chmod -R 755 /home/$USERNAME
 # Install poetry
-RUN pip install "poetry>=1.3.0,<1.4.0"
+RUN pip install poetry
 RUN poetry config virtualenvs.create false 
 # Copy files
 COPY --chown=bunqynab:bunqynab ./pyproject.toml ./poetry.lock ./docker/*.sh ./README.md /home/bunqynab/
@@ -23,12 +23,12 @@ RUN chown -R bunqynab:bunqynab /home/bunqynab
 
 # Install deps
 WORKDIR /home/bunqynab
-RUN poetry export --without-hashes --format=requirements.txt > requirements.txt
-RUN pip install -r requirements.txt --use-deprecated=legacy-resolver
-# RUN poetry install --no-interaction --no-ansi --no-dev --no-root --verbose
+RUN poetry install --no-interaction --no-ansi --no-dev --no-root
 # Install own package
-COPY --chown=bunqynab:bunqynab ./bunq_ynab_connect /home/bunqynab/bunq_ynab_connect    
+COPY --chown=bunqynab:bunqynab ./bunq_ynab_connect /home/bunqynab/bunq_ynab_connect
 RUN poetry install --no-interaction --no-ansi --only-root
 ENV USERNAME=bunqynab
 USER $USERNAME
 CMD ["/bin/bash", "./entrypoint.sh"]
+
+# todo: manual build wheel voor gevent once, then install from wheel. 
