@@ -1,24 +1,16 @@
 import json
+import time
 from logging import LoggerAdapter
 from typing import List
 
-from bunq import ApiEnvironmentType, Pagination
-from bunq.sdk.context.api_context import ApiContext
-from bunq.sdk.context.bunq_context import BunqContext
-from bunq.sdk.model.generated import endpoint
 from bunq.sdk.model.generated.endpoint import (
-    BunqResponsePaymentList,
     MonetaryAccountBank,
-    Payment,
 )
-from dateutil.parser import parse
 from kink import inject
 
 from bunq_ynab_connect.clients.bunq_client import BunqClient
 from bunq_ynab_connect.data.data_extractors.abstract_extractor import AbstractExtractor
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
-from bunq_ynab_connect.helpers.config import BUNQ_CONFIG_FILE
-from bunq_ynab_connect.helpers.general import cache, get_public_ip
 from bunq_ynab_connect.sync_bunq_to_ynab.payment_queue import PaymentQueue
 
 
@@ -58,6 +50,7 @@ class BunqPaymentExtractor(AbstractExtractor):
         )
         payments = []
         for account in accounts:
+            time.sleep(1)
             payments.extend(
                 self.client.get_payments_for_account(account, self.last_runmoment)
             )

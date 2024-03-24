@@ -1,18 +1,10 @@
 from kink import di
-from prefect import flow, get_run_logger, task
-from prefect.task_runners import ConcurrentTaskRunner
+from prefect import flow, task
 from prefect_dask.task_runners import DaskTaskRunner
 
-from bunq_ynab_connect.classification.datasets.matched_transactions_dataset import (
-    MatchedTransactionsDataset,
-)
 from bunq_ynab_connect.classification.deployer import Deployer
-from bunq_ynab_connect.classification.experiments.classifier_selection_experiment import (
-    ClassifierSelectionExperiment,
-)
 from bunq_ynab_connect.classification.feature_store import FeatureStore
 from bunq_ynab_connect.classification.trainer import Trainer
-from bunq_ynab_connect.data.data_extractors.abstract_extractor import AbstractExtractor
 from bunq_ynab_connect.data.data_extractors.bunq_account_extractor import (
     BunqAccountExtractor,
 )
@@ -42,16 +34,21 @@ def run_extractors(extractor_classes: list):
         extractor.extract()
 
 
-@flow(validate_parameters=False, task_runner=ConcurrentTaskRunner())
+@flow(validate_parameters=False)
 def extract():
     """
     Run all extractors.
     Run Bunq and YNAB extractors in parallel.
     """
-    run_extractors.submit([BunqAccountExtractor, BunqPaymentExtractor])
-    run_extractors.submit(
-        [YnabBudgetExtractor, YnabAccountExtractor, YnabTransactionExtractor]
-    )
+    extractors = [
+        BunqAccountExtractor(),
+        BunqPaymentExtractor(),
+        YnabBudgetExtractor(),
+        YnabAccountExtractor(),
+        YnabTransactionExtractor(),
+    ]
+    for extractor in extractors:
+        extractor.extract()
 
 
 @flow

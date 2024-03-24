@@ -1,13 +1,15 @@
 import os
+import platform
 from datetime import datetime
 from logging import LoggerAdapter
-from typing import List, Union
+from typing import List, Optional, Union
 
 from bunq import ApiEnvironmentType, Pagination
 from bunq.sdk.context.api_context import ApiContext
 from bunq.sdk.context.bunq_context import BunqContext
 from bunq.sdk.model.generated import endpoint
 from bunq.sdk.model.generated.endpoint import (
+    BunqResponseMonetaryAccountList,
     BunqResponsePaymentList,
     MonetaryAccount,
     MonetaryAccountBank,
@@ -15,15 +17,13 @@ from bunq.sdk.model.generated.endpoint import (
     MonetaryAccountLight,
     MonetaryAccountSavings,
     Payment,
-    BunqResponseMonetaryAccountList,
 )
 from dateutil.parser import parse
 from kink import inject
 
-from bunq_ynab_connect.data.data_extractors.abstract_extractor import AbstractExtractor
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.helpers.config import BUNQ_CONFIG_FILE
-from bunq_ynab_connect.helpers.general import cache, get_public_ip
+from bunq_ynab_connect.helpers.general import get_public_ip
 
 
 @inject
@@ -40,7 +40,7 @@ class BunqClient:
 
     storage: AbstractStorage
     logger: LoggerAdapter
-    PAYMENTS_PER_PAGE = 50
+    PAYMENTS_PER_PAGE: int = 50
 
     @inject
     def __init__(self, storage: AbstractStorage, logger: LoggerAdapter) -> None:
@@ -55,9 +55,9 @@ class BunqClient:
         - Create ApiContext from bunq config file
         """
         self._check_api_context()
-        context = ApiContext.restore(BUNQ_CONFIG_FILE)
+        context = ApiContext.restore(str(BUNQ_CONFIG_FILE))
         context.ensure_session_active()
-        context.save(BUNQ_CONFIG_FILE)
+        context.save(str(BUNQ_CONFIG_FILE))
         BunqContext.load_api_context(context)
 
     def _check_api_context(self):
@@ -72,14 +72,14 @@ class BunqClient:
                 raise Exception(
                     "Please set your your bunq API key as BUNQ_ONETIME_TOKEN"
                 )
-            description = "bunq_ynab_connect"
+            description = f"bunqynab_{platform.node()}"
 
             env = ApiEnvironmentType.PRODUCTION
             ips = [get_public_ip()]
 
             try:
-                context = ApiContext.create(env, onetime_token, description, ips)
-                context.save(BUNQ_CONFIG_FILE)
+                context = ApiContext.create(env, onetime_token, description, ips)  # type: ignore
+                context.save(str(BUNQ_CONFIG_FILE))
             except Exception as e:
                 self.logger.error(f"Could not create _bunq config: {e}")
                 raise Exception(f"Could not create _bunq config: {e}")
@@ -88,7 +88,7 @@ class BunqClient:
     def _should_continue_loading_payments(
         self,
         payment_list_response: BunqResponsePaymentList,
-        last_runmoment: datetime = None,
+        last_runmoment: Optional[datetime] = None,
     ) -> bool:
         """
         Check if should load more payments:
@@ -109,7 +109,7 @@ class BunqClient:
         return earliest_payment_date > last_runmoment
 
     def get_payments_for_account(
-        self, account: MonetaryAccountBank, last_runmoment: datetime = None
+        self, account: MonetaryAccountBank, last_runmoment: Optional[datetime] = None
     ) -> List[Payment]:
         """
         Get the payments of an account.
