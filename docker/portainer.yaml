@@ -27,7 +27,7 @@ services:
     restart: unless-stopped
 
   prefect-server:
-    image: prefecthq/prefect:2.13.2-python3.8
+    image: prefecthq/prefect:2.16.3-python3.8
     container_name: bunqynab_prefect_server
     restart: unless-stopped
     volumes:
@@ -53,9 +53,9 @@ services:
     depends_on:
       - prefect-server
     volumes:
-      - ../config/mlserver:/home/bunqynab/config/mlserver
       # Docker sock needed to be able to restart the mlserver container
       - /var/run/docker.sock:/var/run/docker.sock
+      - bunq_ynab_connect_prefect_agent:/home/bunqynab
     command: "/bin/sh -c /home/bunqynab/entrypoint.sh"
 
   watchtower:
@@ -72,7 +72,7 @@ services:
       ports:
         - "12003:5000"
       volumes:
-        - ../mlflow:/mlflow
+        - ./mlflow:/mlflow
       command: mlflow server --backend-store-uri sqlite:////mlflow/mlflow.db --host 0.0.0.0 --artifacts-destination /mlflow/artifacts
       restart: unless-stopped    
 
@@ -84,7 +84,7 @@ services:
     ports:
       - "12006:8080"
     volumes:
-      - bunq_ynab_connect_mlserver:/home/bunqynab/config
+      - ./config:/home/bunqynab/config
     command: "mlserver start /home/bunqynab/config/mlserver"
     
   # Temporary solution to restart mlserver daily. Since Prefect agent has no access to the docker socket
@@ -99,7 +99,8 @@ services:
 volumes:
   bunq_ynab_connect_data:
   bunq_ynab_connect_prefect:
-  bunq_ynab_connect_mlserver:
+  bunq_ynab_connect_prefect_agent:
+
 
 networks:
   default:

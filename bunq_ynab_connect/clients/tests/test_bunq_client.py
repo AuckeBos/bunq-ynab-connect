@@ -1,21 +1,12 @@
 import datetime
 import json
-from logging import LoggerAdapter, getLogger
-from typing import List, Union
+from logging import getLogger
 from unittest import mock
 from unittest.mock import Mock
 
-from bunq.sdk.model.generated.endpoint import (
-    BunqResponsePaymentList,
-    MonetaryAccount,
-    MonetaryAccountBank,
-    MonetaryAccountJoint,
-    MonetaryAccountLight,
-    MonetaryAccountSavings,
-    Payment,
-)
-from pytest import fixture
 import pytest
+from bunq.sdk.model.generated.endpoint import MonetaryAccountBank, Payment
+from pytest import fixture
 
 from bunq_ynab_connect.clients.bunq_client import BunqClient
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
