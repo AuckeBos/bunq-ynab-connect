@@ -60,4 +60,8 @@ deployments:
   work_pool:
     name: docker-pool
     work_queue_name: default
-  schedules: {}
+  schedules: 
+  - cron: 0 2 * * 0
+  timezone: Europe/Amsterdam
+  day_or: true
+  active: true

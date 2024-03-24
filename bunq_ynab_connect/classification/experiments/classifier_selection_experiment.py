@@ -1,20 +1,13 @@
 from logging import LoggerAdapter
 
 import numpy as np
-from interpret.glassbox import ExplainableBoostingClassifier
 from kink import inject
-from mlflow.client import MlflowClient
-from prefect import task
 from sklearn.base import ClassifierMixin
-from sklearn.calibration import LabelEncoder
-from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import cohen_kappa_score, make_scorer
-from sklearn.model_selection import KFold, StratifiedKFold, cross_val_score
+from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.naive_bayes import GaussianNB
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
-from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
 import mlflow
@@ -22,9 +15,7 @@ from bunq_ynab_connect.classification.experiments.base_payment_classification_ex
     BasePaymentClassificationExperiment,
 )
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
-from bunq_ynab_connect.models.bunq_payment import BunqPayment
-from bunq_ynab_connect.models.matched_transaction import MatchedTransaction
-from bunq_ynab_connect.models.ynab_transaction import YnabTransaction
+from mlflow.client import MlflowClient
 
 
 class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
@@ -46,10 +37,10 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
     CLASSIFIERS = [
         DecisionTreeClassifier(),
         RandomForestClassifier(),
-        GradientBoostingClassifier(),
+        # GradientBoostingClassifier(),
         GaussianNB(),
         MLPClassifier(max_iter=1000),
-        ExplainableBoostingClassifier(),
+        # ExplainableBoostingClassifier(),
     ]
 
     @inject
