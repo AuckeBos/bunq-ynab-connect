@@ -1,9 +1,9 @@
 name: bunq-ynab-connect
 prefect-version: 2.13.2
 
-build: null
+build:
 
-push: null
+push:
 
 # This deployment only works on an agent that runs on a docker container with image auckebos/bunq-ynab-connect:latest
 pull:
@@ -14,46 +14,50 @@ deployments:
 - name: sync
   version: 2023.08.30.1
   description: Extract all data and sync to Ynab
-  schedule:
-    cron: "00 06-23 * * *"
+  schedules:
+  - cron: 00 06-23 * * *
     timezone: Europe/Amsterdam
+    day_or: true
+    active: true
   entrypoint: flows:sync
   parameters: {}
   work_pool:
     name: docker-pool
     work_queue_name: default
+    job_variables: {}
+  tags: []
 - name: extract
   version: 2023.08.28.1
   description: Extract Bunq & Ynab data
   entrypoint: flows:extract
-  schedule: {}
   parameters: {}
   work_pool:
     name: docker-pool
     work_queue_name: default
+  schedules: {}
 - name: sync_payment_queue
   version: 2023.08.29.1
   description: Sync the whole payment queue Ynab
   entrypoint: flows:sync_payment_queue
-  schedule: {}
   parameters: {}
   work_pool:
     name: docker-pool
     work_queue_name: default
+  schedules: {}
 - name: sync_payment
   version: 2023.08.29.1
   description: Sync one payment by id to Ynab
   entrypoint: flows:sync_payment
-  schedule: {}
   parameters: {}
   work_pool:
     name: docker-pool
     work_queue_name: default
+  schedules: {}
 - name: train
   version: 2023.09.29.1
   description: Train one classifier for each budget
   entrypoint: flows:train
-  schedule: {}
   work_pool:
     name: docker-pool
-    work_queue_name: default        
+    work_queue_name: default
+  schedules: {}
