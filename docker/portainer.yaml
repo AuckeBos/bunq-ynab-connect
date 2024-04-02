@@ -55,7 +55,7 @@ services:
     volumes:
       # Docker sock needed to be able to restart the mlserver container
       - /var/run/docker.sock:/var/run/docker.sock
-      - bunq_ynab_connect_prefect_agent:/home/bunqynab
+      - bunq_ynab_config:/home/bunqynab/config
     command: "/bin/sh -c /home/bunqynab/entrypoint.sh"
 
   watchtower:
@@ -84,7 +84,8 @@ services:
     ports:
       - "12006:8080"
     volumes:
-      - ./config:/home/bunqynab/config
+      - bunq_ynab_config:/home/bunqynab/config
+      
     command: "mlserver start /home/bunqynab/config/mlserver"
     
   # Temporary solution to restart mlserver daily. Since Prefect agent has no access to the docker socket
@@ -99,7 +100,7 @@ services:
 volumes:
   bunq_ynab_connect_data:
   bunq_ynab_connect_prefect:
-  bunq_ynab_connect_prefect_agent:
+  bunq_ynab_config:
 
 
 networks:
