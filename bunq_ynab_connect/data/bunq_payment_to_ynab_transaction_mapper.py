@@ -1,5 +1,7 @@
 from typing import Dict, List, Union
 
+from bunq_ynab_connect.clients.bunq_client import BunqClient
+from bunq_ynab_connect.clients.ynab_client import YnabClient
 from bunq_ynab_connect.models.bunq_payment import BunqPayment
 from bunq_ynab_connect.models.ynab_transaction import YnabTransaction
 from kink import inject
@@ -13,6 +15,11 @@ class PaymentTransactionMapper:
     """
 
     MINIMUM_AMOUNT_FOR_SANE_TRANSACTION = 0.05
+
+    @inject
+    def __init__(self, bunq_client: BunqClient, ynab_client: YnabClient):
+        self.bunq_client = bunq_client
+        self.ynab_client = ynab_client
 
     def map(
         self, payments: List[BunqPayment], transactions: List[YnabTransaction]
@@ -65,3 +72,10 @@ class PaymentTransactionMapper:
         return payment.created.date() == transaction.date.date() and float(
             payment.amount["value"]
         ) == round(transaction.amount / 1000, 2)
+
+    def payment_yet_exists(self, payment: BunqPayment) -> bool:
+        """
+        Check if a payment already exists in the ynab_transaction table.
+        If so, it should not be included in the map (to prevent double imports).
+        """
+        pass

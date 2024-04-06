@@ -22,7 +22,9 @@ class MatchedTransactionsDataset(AbstractDataset):
     Attributes:
         NAME: The name of the dataset.
         KEY_COLUMN: The name of the column that is used as a key.
-        map: A map of bunq account ids to ynab accounts, uses the BunqAccountToYnabAccountMapper
+        map: A map of bunq account ids to ynab accounts, uses the
+            BunqAccountToYnabAccountMapper
+        payment_mapper: A PaymentTransactionMapper instance to match payments
     """
 
     NAME: str = "matched_transactions"

@@ -4,13 +4,11 @@ from logging import LoggerAdapter
 from typing import List
 
 import ynab
+from bunq_ynab_connect.models.ynab_account import YnabAccount
 from kink import inject
 from ynab import ApiClient, TransactionDetail
 from ynab.models.account import Account
 from ynab.models.budget_summary import BudgetSummary
-
-from bunq_ynab_connect.data.data_extractors.abstract_extractor import AbstractExtractor
-from bunq_ynab_connect.models.ynab_account import YnabAccount
 
 
 @inject
@@ -39,13 +37,13 @@ class YnabClient:
         token = os.getenv("YNAB_TOKEN")
         if not token:
             self.logger.error("No ynab token found")
-            raise Exception("Please set your your ynab token as YNAB_TOKEN")
+            msg = "Please set your your ynab token as YNAB_TOKEN"
+            raise OSError(msg)
 
         configuration = ynab.Configuration()
         configuration.api_key["Authorization"] = token
         configuration.api_key_prefix["Authorization"] = "Bearer"
-        client = ApiClient(configuration)
-        return client
+        return ApiClient(configuration)
 
     def get_account_for_budget(self, budget_id: str) -> List[Account]:
         """
@@ -54,12 +52,14 @@ class YnabClient:
         api = ynab.AccountsApi(self.client)
         try:
             response = api.get_accounts(budget_id)
-            accounts = response.data.accounts
+            accounts = response.data.accounts  # type: ignore
             self.logger.info(f"Loaded {len(accounts)} accounts for budget {budget_id}")
-            return accounts
         except Exception as e:
-            self.logger.error(f"Could not get accounts for budget {budget_id}: {e}")
-            raise Exception(f"Could not get accounts for budget {budget_id}: {e}")
+            msg = f"Could not get accounts for budget {budget_id}: {e}"
+            self.logger.exception(msg)
+            raise RuntimeError(msg) from e
+        else:
+            return accounts
 
     def get_budgets(self) -> List[BudgetSummary]:
         """
@@ -68,15 +68,17 @@ class YnabClient:
         api = ynab.BudgetsApi(self.client)
         try:
             response = api.get_budgets()
-            budgets = response.data.budgets
+            budgets = response.data.budgets  # type: ignore
             self.logger.info(f"Loaded {len(budgets)} budgets")
-            return budgets
         except Exception as e:
-            self.logger.error(f"Could not get budgets: {e}")
-            raise Exception(f"Could not get budgets: {e}")
+            msg = f"Could not get budgets: {e}"
+            self.logger.exception(msg)
+            raise RuntimeError(msg) from e
+        else:
+            return budgets
 
     def get_transactions_for_account(
-        self, account: YnabAccount, last_runmoment: datetime = None
+        self, account: YnabAccount, last_runmoment: datetime
     ) -> List[TransactionDetail]:
         """
         Load the transactions for an account.
@@ -88,10 +90,12 @@ class YnabClient:
         api = ynab.TransactionsApi(self.client)
         result = api.get_transactions_by_account(
             account.budget_id, account.id, since_date=last_runmoment.date()
-        ).data.transactions
+        ).data.transactions  # type: ignore
         if len(result):
             self.logger.info(
-                f"Loaded {len(result)} transactions for account {account.name} since {last_runmoment}"
+                "Loaded {} transactions for account {} since {}".format(
+                    len(result), account.name, last_runmoment
+                )
             )
         return result
 
@@ -112,9 +116,6 @@ class YnabClient:
                 f"Added transaction {transaction.memo} to account {transaction.account_id}"
             )
         except Exception as e:
-            self.logger.error(
-                f"Could not add transaction {transaction} to budget {budget_id}: {e}"
-            )
-            raise Exception(
-                f"Could not add transaction {transaction} to budget {budget_id}: {e}"
-            )
+            msg = f"Could not add transaction {transaction}: {e}"
+            self.logger.exception(msg)
+            raise RuntimeError(msg) from e

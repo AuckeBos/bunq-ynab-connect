@@ -2,6 +2,7 @@ import os
 import platform
 from datetime import datetime
 from logging import LoggerAdapter
+from pathlib import Path
 from typing import List, Optional, Union
 
 from bunq import ApiEnvironmentType, Pagination
@@ -18,12 +19,11 @@ from bunq.sdk.model.generated.endpoint import (
     MonetaryAccountSavings,
     Payment,
 )
-from dateutil.parser import parse
-from kink import inject
-
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.helpers.config import BUNQ_CONFIG_FILE
 from bunq_ynab_connect.helpers.general import get_public_ip
+from dateutil.parser import parse
+from kink import inject
 
 
 @inject
@@ -43,12 +43,12 @@ class BunqClient:
     PAYMENTS_PER_PAGE: int = 50
 
     @inject
-    def __init__(self, storage: AbstractStorage, logger: LoggerAdapter) -> None:
+    def __init__(self, storage: AbstractStorage, logger: LoggerAdapter):
         self.storage = storage
         self.logger = logger
         self._load_api_context()
 
-    def _load_api_context(self):
+    def _load_api_context(self) -> None:
         """
         Initialize context, ran on init
         - Check if bunq config file exists, if not, create it
@@ -60,18 +60,17 @@ class BunqClient:
         context.save(str(BUNQ_CONFIG_FILE))
         BunqContext.load_api_context(context)
 
-    def _check_api_context(self):
+    def _check_api_context(self) -> None:
         """
         Check if the bunq config file exists, if not, create it.
         """
-        if not os.path.isfile(BUNQ_CONFIG_FILE):
+        if not Path(BUNQ_CONFIG_FILE).is_file():
             self.logger.info("Trading onetime token for bunq config file")
             onetime_token = os.getenv("BUNQ_ONETIME_TOKEN")
             if not onetime_token:
                 self.logger.error("No bunq onetime token found")
-                raise Exception(
-                    "Please set your your bunq API key as BUNQ_ONETIME_TOKEN"
-                )
+                msg = "Please set your your bunq API key as BUNQ_ONETIME_TOKEN"
+                raise ValueError(msg)
             description = f"bunqynab_{platform.node()}"
 
             env = ApiEnvironmentType.PRODUCTION
@@ -81,8 +80,9 @@ class BunqClient:
                 context = ApiContext.create(env, onetime_token, description, ips)  # type: ignore
                 context.save(str(BUNQ_CONFIG_FILE))
             except Exception as e:
-                self.logger.error(f"Could not create _bunq config: {e}")
-                raise Exception(f"Could not create _bunq config: {e}")
+                msg = f"Could not create bunq config file: {e}"
+                self.logger.exception(msg)
+                raise RuntimeError(msg) from e
             self.logger.info("Created bunq config file")
 
     def _should_continue_loading_payments(
@@ -97,8 +97,8 @@ class BunqClient:
 
         Args:
             payment_list_response: The response from the bunq API
-            last_runmoment: The last runmoment, used to determine if we should load more payments.
-                If not provided, all payments will be loaded.
+            last_runmoment: The last runmoment, used to determine if we should load more
+                payments. If not provided, all payments will be loaded.
         """
         if not payment_list_response.pagination.has_previous_page():
             return False
@@ -116,14 +116,14 @@ class BunqClient:
 
         Args:
             account: The account to get the payments for
-            last_runmoment: The last runmoment, used to determine if we should load more payments.
-                If not provided, all payments will be loaded.
+            last_runmoment: The last runmoment, used to determine if we should load more
+            payments. If not provided, all payments will be loaded.
         """
         account_id = account.id_
         payments = []
         page_count = self.PAYMENTS_PER_PAGE
         pagination = Pagination()
-        pagination.count = page_count
+        pagination.count = page_count  # type: ignore
 
         # For first query, only param is the count param
         params = pagination.url_params_count_only
@@ -135,7 +135,7 @@ class BunqClient:
             # Convert to dict
             current_payments = query_result.value
             payments.extend(current_payments)
-            if self._should_continue_loading_payments(query_result, last_runmoment):
+            if self._should_continue_loading_payments(query_result, last_runmoment):  # type: ignore
                 # Use previous_page since ordering is new to old
                 params = query_result.pagination.url_params_previous_page
             else:
@@ -163,15 +163,17 @@ class BunqClient:
         Get a list of all Bunq accounts
         """
         pagination = Pagination()
-        pagination.count = 100
+        pagination.count = 100  # type: ignore
         params = pagination.url_params_count_only
         try:
             response: BunqResponseMonetaryAccountList = endpoint.MonetaryAccount.list(
                 params=params
-            )
+            )  # type: ignore
             accounts = [a.get_referenced_object() for a in response.value]
             self.logger.info(f"Loaded {len(accounts)} bunq accounts")
-            return accounts
         except Exception as e:
-            self.logger.error(f"Could not load bunq accounts: {e}")
-            raise Exception(f"Could not load bunq accounts: {e}")
+            msg = f"Could not load bunq accounts: {e}"
+            self.logger.exception(msg)
+            raise RuntimeError(msg) from e
+        else:
+            return accounts

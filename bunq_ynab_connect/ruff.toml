@@ -7,4 +7,6 @@ ignore = [
     "ANN101", # missing-type-self
     "ANN204", # missing-return-type-special-method
     "G004", # logging-f-string
+    "PGH003", # blanket-type-ignore
+    "UP032", # f-string
 ] 
