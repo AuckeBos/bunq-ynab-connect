@@ -4,13 +4,12 @@
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
-
     "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
-            "source.organizeImports": "explicit"
+            "source.organizeImports": "explicit",
+            "source.unusedImports": "explicit"
         },
-      },
-      "isort.args":["--profile", "black"],    
+    },
+    "ruff.organizeImports": true
 }

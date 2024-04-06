@@ -1,16 +1,16 @@
 from logging import LoggerAdapter
 
-from kink import inject
-
 from bunq_ynab_connect.classification.datasets.abstract_dataset import AbstractDataset
 from bunq_ynab_connect.data.bunq_account_to_ynab_account_mapper import (
     BunqAccountToYnabAccountMapper,
 )
+from bunq_ynab_connect.data.bunq_payment_to_ynab_transaction_mapper import (
+    PaymentTransactionMapper,
+)
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
-from bunq_ynab_connect.models.bunq_account import BunqAccount
 from bunq_ynab_connect.models.bunq_payment import BunqPayment
-from bunq_ynab_connect.models.ynab_account import YnabAccount
 from bunq_ynab_connect.models.ynab_transaction import YnabTransaction
+from kink import inject
 
 
 class MatchedTransactionsDataset(AbstractDataset):
@@ -27,63 +27,26 @@ class MatchedTransactionsDataset(AbstractDataset):
 
     NAME: str = "matched_transactions"
     KEY_COLUMN: str = "id"
-    map: dict
+    account_map: dict
+    payment_mapper: PaymentTransactionMapper
 
     @inject
     def __init__(
         self,
-        mapper: BunqAccountToYnabAccountMapper,
+        account_mapper: BunqAccountToYnabAccountMapper,
+        payment_mapper: PaymentTransactionMapper,
         storage: AbstractStorage,
         logger: LoggerAdapter,
     ):
         super().__init__(storage, logger)
-        self.map = mapper.map()
+        self.payment_mapper = payment_mapper
+        self.account_map = account_mapper.map()
 
-    def is_match(self, bunq_payment: BunqPayment, ynab_transaction: YnabTransaction):
-        """
-        Match when:
-        - The dates are equal
-        - The amounts are equal
-        """
-        return bunq_payment.created.date() == ynab_transaction.date.date() and float(
-            bunq_payment.amount["value"]
-        ) == round(ynab_transaction.amount / 1000, 2)
-
-    def match(self, bunq_payments: list, ynab_transactions: list) -> list:
-        """
-        Match the bunq payments to the ynab transactions.
-
-        Returns:
-            A list of matches. A match is:
-            {
-                "match_id": ynab_transaction.id, # Identifies the row
-                "bunq_payment": BunqPayment,
-                "ynab_transaction": YnabTransaction
-            }
-        """
-        matches = []
-        for ynab_transaction in ynab_transactions:
-            if not self.sanity_check_ynab_transaction(ynab_transaction):
-                continue
-            for bunq_payment in bunq_payments:
-                if not self.sanity_check_bunq_payment(bunq_payment):
-                    continue
-                elif self.is_match(bunq_payment, ynab_transaction):
-                    matches.append(
-                        {
-                            "match_id": ynab_transaction.id,
-                            "bunq_payment": bunq_payment.dict(),
-                            "ynab_transaction": ynab_transaction.dict(),
-                        }
-                    )
-                    break
-        return matches
-
-    def load_candidates(self, bunq_account_id: int, ynab_account_id: int) -> tuple:
+    def _load_candidates(self, bunq_account_id: int, ynab_account_id: int) -> tuple:
         """
         Load the candidates for matching.
-        - Load all bunq payments for the account with a created date after the last runmoment
-        - Load all ynab transactions for the account with a date after the last runmoment
+        - Load all bunq payments for the account with a created date > last runmoment
+        - Load all ynab transactions for the account with a date > last runmoment
 
         Returns:
             A tuple with the bunq payments and ynab transactions
@@ -104,7 +67,8 @@ class MatchedTransactionsDataset(AbstractDataset):
         )
         bunq_payments = self.storage.rows_to_entities(bunq_payments, BunqPayment)
         ynab_transactions = self.storage.rows_to_entities(
-            ynab_transactions, YnabTransaction
+            ynab_transactions,
+            YnabTransaction,
         )
         return bunq_payments, ynab_transactions
 
@@ -116,33 +80,16 @@ class MatchedTransactionsDataset(AbstractDataset):
         - Match the bunq payments to the ynab transactions
         """
         matches = []
-        for bunq_account_id, ynab_account in self.map.items():
+        for bunq_account_id, ynab_account in self.account_map.items():
             ynab_account_id = ynab_account.id
-            bunq_payments, ynab_transactions = self.load_candidates(
-                bunq_account_id, ynab_account_id
+            bunq_payments, ynab_transactions = self._load_candidates(
+                bunq_account_id,
+                ynab_account_id,
             )
-            current_matches = self.match(bunq_payments, ynab_transactions)
+            current_matches = self.payment_mapper.map(bunq_payments, ynab_transactions)
             if len(current_matches) > 0:
                 self.logger.info(
-                    f"Found {len(current_matches)} matches for {ynab_account.name}"
+                    f"Found {len(current_matches)} matches for {ynab_account.name}",
                 )
             matches.extend(current_matches)
         return matches
-
-    def sanity_check_ynab_transaction(self, ynab_transaction: YnabTransaction):
-        """
-        Sanity check for whether a ynab transaction should be included in the dataset.
-        - Check that the amount is at least +=0.05. Lower amounts are test payments
-        """
-        if not abs(ynab_transaction.amount) > 0.05:
-            return False
-        return True
-
-    def sanity_check_bunq_payment(self, bunq_payment: BunqPayment):
-        """
-        Sanity check for whether a bunq payment should be included in the dataset.
-        - Check that the amount is at least +=0.05. Lower amounts are test payments
-        """
-        if not abs(float(bunq_payment.amount["value"])) > 0.05:
-            return False
-        return True

@@ -42,9 +42,6 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 bunqynab = "bunq_ynab_connect.main:cli"
 
-[tool.isort]
-profile = "black"
-
 [tool.pytest.ini_options]
 log_cli = true
 log_cli_level = "INFO"

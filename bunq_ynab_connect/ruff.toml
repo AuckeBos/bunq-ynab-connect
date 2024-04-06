@@ -1,0 +1,10 @@
+[lint]
+select = ["ALL"]
+
+ignore = [
+    "D", # pydocsyle
+    "FA", # Future annotations
+    "ANN101", # missing-type-self
+    "ANN204", # missing-return-type-special-method
+    "G004", # logging-f-string
+] 

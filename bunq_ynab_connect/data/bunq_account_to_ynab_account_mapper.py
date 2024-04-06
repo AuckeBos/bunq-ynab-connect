@@ -1,15 +1,9 @@
 from logging import LoggerAdapter
 
-from bunq.sdk.model.generated.endpoint import (
-    BunqResponsePaymentList,
-    MonetaryAccountBank,
-    Payment,
-)
-from kink import inject
-
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.models.bunq_account import BunqAccount
 from bunq_ynab_connect.models.ynab_account import YnabAccount
+from kink import inject
 
 
 @inject

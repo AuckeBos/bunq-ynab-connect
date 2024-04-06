@@ -1,10 +1,8 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, validator
-from pydantic.dataclasses import dataclass
-
 from bunq_ynab_connect.helpers.general import date_to_datetime
+from pydantic import BaseModel, validator
 
 
 class YnabTransaction(BaseModel):
@@ -15,8 +13,8 @@ class YnabTransaction(BaseModel):
 
     id: Optional[str]
     budget_id: Optional[str]
-    date: Optional[datetime]
-    amount: Optional[int]
+    date: datetime
+    amount: int
     memo: Optional[str]
     cleared: Optional[str]
     approved: Optional[bool]
