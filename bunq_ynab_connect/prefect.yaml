@@ -7,61 +7,70 @@ push:
 
 # This deployment only works on an agent that runs on a docker container with image auckebos/bunq-ynab-connect:latest
 pull:
-- prefect.deployments.steps.set_working_directory:
-    directory: /home/bunqynab/bunq_ynab_connect
+  - prefect.deployments.steps.set_working_directory:
+      directory: /home/bunqynab/bunq_ynab_connect
 
 deployments:
-- name: sync
-  version: 2023.08.30.1
-  description: Extract all data and sync to Ynab
-  schedules:
-  - cron: 00 06-23 * * *
+  - name: sync
+    version: 2023.08.30.1
+    description: Extract all data and sync to Ynab
+    schedules:
+      - cron: 00 06-23 * * *
+        timezone: Europe/Amsterdam
+        day_or: true
+        active: true
+    entrypoint: flows:sync
+    parameters: {}
+    work_pool:
+      name: docker-pool
+      work_queue_name: default
+      job_variables: {}
+    tags: []
+  - name: extract
+    version: 2023.08.28.1
+    description: Extract Bunq & Ynab data
+    entrypoint: flows:extract
+    parameters: {}
+    work_pool:
+      name: docker-pool
+      work_queue_name: default
+    schedules: {}
+  - name: sync_payment_queue
+    version: 2023.08.29.1
+    description: Sync the whole payment queue Ynab
+    entrypoint: flows:sync_payment_queue
+    parameters: {}
+    work_pool:
+      name: docker-pool
+      work_queue_name: default
+    schedules: {}
+  - name: sync_payment
+    version: 2023.08.29.1
+    description: Sync one payment by id to Ynab
+    entrypoint: flows:sync_payment
+    parameters: {}
+    work_pool:
+      name: docker-pool
+      work_queue_name: default
+    schedules: {}
+  - name: train
+    version: 2023.09.29.1
+    description: Train one classifier for each budget
+    entrypoint: flows:train
+    work_pool:
+      name: docker-pool
+      work_queue_name: default
+    schedules:
+      - cron: 0 2 * * 0
     timezone: Europe/Amsterdam
     day_or: true
     active: true
-  entrypoint: flows:sync
-  parameters: {}
-  work_pool:
-    name: docker-pool
-    work_queue_name: default
-    job_variables: {}
-  tags: []
-- name: extract
-  version: 2023.08.28.1
-  description: Extract Bunq & Ynab data
-  entrypoint: flows:extract
-  parameters: {}
-  work_pool:
-    name: docker-pool
-    work_queue_name: default
-  schedules: {}
-- name: sync_payment_queue
-  version: 2023.08.29.1
-  description: Sync the whole payment queue Ynab
-  entrypoint: flows:sync_payment_queue
-  parameters: {}
-  work_pool:
-    name: docker-pool
-    work_queue_name: default
-  schedules: {}
-- name: sync_payment
-  version: 2023.08.29.1
-  description: Sync one payment by id to Ynab
-  entrypoint: flows:sync_payment
-  parameters: {}
-  work_pool:
-    name: docker-pool
-    work_queue_name: default
-  schedules: {}
-- name: train
-  version: 2023.09.29.1
-  description: Train one classifier for each budget
-  entrypoint: flows:train
-  work_pool:
-    name: docker-pool
-    work_queue_name: default
-  schedules: 
-  - cron: 0 2 * * 0
-  timezone: Europe/Amsterdam
-  day_or: true
-  active: true
+  - name: exchange_pat
+    version: 2024.07.23.1
+    description: Exchange a PAT for a permanent API key
+    entrypoint: flows:exchange_pat
+    parameters: {}
+    work_pool:
+      name: docker-pool
+      work_queue_name: default
+    schedules: {}

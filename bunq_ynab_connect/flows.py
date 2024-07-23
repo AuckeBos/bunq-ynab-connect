@@ -5,6 +5,7 @@ from prefect_dask.task_runners import DaskTaskRunner
 from bunq_ynab_connect.classification.deployer import Deployer
 from bunq_ynab_connect.classification.feature_store import FeatureStore
 from bunq_ynab_connect.classification.trainer import Trainer
+from bunq_ynab_connect.clients.bunq_client import BunqClient
 from bunq_ynab_connect.data.data_extractors.bunq_account_extractor import (
     BunqAccountExtractor,
 )
@@ -104,3 +105,12 @@ def train():
     budget_ids = storage.get_budget_ids()
     for budget_id in budget_ids:
         train_for_budget.submit(budget_id)
+
+
+@flow
+def exchange_pat(pat: str):
+    """
+    Exchange a new PAT for a new API context.
+    """
+    client = di[BunqClient]
+    client.exchange_pat(pat)

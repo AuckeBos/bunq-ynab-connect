@@ -1,3 +1,4 @@
+import json
 import os
 import platform
 from datetime import datetime
@@ -7,9 +8,11 @@ from typing import List, Optional, Union
 from bunq import ApiEnvironmentType, Pagination
 from bunq.sdk.context.api_context import ApiContext
 from bunq.sdk.context.bunq_context import BunqContext
+from bunq.sdk.http.api_client import ApiClient
 from bunq.sdk.model.generated import endpoint
 from bunq.sdk.model.generated.endpoint import (
     BunqResponseMonetaryAccountList,
+    BunqResponseNotificationFilterUrlMonetaryAccountList,
     BunqResponsePaymentList,
     MonetaryAccount,
     MonetaryAccountBank,
@@ -60,13 +63,14 @@ class BunqClient:
         context.save(str(BUNQ_CONFIG_FILE))
         BunqContext.load_api_context(context)
 
-    def _check_api_context(self):
+    def _check_api_context(self, pat: Optional[str] = None) -> None:
         """
         Check if the bunq config file exists, if not, create it.
+        If the pat is provided as param, always create it
         """
-        if not os.path.isfile(BUNQ_CONFIG_FILE):
+        if pat or not os.path.isfile(BUNQ_CONFIG_FILE):
             self.logger.info("Trading onetime token for bunq config file")
-            onetime_token = os.getenv("BUNQ_ONETIME_TOKEN")
+            onetime_token = pat or os.getenv("BUNQ_ONETIME_TOKEN")
             if not onetime_token:
                 self.logger.error("No bunq onetime token found")
                 raise Exception(
@@ -168,10 +172,22 @@ class BunqClient:
         try:
             response: BunqResponseMonetaryAccountList = endpoint.MonetaryAccount.list(
                 params=params
-            )
+            )  # type: ignore
             accounts = [a.get_referenced_object() for a in response.value]
             self.logger.info(f"Loaded {len(accounts)} bunq accounts")
             return accounts
         except Exception as e:
             self.logger.error(f"Could not load bunq accounts: {e}")
             raise Exception(f"Could not load bunq accounts: {e}")
+
+    def exchange_pat(self, pat: str) -> None:
+        """
+        Trade a PAT for a key. Needed when the IP address of the host changes.
+        Note this only works of the old key is temporarily allows all IPs.
+        """
+        try:
+            self._check_api_context(pat)
+        except Exception as e:
+            self.logger.error(f"Could not trade the PAT: {e}")
+            return
+        self.logger.warn("Token traded. Make sure to remove the old token in the app")
