@@ -6,7 +6,7 @@ MONGO_PASSWORD=MYPASSWORD
 # Bunq OTP
 BUNQ_ONETIME_TOKEN=MYOTP
 # YNAB
-YNAB_TOKEN="MYTOKEN"
+YNAB_TOKEN=MYTOKEN
 # You should probably set it to the day of first deployment
 START_SYNC_DATE="2024-01-01 00:00:00"
 
@@ -17,7 +17,6 @@ PREFECT_SERVER_API_HOST=0.0.0.0
 PREFECT_API_URL_FOR_SERVER=http://127.0.0.1:12002/api
 
 # MLFlow
-MLFLOW_TRACKING_URI=http://localhost:12003/
-
+MLFLOW_TRACKING_URI=http://mlflow:5000/
 # MLServer
-MLSERVER_URL="http://localhost:12005"
+MLSERVER_URL="http://bunqynab_mlserver:8080"
