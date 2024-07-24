@@ -1,6 +1,9 @@
 """
 Define the configuration variables for the project.
+
+Todo: Store in json, read to class.
 """
+
 import os
 from pathlib import Path
 

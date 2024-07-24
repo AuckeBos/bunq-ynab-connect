@@ -1,0 +1,2 @@
+# Introduction
+A DataExctractor should be implemented for each dataset in the [metadata](/bunq_ynab_connect/metadata) folder. The base class [AbstractExtractor](/bunq_ynab_connect/data/data_extractors/abstract_extractor.py) should be extended for this. An extractor should then only implement the `load_new_data` method, and define `IS_FULL_LOAD`. For an extractor to be ran hourly, it should be added to the `extract` flow. 

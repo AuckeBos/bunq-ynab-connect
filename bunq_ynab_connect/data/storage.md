@@ -1,0 +1,2 @@
+# Introduction
+The storage module is used to store and retrieve data from the database. It uses the metadata to know how to store and retrieve the data. [AbstractStorage](/bunq_ynab_connect/data/storage/abstract_storage.py) is the base class, and referenced in the project. [bootstrap](/bunq_ynab_connect/bootstrap.md) currently injects the MongoStorage as storage handler. Other storage implementations could be added, as long as they implement the AbstractStorage interface.
