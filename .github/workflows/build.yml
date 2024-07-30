@@ -4,16 +4,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - run: pipx install poetry
-    - uses: actions/setup-python@v4
-      with:
-        python-version: '3.8'
-        cache: 'poetry'
-    - run: poetry install
-    - run: poetry run black --check --verbose .
-    # - run: poetry run isort --check --profile black . # Temp disable, clashes with black
-    - run: poetry run pytest
-      env:
-        PYTEST_ADDOPTS: "--color=yes"
-      
+      - uses: actions/checkout@v3
+      - run: pipx install poetry
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache: "poetry"
+      - run: poetry install
+      - run: poetry run ruff check .
+      - run: poetry run pytest
+        env:
+          PYTEST_ADDOPTS: "--color=yes"
