@@ -1,17 +1,6 @@
 import click
 from kink import inject
-from sklearn.tree import DecisionTreeClassifier
 
-from bunq_ynab_connect.classification.datasets.matched_transactions_dataset import (
-    MatchedTransactionsDataset,
-)
-from bunq_ynab_connect.classification.experiments.classifier_selection_experiment import (
-    ClassifierSelectionExperiment,
-)
-from bunq_ynab_connect.classification.experiments.classifier_tuning_experiment import (
-    ClassifierTuningExperiment,
-)
-from bunq_ynab_connect.classification.feature_store import FeatureStore
 from bunq_ynab_connect.classification.trainer import Trainer
 from bunq_ynab_connect.data.data_extractors.bunq_account_extractor import (
     BunqAccountExtractor,
@@ -33,17 +22,13 @@ from bunq_ynab_connect.sync_bunq_to_ynab.payment_syncer import PaymentSyncer
 
 
 @click.group
-def cli():
-    """
-    Main cli
-    """
+def cli() -> None:
+    """Provide the cli."""
 
 
 @cli.command()
-def extract():
-    """ 
-    Run all extractors.
-    """
+def extract() -> None:
+    """Run all extractors."""
     extractors = [
         BunqAccountExtractor(),
         BunqPaymentExtractor(),
@@ -56,39 +41,31 @@ def extract():
 
 
 @cli.command()
-def sync_payments():
-    """
-    Sync payments from bunq to YNAB.
-    """
+def sync_payments() -> None:
+    """Sync payments from bunq to YNAB."""
     syncer = PaymentSyncer()
     syncer.sync_queue()
 
 
 @cli.command()
 @click.argument("payment_id", type=int)
-def sync_payment(payment_id: int):
-    """
-    Sync a single payment from bunq to YNAB.
-    """
+def sync_payment(payment_id: int) -> None:
+    """Sync a single payment from bunq to YNAB."""
     syncer = PaymentSyncer()
     syncer.sync_payment(payment_id)
 
 
 @cli.command()
 @inject
-def test(storage: AbstractStorage):
-    """
-    Testing function
-    """
+def test(storage: AbstractStorage) -> None:  # noqa: ARG001
+    """Testing function."""
     trainer = Trainer(budget_id="my-budget")
     trainer.train()
 
 
 @cli.command()
-def help():
-    """
-    Show the help message.
-    """
+def help() -> None:  # noqa: A001
+    """Show the help message."""
     ctx = click.Context(cli)
     click.echo(ctx.get_help())
 

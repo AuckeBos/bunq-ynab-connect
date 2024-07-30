@@ -1,7 +1,6 @@
 import json
 import time
 from logging import LoggerAdapter
-from typing import List
 
 from bunq.sdk.model.generated.endpoint import (
     MonetaryAccountBank,
@@ -15,14 +14,16 @@ from bunq_ynab_connect.sync_bunq_to_ynab.payment_queue import PaymentQueue
 
 
 class BunqPaymentExtractor(AbstractExtractor):
-    """
-    Extractor for bunq payments.
+    """Extractor for bunq payments.
+
     Loads all payments from all accounts.
 
-    Attributes:
+    Attributes
+    ----------
         client: The bunq client to use to get the payments
         payment_queue: The payment queue to use to queue payments
-            All loaded payments are added to the queue, such that they can be processed later
+            All loaded payments are added to the queue, such that they can be processed
+
     """
 
     client: BunqClient
@@ -40,13 +41,13 @@ class BunqPaymentExtractor(AbstractExtractor):
         self.client = client
         self.payment_queue = payment_queue
 
-    def load(self) -> List:
-        """
-        Load the data from the source.
+    def load(self) -> list:
+        """Load the data from the source.
+
         Loads all payments from all accounts
         """
         accounts = self.storage.get_as_entity(
-            "bunq_accounts", MonetaryAccountBank.from_json, True
+            "bunq_accounts", MonetaryAccountBank.from_json, provide_kwargs_as_json=True
         )
         payments = []
         for account in accounts:
@@ -56,5 +57,4 @@ class BunqPaymentExtractor(AbstractExtractor):
             )
         for payment in payments:
             self.payment_queue.add(payment.id_)
-        payments_dict = [json.loads(pay.to_json()) for pay in payments]
-        return payments_dict
+        return [json.loads(pay.to_json()) for pay in payments]

@@ -6,7 +6,6 @@ from unittest.mock import Mock
 
 import pytest
 from bunq.sdk.model.generated.endpoint import MonetaryAccountBank, Payment
-from pytest import fixture
 
 from bunq_ynab_connect.clients.bunq_client import BunqClient
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
@@ -14,13 +13,14 @@ from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 ACCOUNT_ID_FOR_TESTING = 4023038
 
 
-@fixture
+@pytest.fixture()
 def client() -> BunqClient:
+    """Return a BunqClient with a mocked storage and logger."""
     return BunqClient(storage=Mock(spec=AbstractStorage), logger=getLogger("test"))
 
 
 @pytest.mark.skip(reason="Not working in CI/CD")
-def test_get_accounts(client: BunqClient):
+def test_get_accounts(client: BunqClient) -> None:  # noqa: D103
     # Arrange
     # Act
     accounts = client.get_accounts()
@@ -29,7 +29,7 @@ def test_get_accounts(client: BunqClient):
 
 
 @pytest.mark.skip(reason="Not working in CI/CD")
-def test_get_payments(client: BunqClient):
+def test_get_payments(client: BunqClient) -> None:  # noqa: D103
     # Arrange
     # Act
     account = MonetaryAccountBank.from_json(json.dumps({}))
@@ -37,8 +37,9 @@ def test_get_payments(client: BunqClient):
         # do stuff
         payments = client.get_payments_for_account(
             account,
-            last_runmoment=datetime.datetime.today() - datetime.timedelta(weeks=1),
+            last_runmoment=datetime.datetime.now(tz=datetime.timezone.utc)
+            - datetime.timedelta(weeks=1),
         )
     # Assert
     assert len(payments) > 0
-    assert type(payments[0]) == Payment
+    assert isinstance(payments[0], Payment)

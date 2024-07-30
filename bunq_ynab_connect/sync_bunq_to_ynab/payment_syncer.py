@@ -1,48 +1,48 @@
+from __future__ import annotations
+
 import json
 import os
-from datetime import datetime
-from logging import LoggerAdapter
-from typing import List, Optional
+from typing import TYPE_CHECKING
 
 import pandas as pd
 import requests
-from bunq.sdk.model.generated.endpoint import (
-    BunqResponsePaymentList,
-    MonetaryAccountBank,
-    Payment,
-)
-from bunq.sdk.model.generated.object_ import MonetaryAccountReference
 from dateutil import parser
 from kink import inject
 from mlserver.codecs import PandasCodec
 from ynab import TransactionDetail
 from ynab.configuration import Configuration
 
-from bunq_ynab_connect.clients.ynab_client import YnabClient
-from bunq_ynab_connect.data.bunq_account_to_ynab_account_mapper import (
-    BunqAccountToYnabAccountMapper,
-)
-from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.models.bunq_account import BunqAccount
 from bunq_ynab_connect.models.bunq_payment import BunqPayment
-from bunq_ynab_connect.models.ynab_account import YnabAccount
-from bunq_ynab_connect.sync_bunq_to_ynab.payment_queue import PaymentQueue
+
+if TYPE_CHECKING:
+    from datetime import datetime
+    from logging import LoggerAdapter
+
+    from bunq_ynab_connect.clients.ynab_client import YnabClient
+    from bunq_ynab_connect.data.bunq_account_to_ynab_account_mapper import (
+        BunqAccountToYnabAccountMapper,
+    )
+    from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
+    from bunq_ynab_connect.models.ynab_account import YnabAccount
+    from bunq_ynab_connect.sync_bunq_to_ynab.payment_queue import PaymentQueue
 
 
 class PaymentSyncer:
-    """
-    Class that syncs payments from Bunq to Ynab.
+    """Class that syncs payments from Bunq to Ynab.
 
     Loops over the payment queue and syncs payments one by one.
 
-    Attributes:
+    Attributes
+    ----------
         logger: The logger to use to log messages.
         storage: The storage class to use to read the queue and payments from.
         client: The YNAB client to use to create transactions.
         mapper: The mapper to use to map Bunq accounts to YNAB accounts.
         queue: The queue to use to get the payments to sync.
         account_map: A map from Bunq account id to YNAB account.
-        prediction_base_url: The base url of the ML server to use to predict categories. Read from env.
+        prediction_base_url: The base url of the ML server to use to predict categories.
+            Read from env.
 
     """
 
@@ -74,20 +74,22 @@ class PaymentSyncer:
         self.prediction_base_url = f"{os.getenv('MLSERVER_URL')}/v2/models"
 
     def sanity_check_payment(self, payment: BunqPayment) -> bool:
-        """
-        Do a sanity check on the payment. Payment should not be synced if the check fails.
+        """Do a sanity check on the payment. Payment should not be synced if the fails.
+
         Check:
         - The 'date' should be larger than the START_SYNC_DATE from the env
             If the START_SYNC_DATE is not set, we raise an exception. In that case, we
-            don't want to sync any payment, since we could overflow YNAB with old transactions.
+            don't want to sync any payment, since we could overflow YNAB with old
+            transactions.
         """
         min_date = os.getenv("START_SYNC_DATE")
         if min_date is None:
-            raise ValueError("START_SYNC_DATE is not set. Not syncing any payments")
+            msg = "START_SYNC_DATE is not set. Not syncing any payments"
+            raise ValueError(msg)
 
         if payment.created < parser.parse(min_date):
             self.logger.warning(
-                f"Payment {payment.id} is older than {min_date}. Not syncing"
+                "Payment %s is older than %s. Not syncing", payment.id, min_date
             )
             return False
         return True
@@ -95,16 +97,19 @@ class PaymentSyncer:
     def payment_to_transaction(
         self, payment: BunqPayment, account: YnabAccount
     ) -> TransactionDetail:
-        """
-        Create a YNAB transaction from a Bunq payment.
+        """Create a YNAB transaction from a Bunq payment.
+
         Use values from the payment to fill in the transaction.
 
-        Args:
+        Parameters
+        ----------
             payment: The Bunq payment
             account: The YNAB account to which the payment belongs
 
-        Returns:
+        Returns
+        -------
             The YNAB transaction to be created
+
         """
         name = (
             payment.counterparty_alias["display_name"]
@@ -114,7 +119,7 @@ class PaymentSyncer:
         configuration = Configuration()
         configuration.client_side_validation = False
         amount = int(float(payment.amount["value"]) * 1000)  # Convert to milliunits
-        transaction = TransactionDetail(
+        return TransactionDetail(
             account_id=account.id,
             amount=amount,
             date=payment.created,
@@ -126,11 +131,9 @@ class PaymentSyncer:
             local_vars_configuration=configuration,
             category_name=self.decide_category(payment, account),
         )
-        return transaction
 
     def decide_category(self, payment: BunqPayment, account: YnabAccount) -> str:
-        """
-        Decide the category of a payment. Use the ML server to predict the category.
+        """Decide the category of a payment. Use the ML server to predict the category.
 
         - Build endpoint
         - Convert payment to dict
@@ -148,30 +151,33 @@ class PaymentSyncer:
             request = PandasCodec.encode_request(
                 pd.DataFrame.from_dict([payment_as_dict])
             )
-            response = requests.post(endpoint, json=request.dict())
-            if response.status_code != 200:
-                raise ValueError(f"Error in response: {response.text}")
+            response = requests.post(endpoint, json=request.dict(), timeout=10)
+            response.raise_for_status()
             prediction = response.json()["outputs"][0]["data"][0]
             if prediction in invalid_categories:
-                raise ValueError(f"Invalid category predicted: {prediction}")
+                msg = f"Invalid category predicted: {prediction}"
+                raise ValueError(msg)  # noqa: TRY301
             self.logger.info(
-                f"Predicted category {prediction} for payment {payment.id}"
+                "Predicted category %s for payment %s", prediction, payment.id
             )
-            return prediction
-        except Exception as e:
-            self.logger.error(
-                f"Could not predict category for payment {payment.id}: {e}. Falling back to None"
+        except Exception:
+            self.logger.exception(
+                "Could not predict category for payment %s", payment.id
             )
             return None
+        else:
+            return prediction
 
-    def create_transaction(self, payment: BunqPayment, account: YnabAccount):
-        """
-        Create a YNAB transaction from a Bunq payment and create it in YNAB.
+    def create_transaction(self, payment: BunqPayment, account: YnabAccount) -> None:
+        """Create a YNAB transaction from a Bunq payment and create it in YNAB.
+
         If the payment fails the sanity check, do not create the transaction.
 
-        Args:
+        Parameters
+        ----------
             payment: The Bunq payment
             account: The YNAB account to which the payment belongs
+
 
         """
         transaction = self.payment_to_transaction(payment, account)
@@ -180,52 +186,64 @@ class PaymentSyncer:
 
         self.client.create_transaction(transaction, account.budget_id)
 
-    def sync_payment(self, payment_id: int):
-        """
-        Sync a payment from Bunq to YNAB.
+    def sync_payment(self, payment_id: int) -> None:
+        """Sync a payment from Bunq to YNAB.
+
         - Load the payment from the database
         - Find the corresponding YNAB account
         - Create a transaction.
 
-        Args:
+        Parameters
+        ----------
             payment_id: The id of the payment to sync
+
 
         """
         payment = self.storage.find_one("bunq_payments", [("id", "eq", payment_id)])
         if payment is None:
-            raise ValueError(f"Could not find payment with id {payment_id}")
+            msg = f"Could not find payment with id {payment_id}"
+            raise ValueError(msg)
         payment = self.storage.rows_to_entities([payment], BunqPayment)[0]
         account_id = payment.monetary_account_id
         if account_id not in self.account_map:
             self.logger.warning(
-                f"Could not find YNAB account for Bunq account {account_id}. Not syncing payment {payment_id}"
+                "Could not find YNAB account for Bunq account %s, not syncing payment %s",  # noqa: E501
+                account_id,
+                payment_id,
             )
             return
         ynab_account: YnabAccount = self.account_map[account_id]
         self.create_transaction(payment, ynab_account)
 
-    def sync_queue(self):
-        """
-        Sync all payments in the queue from Bunq to YNAB.
-        """
+    def sync(self) -> None:
+        """Sync all payments in the queue from Bunq to YNAB."""
         counter = 0
         while self.queue:
             with self.queue.pop() as payment_id:
                 self.sync_payment(payment_id)
             counter += 1
-        self.logger.info(f"Synced {counter} payments")
+        self.logger.info("Synced %s payments", counter)
 
-    def sync_account(self, iban: str, from_date: Optional[datetime] = None, to_date: Optional[datetime] = None):
+    def sync_account(
+        self,
+        iban: str,
+        from_date: datetime | None = None,
+        to_date: datetime | None = None,
+    ) -> None:
         if account := BunqAccount.by_iban(iban=iban):
             query = [("monetary_account_id", "eq", account.id)]
             if from_date:
-                query.append(("created", "gte", from_date.strftime("%Y-%m-%d %H:%M:%S.%f")))
+                query.append(
+                    ("created", "gte", from_date.strftime("%Y-%m-%d %H:%M:%S.%f"))
+                )
             if to_date:
-                query.append(("created", "lte", to_date.strftime("%Y-%m-%d %H:%M:%S.%f")))
-            self.logger.info(f"Querying payments for account {iban}, query: {query!s}")
+                query.append(
+                    ("created", "lte", to_date.strftime("%Y-%m-%d %H:%M:%S.%f"))
+                )
+            self.logger.info("Querying payments for account %s, query: %s", iban, query)
             payments = self.storage.find("bunq_payments", query)
-            self.logger.info(f"Found {len(payments)} payments for account {iban}")
+            self.logger.info("Found %s payments for account %s", len(payments), iban)
             for payment in payments:
                 self.sync_payment(payment["id"])
         else:
-            self.logger.error(f"Could not find account with IBAN {iban}")
+            self.logger.exception("Could not find account with IBAN %s", iban)

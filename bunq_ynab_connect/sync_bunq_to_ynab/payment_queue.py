@@ -10,10 +10,10 @@ from bunq_ynab_connect.helpers.general import now
 
 @inject
 class PaymentQueue:
-    """
-    Class to handle the queue of payments to be synced.
+    """Class to handle the queue of payments to be synced.
 
-    Attributes:
+    Attributes
+    ----------
         logger: The logger to use to log messages.
         storage: The storage class to use to store the queue.
 
@@ -34,38 +34,32 @@ class PaymentQueue:
         self.storage = storage
 
     def get_payment_id(self) -> str:
-        """
-        Get the payment id of the first non-synced payment in the queue.
+        """Get the payment id of the first non-synced payment in the queue.
+
         Order is determined by the updated_at column (first in, first out)
         """
         payment = self.storage.find_one(
             self.TABLE_NAME, {("synced_at", "eq", None)}, "updated_at"
         )
         if payment is None:
-            raise IndexError("No payments in queue")
+            msg = "No payments in queue"
+            raise IndexError(msg)
         return payment["payment_id"]
 
-    def mark_as_synced(self, payment_id: str):
-        """
-        Mark a payment as synced.
-        """
+    def mark_as_synced(self, payment_id: str) -> None:
+        """Mark a payment as synced."""
         data = {
             "payment_id": payment_id,
             "synced_at": now(),
         }
         self.storage.upsert(self.TABLE_NAME, [data])
 
-    def __bool__(self):
-        """
-        To support the usage of the queue in a while loop.
-        """
+    def __bool__(self) -> bool:
+        """To support the usage of the queue in a while loop."""
         return self.storage.count(self.TABLE_NAME, {("synced_at", "eq", None)}) > 0
 
-    def add(self, payment_id: str):
-        """
-        Add a payment to the queue (if it doesn't already exist)
-        """
-
+    def add(self, payment_id: str) -> None:
+        """Add a payment to the queue (if it doesn't already exist)."""
         data = {
             "payment_id": payment_id,
             "synced_at": None,
@@ -74,8 +68,8 @@ class PaymentQueue:
 
     @contextmanager
     def pop(self) -> Generator[str, None, None]:
-        """
-        Pop a payment from the queue.
+        """Pop a payment from the queue.
+
         The payment is removed from the queue when the context is exited cleanly.
         Can be used in a with statement.
         """
@@ -83,6 +77,6 @@ class PaymentQueue:
         try:
             yield payment_id
             self.mark_as_synced(payment_id)
-        except Exception as e:
-            self.logger.error(f"Error processing payment {payment_id}: {e}")
-            raise e
+        except Exception:
+            self.logger.exception("Error processing payment %s", payment_id)
+            raise

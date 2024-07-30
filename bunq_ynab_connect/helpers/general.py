@@ -1,11 +1,13 @@
+from __future__ import annotations
+
 import pickle
 import shelve
 from datetime import date, datetime
 from functools import wraps
-from logging import LoggerAdapter
+from pathlib import Path
 from tempfile import TemporaryDirectory
 from time import time
-from typing import Any
+from typing import TYPE_CHECKING, Any, Callable
 
 import pytz
 import requests
@@ -14,30 +16,34 @@ from kink import inject
 from bunq_ynab_connect.helpers.config import CACHE_DIR
 from mlflow import log_artifact
 
+if TYPE_CHECKING:
+    from logging import LoggerAdapter
 
-def now():
+
+def now() -> datetime:
+    """Get now in Amsterdam timezone."""
     return datetime.now(tz=pytz.timezone("Europe/Amsterdam"))
 
 
-def get_public_ip():
-    """
-    Get the current public ip address
-    """
-    return requests.get("http://ipinfo.io/json").json()["ip"]
+def get_public_ip() -> str:
+    """Get the current public ip address."""
+    return requests.get("http://ipinfo.io/json", timeout=10).json()["ip"]
 
 
 @inject
-def cache(logger: LoggerAdapter, ttl: int = None):
-    """
-    Cache decorator, to cache the result of a function for some seconds
-    :param ttl: Time to live of cache in seconds
-    args
+def cache(logger: LoggerAdapter, ttl: int | None = None) -> Callable:
+    """Cache decorator, to cache the result of a function for some seconds.
+
+    Parameters
+    ----------
+        ttl: Time to live of cache in seconds
+
     """
     expires_at = time() + ttl
 
-    def decorator(func):
+    def decorator(func: Callable):  # noqa: ANN202
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs):  # noqa: ANN202,ANN002,ANN003
             key = str(args[1:]) + str(tuple(sorted(kwargs.items())))[1:-1]
             c = shelve.open(f"{CACHE_DIR}/{func.__name__}_{key}")
             is_expired = (
@@ -51,7 +57,7 @@ def cache(logger: LoggerAdapter, ttl: int = None):
                 c["value"] = value
                 c["expires_at"] = expires_at
             else:
-                logger.info(f"Using cached value for {func.__name__}_{key}")
+                logger.info("Using cached value for %s_%s", func.__name__, key)
                 value = c["value"]
             c.close()
             return value
@@ -62,24 +68,29 @@ def cache(logger: LoggerAdapter, ttl: int = None):
 
 
 def date_to_datetime(_date: date) -> datetime:
-    return datetime(_date.year, _date.month, _date.day)
+    """Convert a date to a datetime."""
+    return datetime(
+        _date.year, _date.month, _date.day, tzinfo=pytz.timezone("Europe/Amsterdam")
+    )
 
 
-def object_to_mlflow(obj: Any, name: str) -> None:
-    """
-    Save an object to an artifact by:
-    - Saving the object to a temp pickle file
-    - Saving the temp pickle file as artifact in the current mlfow run
+def object_to_mlflow(obj: Any, name: str) -> None:  # noqa: ANN401
+    """Save an object to an artifact.
+
+    - Save the object to a temp pickle file
+    - Save the temp pickle file as artifact in the current mlfow run
+
     Parameters
     ----------
     obj: Any
         The dict to save
     name: str
         The artefact name
+
     """
     with TemporaryDirectory() as temp_dir:
-        path = f"{temp_dir}/{name}"
-        with open(path, "wb") as tmp_file:
+        path = Path(f"{temp_dir}/{name}")
+        with path.open("wb") as tmp_file:
             pickle.dump(obj, tmp_file)
         log_artifact(path)
         return path

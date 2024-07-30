@@ -1,37 +1,41 @@
-from datetime import datetime
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, validator
-from pydantic.dataclasses import dataclass
 
 from bunq_ynab_connect.helpers.general import date_to_datetime
 
+if TYPE_CHECKING:
+    from datetime import datetime
+
 
 class YnabTransaction(BaseModel):
-    """
-    YnabTransaction model.
-    Used because the default YnabTransaction model (TransactionDetail), has a property of type 'date', which is not supported by pymongo.
+    """Represents a transaction on an account of a budget in Ynab.
+
+    Used because the default YnabTransaction model (TransactionDetail)
+    has a property of type 'date', which is not supported by pymongo.
     """
 
-    id: Optional[str]
-    budget_id: Optional[str]
-    date: Optional[datetime]
-    amount: Optional[int]
-    memo: Optional[str]
-    cleared: Optional[str]
-    approved: Optional[bool]
-    flag_color: Optional[str]
-    account_id: Optional[str]
-    payee_id: Optional[str]
-    category_id: Optional[str]
-    transfer_account_id: Optional[str]
-    transfer_transaction_id: Optional[str]
-    matched_transaction_id: Optional[str]
-    import_id: Optional[str]
-    deleted: Optional[bool]
-    account_name: Optional[str]
-    payee_name: Optional[str]
-    category_name: Optional[str]
-    subtransactions: Optional[list]
+    id: str | None
+    budget_id: str | None
+    date: datetime | None
+    amount: int | None
+    memo: str | None
+    cleared: str | None
+    approved: bool | None
+    flag_color: str | None
+    account_id: str | None
+    payee_id: str | None
+    category_id: str | None
+    transfer_account_id: str | None
+    transfer_transaction_id: str | None
+    matched_transaction_id: str | None
+    import_id: str | None
+    deleted: bool | None
+    account_name: str | None
+    payee_name: str | None
+    category_name: str | None
+    subtransactions: list | None
     # Convert dates to datetime
     _convert_dates = validator("date", allow_reuse=True, pre=True)(date_to_datetime)

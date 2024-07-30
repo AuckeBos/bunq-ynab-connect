@@ -1,22 +1,22 @@
-from logging import LoggerAdapter
-from typing import List
+from __future__ import annotations
 
-import ynab
+from typing import TYPE_CHECKING
+
 from kink import inject
-from pyparsing import Iterable
-from ynab import ApiClient
 
-from bunq_ynab_connect.clients.ynab_client import YnabClient
 from bunq_ynab_connect.data.data_extractors.abstract_extractor import AbstractExtractor
-from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.models.ynab_account import YnabAccount
 from bunq_ynab_connect.models.ynab_transaction import YnabTransaction
 
+if TYPE_CHECKING:
+    from logging import LoggerAdapter
+
+    from bunq_ynab_connect.clients.ynab_client import YnabClient
+    from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
+
 
 class YnabTransactionExtractor(AbstractExtractor):
-    """
-    Extractor for YNAB transactions.
-    """
+    """Extractor for YNAB transactions."""
 
     client: YnabClient
 
@@ -27,12 +27,11 @@ class YnabTransactionExtractor(AbstractExtractor):
         super().__init__("ynab_transactions", storage, logger)
         self.client = client
 
-    def load(self) -> List[dict]:
-        """
-        Use the YNAB client to get the transactions.
-        Use custom YnabTransaction model to convert to dict, to convert dates to datetime.
-        """
-        accounts = self.storage.get_as_entity("ynab_accounts", YnabAccount, False)
+    def load(self) -> list[dict]:
+        """Use the YNAB client to get the transactions."""
+        accounts = self.storage.get_as_entity(
+            "ynab_accounts", YnabAccount, provide_kwargs_as_json=False
+        )
         transactions = []
         for a in accounts:
             transactions_for_account = self.client.get_transactions_for_account(

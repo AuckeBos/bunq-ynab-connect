@@ -1,13 +1,11 @@
-"""
-Define the configuration variables for the project.
+"""Define the configuration variables for the project.
 
 Todo: Store in json, read to class.
 """
 
-import os
 from pathlib import Path
 
-PROJECT_DIR = Path(os.path.dirname(os.path.abspath(__file__))) / ".."
+PROJECT_DIR = Path(__file__).parents[1]
 CONFIG_DIR = PROJECT_DIR / ".." / "config"
 BUNQ_CONFIG_FILE = CONFIG_DIR / "bunq.cfg"
 METADATA_DIR = PROJECT_DIR / "metadata"
