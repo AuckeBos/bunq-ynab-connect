@@ -1,17 +1,6 @@
 import click
 from kink import inject
-from sklearn.tree import DecisionTreeClassifier
 
-from bunq_ynab_connect.classification.datasets.matched_transactions_dataset import (
-    MatchedTransactionsDataset,
-)
-from bunq_ynab_connect.classification.experiments.classifier_selection_experiment import (
-    ClassifierSelectionExperiment,
-)
-from bunq_ynab_connect.classification.experiments.classifier_tuning_experiment import (
-    ClassifierTuningExperiment,
-)
-from bunq_ynab_connect.classification.feature_store import FeatureStore
 from bunq_ynab_connect.classification.trainer import Trainer
 from bunq_ynab_connect.data.data_extractors.bunq_account_extractor import (
     BunqAccountExtractor,

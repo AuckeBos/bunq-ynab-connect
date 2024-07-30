@@ -1,6 +1,7 @@
 """
 Initialize the dependency injection container and inject dependencies.
 """
+
 import logging
 import os
 import sys
@@ -12,7 +13,6 @@ from pymongo import MongoClient
 from pymongo.database import Database
 from ynab.models.account import Account
 
-from bunq_ynab_connect.clients.ynab_client import YnabClient
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.data.storage.mongo_storage import MongoStorage
 from bunq_ynab_connect.helpers.config import (

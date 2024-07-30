@@ -37,7 +37,13 @@ target-version = "py38"
 
 [lint]
 select = ["ALL"]
-ignore = []
+ignore = [
+    "COM812",
+    "D107", # Docstring init method
+    "D100", # Docstring for public module
+    "D102", # Require docstring
+    "ANN204", # Return type on init
+] 
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
@@ -47,8 +53,7 @@ unfixable = []
 # Like Black, use double quotes for strings.
 quote-style = "double"
 
-# Like Black, indent with spaces, rather than tabs.
-indent-style = "tab"
+
 
 # Like Black, respect magic trailing commas.
 skip-magic-trailing-comma = false
@@ -59,3 +64,5 @@ line-ending = "auto"
 docstring-code-format = true
 
 docstring-code-line-length = "dynamic"
+
+# Like Black, indent with spaces, rather than tabs.
