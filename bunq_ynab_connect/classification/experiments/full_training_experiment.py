@@ -21,8 +21,8 @@ from bunq_ynab_connect.helpers.general import object_to_mlflow
 
 
 class FullTrainingExperiment(BasePaymentClassificationExperiment):
-    """
-    An experiment to run a classifier with the best parameters on all data.
+    """An experiment to run a classifier with the best parameters on all data.
+
     The result of this experiment is the final model, which can be deployed.
     """
 
@@ -37,14 +37,15 @@ class FullTrainingExperiment(BasePaymentClassificationExperiment):
         logger: LoggerAdapter,
         *,
         clf: Any,
-        parameters: dict
+        parameters: dict,
     ):
         super().__init__(budget_id, storage, logger)
         self.model = clf(**parameters)
 
-    def _run(self, X: np.ndarray, y: np.ndarray):
-        """
-        Split the data once. Train the classifier on the training data and evaluate on the test data.
+    def _run(self, X: np.ndarray, y: np.ndarray) -> None:  # noqa: N803
+        """Split the data once.
+
+        Train the classifier on the training data and evaluate on the test data.
         Log the model as a DeployableMlflowModel.
         """
         classifier = self.create_pipeline(self.model)
@@ -54,7 +55,7 @@ class FullTrainingExperiment(BasePaymentClassificationExperiment):
                 n_splits=5, shuffle=True, random_state=self.RANDOM_STATE
             ).split(X, y)
         )
-        X_train, X_test = X[train_idx], X[test_idx]
+        X_train, X_test = X[train_idx], X[test_idx]  # noqa: N806
         y_train, y_test = y[train_idx], y[test_idx]
 
         classifier.fit(X_train, y_train)

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import os
 import tempfile
 from abc import abstractmethod
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -60,8 +60,8 @@ class BasePaymentClassificationExperiment:
         """Log the training data to mlflow."""
         with tempfile.TemporaryDirectory() as dir:
             filename = f"{name}.txt"
-            path = os.path.join(dir, filename)
-            with open(path, "w") as file:
+            path = Path(dir) / filename
+            with path.open() as file:
                 ids = [t.match_id for t in transactions]
                 file.write("\n".join(ids))
             mlflow.log_artifact(path)
@@ -142,4 +142,4 @@ class BasePaymentClassificationExperiment:
     @abstractmethod
     def _run(self, X: np.array, y: np.array) -> None:  # noqa: N803
         """Run the actual experiment on the full set."""
-        raise NotImplementedError()
+        raise NotImplementedError

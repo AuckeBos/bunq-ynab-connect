@@ -15,14 +15,16 @@ from bunq_ynab_connect.sync_bunq_to_ynab.payment_queue import PaymentQueue
 
 
 class BunqPaymentExtractor(AbstractExtractor):
-    """
-    Extractor for bunq payments.
+    """Extractor for bunq payments.
+
     Loads all payments from all accounts.
 
-    Attributes:
+    Attributes
+    ----------
         client: The bunq client to use to get the payments
         payment_queue: The payment queue to use to queue payments
-            All loaded payments are added to the queue, such that they can be processed later
+            All loaded payments are added to the queue, such that they can be processed
+
     """
 
     client: BunqClient
@@ -41,8 +43,8 @@ class BunqPaymentExtractor(AbstractExtractor):
         self.payment_queue = payment_queue
 
     def load(self) -> List:
-        """
-        Load the data from the source.
+        """Load the data from the source.
+
         Loads all payments from all accounts
         """
         accounts = self.storage.get_as_entity(

@@ -43,6 +43,9 @@ ignore = [
     "D100", # Docstring for public module
     "D102", # Require docstring
     "ANN204", # Return type on init
+    "S301", # Pickle
+    "FIX002", # TODO
+    "TD", # TODO
 ] 
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
