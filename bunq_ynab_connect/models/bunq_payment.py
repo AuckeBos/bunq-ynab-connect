@@ -1,27 +1,26 @@
-from datetime import datetime
-from typing import Optional
+from __future__ import annotations
 
-from pydantic import BaseModel, validator
-from pydantic.dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from bunq_ynab_connect.helpers.general import date_to_datetime
+from pydantic import BaseModel
+
+if TYPE_CHECKING:
+    from datetime import datetime
 
 
 class BunqPayment(BaseModel):
-    """
-    BunqPayment model.
-    """
+    """Represents a payment in a BunqAccount."""
 
-    id: Optional[int]
-    alias: Optional[dict]
-    amount: Optional[dict]
-    attachment: Optional[list]
-    balance_after_mutation: Optional[dict]
-    counterparty_alias: Optional[dict]
-    created: Optional[datetime]
-    description: Optional[str]
-    monetary_account_id: Optional[int]
-    request_reference_split_the_bill: Optional[list]
-    sub_type: Optional[str]
-    type: Optional[str]
-    updated: Optional[datetime]
+    id: int | None
+    alias: dict | None
+    amount: dict | None
+    attachment: list | None
+    balance_after_mutation: dict | None
+    counterparty_alias: dict | None
+    created: datetime | None
+    description: str | None
+    monetary_account_id: int | None
+    request_reference_split_the_bill: list | None
+    sub_type: str | None
+    type: str | None
+    updated: datetime | None

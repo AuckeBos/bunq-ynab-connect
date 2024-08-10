@@ -1,39 +1,38 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from kink import inject
-from pydantic import BaseModel, validator
-from pydantic.dataclasses import dataclass
+from pydantic import BaseModel
 
-from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
-from bunq_ynab_connect.helpers.general import date_to_datetime
+if TYPE_CHECKING:
+    from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 
 
 class BunqAccount(BaseModel):
-    """
-    BunqAccount model.
-    """
+    """Represent an account in Bunq."""
 
-    alias: Optional[list]
-    avatar: Optional[dict]
-    balance: Optional[dict]
-    created: Optional[str]
-    currency: Optional[str]
-    daily_limit: Optional[dict]
-    description: Optional[str]
-    display_name: Optional[str]
-    id: Optional[int]
-    monetary_account_profile: Optional[dict]
-    public_uuid: Optional[str]
-    setting: Optional[dict]
-    status: Optional[str]
-    sub_status: Optional[str]
-    updated: Optional[str]
-    user_id: Optional[int]
+    alias: list | None
+    avatar: dict | None
+    balance: dict | None
+    created: str | None
+    currency: str | None
+    daily_limit: dict | None
+    description: str | None
+    display_name: str | None
+    id: int | None
+    monetary_account_profile: dict | None
+    public_uuid: str | None
+    setting: dict | None
+    status: str | None
+    sub_status: str | None
+    updated: str | None
+    user_id: int | None
 
     @property
-    def iban(self) -> Optional[str]:
-        """
-        Get the IBAN of the account.
+    def iban(self) -> str | None:
+        """Get the IBAN of the account.
+
         It is one of the aliases of the account.
         """
         for a in self.alias:
@@ -43,11 +42,11 @@ class BunqAccount(BaseModel):
 
     @staticmethod
     @inject
-    def by_iban(storage: AbstractStorage, iban: str) -> Optional["BunqAccount"]:
-        """
-        Get a Bunq account by IBAN.
-        """
-        accounts = storage.get_as_entity("bunq_accounts", BunqAccount, False)
+    def by_iban(storage: AbstractStorage, iban: str) -> BunqAccount | None:
+        """Get a Bunq account by IBAN."""
+        accounts = storage.get_as_entity(
+            "bunq_accounts", BunqAccount, provide_kwargs_as_json=False
+        )
         for account in accounts:
             if account.iban == iban:
                 return account

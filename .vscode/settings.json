@@ -1,16 +1,12 @@
 {
-    "python.testing.pytestArgs": [
-        "bunq_ynab_connect"
-    ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
-
     "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
-            "source.organizeImports": "explicit"
+            "source.organizeImports": "always",
+            "source.unusedImports": "always"
         },
-      },
-      "isort.args":["--profile", "black"],    
+    }
 }

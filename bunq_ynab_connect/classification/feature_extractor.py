@@ -1,8 +1,9 @@
-from typing import List
+from __future__ import annotations
+
+from typing import ClassVar
 
 import numpy as np
 from numpy import ndarray
-from pandas import DataFrame
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -10,15 +11,11 @@ from bunq_ynab_connect.models.bunq_payment import BunqPayment
 
 
 class FeatureExtractor(BaseEstimator, TransformerMixin):
-    """
-    Extract features from the bunq payments.
-
-
-    """
+    """Extract features from the bunq payments."""
 
     encoder: TfidfVectorizer
 
-    COLUMNS = [
+    COLUMNS: ClassVar[list[str]] = [
         "description",
         "amount",
         "hour",
@@ -27,16 +24,16 @@ class FeatureExtractor(BaseEstimator, TransformerMixin):
         "weekday",
     ]
 
-    feature_names: List[str] = None
+    feature_names: list[str] = None
 
-    def fit(self, X: List[dict], y=None) -> "FeatureExtractor":
-        """
-        Fit the feature extractor on a list of bunq payments.
+    def fit(self, X: list[dict], _: list | None = None) -> FeatureExtractor:  # noqa: N803
+        """Fit the feature extractor on a list of bunq payments.
+
         - Fit the TFIDF encoder on the description column.
         - Store the feature names
 
         """
-        X = [BunqPayment(**x) for x in X]
+        X = [BunqPayment(**x) for x in X]  # noqa: N806
         # Fit TFIDF encoder on the description column
         descriptions = [x.description for x in X]
         encoder = TfidfVectorizer(
@@ -48,13 +45,13 @@ class FeatureExtractor(BaseEstimator, TransformerMixin):
         self.encoder = encoder
         return self
 
-    def transform(self, X: List[BunqPayment]) -> ndarray:
-        """
-        Transform a list of bunq payments to a numpy array.
+    def transform(self, X: list[BunqPayment]) -> ndarray:  # noqa: N803
+        """Transform a list of bunq payments to a numpy array.
+
         - Add self.COLUMNS as array.
         - Transform the description column with the TFIDF encoder.
         """
-        X = [BunqPayment(**x) for x in X]
+        X = [BunqPayment(**x) for x in X]  # noqa: N806
         data = np.array(
             [
                 [
@@ -72,5 +69,4 @@ class FeatureExtractor(BaseEstimator, TransformerMixin):
         data = np.array(data[:, 1:], dtype=np.float64)
 
         # Convert the data to a numpy array
-        data = np.hstack((data, descriptions))
-        return data
+        return np.hstack((data, descriptions))

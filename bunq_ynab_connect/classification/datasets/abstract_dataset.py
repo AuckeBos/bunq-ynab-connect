@@ -9,15 +9,17 @@ from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 
 
 class AbstractDataset:
-    """
-    Abstract class for datasets.
+    """Abstract class for datasets.
+
     A Dataset can be updated, which means the data is loaded from storage, transformed
     into the format of the dataset, and then stored (upserted) in the storage.
 
-    Attributes:
+    Attributes
+    ----------
         NAME: The name of the dataset.
         KEY_COLUMN: The name of the column that is used as a key.
         last_runmoment: The last time the dataset was updated.
+
     """
 
     NAME: str
@@ -25,20 +27,18 @@ class AbstractDataset:
     last_runmoment: datetime
 
     @inject
-    def __init__(self, storage: AbstractStorage, logger: LoggerAdapter):
+    def __init__(self, storage: AbstractStorage, logger: LoggerAdapter) -> None:
         self.storage = storage
         self.logger = logger
 
     @abstractmethod
     def load_new_data(self) -> list:
-        """
-        Based on self.last_runmoment, load the new data from the storage.
-        """
+        """Based on self.last_runmoment, load the new data from the storage."""
         raise NotImplementedError
 
-    def update(self):
-        """
-        Update the dataset.
+    def update(self) -> None:
+        """Update the dataset.
+
         - Load the new data
         - Upsert the new data
         - Set the last runmoment
@@ -47,7 +47,7 @@ class AbstractDataset:
         self.last_runmoment = self.storage.get_last_runmoment(self.NAME)
         new_data = self.load_new_data()
         if len(new_data) > 0:
-            self.logger.info(f"Upserting {len(new_data)} rows in {self.NAME}")
+            self.logger.info("Upserting %s rows in %s", len(new_data), self.NAME)
             self.storage.upsert(self.NAME, new_data)
         self.storage.set_last_runmoment(self.NAME, new_last_runmoment)
-        self.logger.info(f"Updated dataset {self.NAME}")
+        self.loggger.info("Upded dataset %s", self.NAME)

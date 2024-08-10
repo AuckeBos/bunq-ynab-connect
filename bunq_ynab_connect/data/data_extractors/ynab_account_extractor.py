@@ -1,25 +1,30 @@
-from logging import LoggerAdapter
-from typing import List
+from __future__ import annotations
 
-import ynab
+from typing import TYPE_CHECKING
+
 from kink import inject
-from ynab import ApiClient
 
-from bunq_ynab_connect.clients.ynab_client import YnabClient
 from bunq_ynab_connect.data.data_extractors.abstract_extractor import AbstractExtractor
-from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.models.ynab_account import YnabAccount
 from bunq_ynab_connect.models.ynab_budget import YnabBudget
 
+if TYPE_CHECKING:
+    from logging import LoggerAdapter
+
+    from bunq_ynab_connect.clients.ynab_client import YnabClient
+    from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
+
 
 class YnabAccountExtractor(AbstractExtractor):
-    """
-    A FullLoadExtractor that extracts all accounts from YNAB.
+    """A FullLoadExtractor that extracts all accounts from YNAB.
+
     Is FullLoad since the accounts do not have an update date.
 
-    Attributes:
+    Attributes
+    ----------
         client: The YNAB client to use to get the accounts
         IS_FULL_LOAD: Whether the extractor is a full load extractor
+
     """
 
     client: YnabClient
@@ -32,13 +37,15 @@ class YnabAccountExtractor(AbstractExtractor):
         super().__init__("ynab_accounts", storage, logger)
         self.client = client
 
-    def load(self) -> List[dict]:
-        """
-        Load the data from the source.
+    def load(self) -> list[dict]:
+        """Load the data from the source.
+
         Loads all accounts from all budgets.
         Uses custom YnabAccount model to convert to dict: includes budget_id.
         """
-        budgets = self.storage.get_as_entity("ynab_budgets", YnabBudget, False)
+        budgets = self.storage.get_as_entity(
+            "ynab_budgets", YnabBudget, provide_kwargs_as_json=False
+        )
         accounts = []
         for b in budgets:
             accounts_for_budget = self.client.get_account_for_budget(b.id)

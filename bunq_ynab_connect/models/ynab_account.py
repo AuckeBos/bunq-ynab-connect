@@ -1,26 +1,23 @@
-from typing import Optional
+from __future__ import annotations
 
-from pydantic import BaseModel, validator
-from pydantic.dataclasses import dataclass
-
-from bunq_ynab_connect.helpers.general import date_to_datetime
+from pydantic import BaseModel
 
 
 class YnabAccount(BaseModel):
-    """
-    YnabAccount model.
-    Used because the default YnabAccount model (Account) does not have the budget_id included.
+    """Represents an account in a Ynab budget.
+
+    Used because the default YnabAccount model (Account) does not have a budget_id attr.
     """
 
     id: str
     budget_id: str
-    name: Optional[str]
-    type: Optional[str]
-    on_budget: Optional[bool]
-    closed: Optional[bool]
-    note: Optional[str]
-    balance: Optional[int]
-    cleared_balance: Optional[int]
-    uncleared_balance: Optional[int]
-    transfer_payee_id: Optional[str]
-    deleted: Optional[bool]
+    name: str | None
+    type: str | None
+    on_budget: bool | None
+    closed: bool | None
+    note: str | None
+    balance: int | None
+    cleared_balance: int | None
+    uncleared_balance: int | None
+    transfer_payee_id: str | None
+    deleted: bool | None
