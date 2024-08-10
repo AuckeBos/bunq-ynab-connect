@@ -1,3 +1,6 @@
+from datetime import datetime
+from typing import Optional
+
 from kink import di
 from prefect import flow, task
 from prefect_dask.task_runners import DaskTaskRunner
@@ -22,6 +25,7 @@ from bunq_ynab_connect.data.data_extractors.ynab_transaction_extractor import (
     YnabTransactionExtractor,
 )
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
+from bunq_ynab_connect.models.ynab_budget import YnabBudget
 from bunq_ynab_connect.sync_bunq_to_ynab.payment_syncer import PaymentSyncer
 
 
@@ -58,7 +62,7 @@ def sync_payment_queue():
     Sync all payements in the payment queue.
     """
     syncer = PaymentSyncer()
-    syncer.sync()
+    syncer.sync_queue()
 
 
 @flow
@@ -77,6 +81,14 @@ def sync():
     """
     extract()
     sync_payment_queue()
+
+@flow
+def sync_payments_of_account(iban: str, from_date: Optional[datetime] = None, to_date: Optional[datetime] = None):
+    """
+    Sync payments for a single IBAN.
+    """
+    syncer = PaymentSyncer()
+    syncer.sync_account(iban, from_date, to_date)
 
 
 @task(task_run_name="train_for_budget_{budget_id}")
@@ -102,7 +114,7 @@ def train():
     feature_store.update()
 
     storage = di[AbstractStorage]
-    budget_ids = storage.get_budget_ids()
+    budget_ids = YnabBudget.get_budget_ids(storage)
     for budget_id in budget_ids:
         train_for_budget.submit(budget_id)
 

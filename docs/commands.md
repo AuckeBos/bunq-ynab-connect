@@ -15,6 +15,7 @@ This page lists some commands often used during development. Some of these will 
     - Build for one architecture: `docker buildx build --platform linux/arm64 -f docker/Dockerfile .`
 
 # Development
-- `[Untill fixed with ruff]` Remove unused imports: `autoflake --in-place --remove-unused-variables --recursive .`.
+- `[Untill fixed with ruff]` Remove unused imports: `autoflake --in-place --remove-unused-variables --recursive .`
+- Delete old mlfow runs: `mlflow gc --backend-store-uri sqlite:////mlflow/mlflow.db --older-than 30d`. Delete runs manually first
 
 

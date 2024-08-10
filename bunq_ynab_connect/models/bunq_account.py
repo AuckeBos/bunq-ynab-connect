@@ -1,8 +1,10 @@
 from typing import Optional
 
+from kink import inject
 from pydantic import BaseModel, validator
 from pydantic.dataclasses import dataclass
 
+from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.helpers.general import date_to_datetime
 
 
@@ -37,4 +39,16 @@ class BunqAccount(BaseModel):
         for a in self.alias:
             if a["type"] == "IBAN":
                 return a["value"]
+        return None
+
+    @staticmethod
+    @inject
+    def by_iban(storage: AbstractStorage, iban: str) -> Optional["BunqAccount"]:
+        """
+        Get a Bunq account by IBAN.
+        """
+        accounts = storage.get_as_entity("bunq_accounts", BunqAccount, False)
+        for account in accounts:
+            if account.iban == iban:
+                return account
         return None
