@@ -53,6 +53,15 @@ deployments:
       name: docker-pool
       work_queue_name: default
     schedules: {}
+  - name: sync_payments_of_account
+    version: 2024.08.10.1
+    description: Force sync payemnts of an iban within a date range
+    entrypoint: flows:sync_payments_of_account
+    parameters: {}
+    work_pool:
+      name: docker-pool
+      work_queue_name: default
+    schedules: {}
   - name: train
     version: 2023.09.29.1
     description: Train one classifier for each budget

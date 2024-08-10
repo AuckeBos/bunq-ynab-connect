@@ -1,9 +1,11 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
+from kink import inject
 from pydantic import BaseModel, validator
 from pydantic.dataclasses import dataclass
 
+from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.helpers.general import date_to_datetime
 
 
@@ -24,3 +26,11 @@ class YnabBudget(BaseModel):
     _convert_dates = validator("first_month", "last_month", allow_reuse=True, pre=True)(
         date_to_datetime
     )
+
+    @staticmethod
+    def get_budget_ids(storage: AbstractStorage) -> List[str]:
+        """
+        Get all budget ids from the storage.
+        """
+        ynab_budgets = storage.find("ynab_budgets")
+        return [budget["id"] for budget in ynab_budgets]

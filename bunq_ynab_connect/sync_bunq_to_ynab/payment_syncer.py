@@ -1,6 +1,8 @@
 import json
 import os
+from datetime import datetime
 from logging import LoggerAdapter
+from typing import List, Optional
 
 import pandas as pd
 import requests
@@ -21,6 +23,7 @@ from bunq_ynab_connect.data.bunq_account_to_ynab_account_mapper import (
     BunqAccountToYnabAccountMapper,
 )
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
+from bunq_ynab_connect.models.bunq_account import BunqAccount
 from bunq_ynab_connect.models.bunq_payment import BunqPayment
 from bunq_ynab_connect.models.ynab_account import YnabAccount
 from bunq_ynab_connect.sync_bunq_to_ynab.payment_queue import PaymentQueue
@@ -201,7 +204,7 @@ class PaymentSyncer:
         ynab_account: YnabAccount = self.account_map[account_id]
         self.create_transaction(payment, ynab_account)
 
-    def sync(self):
+    def sync_queue(self):
         """
         Sync all payments in the queue from Bunq to YNAB.
         """
@@ -211,3 +214,18 @@ class PaymentSyncer:
                 self.sync_payment(payment_id)
             counter += 1
         self.logger.info(f"Synced {counter} payments")
+
+    def sync_account(self, iban: str, from_date: Optional[datetime] = None, to_date: Optional[datetime] = None):
+        if account := BunqAccount.by_iban(iban=iban):
+            query = [("monetary_account_id", "eq", account.id)]
+            if from_date:
+                query.append(("created", "gte", from_date.strftime("%Y-%m-%d %H:%M:%S.%f")))
+            if to_date:
+                query.append(("created", "lte", to_date.strftime("%Y-%m-%d %H:%M:%S.%f")))
+            self.logger.info(f"Querying payments for account {iban}, query: {query!s}")
+            payments = self.storage.find("bunq_payments", query)
+            self.logger.info(f"Found {len(payments)} payments for account {iban}")
+            for payment in payments:
+                self.sync_payment(payment["id"])
+        else:
+            self.logger.error(f"Could not find account with IBAN {iban}")

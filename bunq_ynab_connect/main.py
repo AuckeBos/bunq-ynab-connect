@@ -41,7 +41,7 @@ def cli():
 
 @cli.command()
 def extract():
-    """
+    """ 
     Run all extractors.
     """
     extractors = [
@@ -61,7 +61,7 @@ def sync_payments():
     Sync payments from bunq to YNAB.
     """
     syncer = PaymentSyncer()
-    syncer.sync()
+    syncer.sync_queue()
 
 
 @cli.command()

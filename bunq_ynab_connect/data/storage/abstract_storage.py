@@ -241,10 +241,3 @@ class AbstractStorage(ABC):
         """
         rows = self.get(table)
         return self.rows_to_entities(rows, fn, as_json)
-
-    def get_budget_ids(self) -> List[str]:
-        """
-        Get a list of all budget ids
-        """
-        ynab_budgets = self.find("ynab_budgets")
-        return [budget["id"] for budget in ynab_budgets]
