@@ -1,13 +1,13 @@
-from __future__ import annotations
-
 import pickle
 import shelve
+from collections.abc import Callable
 from datetime import date, datetime
 from functools import wraps
+from logging import LoggerAdapter
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from time import time
-from typing import TYPE_CHECKING, Any, Callable
+from typing import Any
 
 import pytz
 import requests
@@ -15,9 +15,6 @@ from kink import inject
 
 from bunq_ynab_connect.helpers.config import CACHE_DIR
 from mlflow import log_artifact
-
-if TYPE_CHECKING:
-    from logging import LoggerAdapter
 
 
 def now() -> datetime:

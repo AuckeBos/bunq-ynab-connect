@@ -1,19 +1,13 @@
-from __future__ import annotations
+from logging import LoggerAdapter
+from typing import Any
 
-from typing import TYPE_CHECKING, Any
-
+import pandas as pd
 from kink import inject
+from pymongo import MongoClient
+from pymongo.database import Database
 
+from bunq_ynab_connect.data.metadata import Metadata
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
-
-if TYPE_CHECKING:
-    from logging import LoggerAdapter
-
-    import pandas as pd
-    from pymongo import MongoClient
-    from pymongo.database import Database
-
-    from bunq_ynab_connect.data.metadata import Metadata
 
 
 class MongoStorage(AbstractStorage):

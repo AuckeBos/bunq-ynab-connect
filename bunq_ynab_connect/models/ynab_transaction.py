@@ -1,13 +1,8 @@
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
+from datetime import datetime
 
 from pydantic import BaseModel, validator
 
 from bunq_ynab_connect.helpers.general import date_to_datetime
-
-if TYPE_CHECKING:
-    from datetime import datetime
 
 
 class YnabTransaction(BaseModel):

@@ -1,20 +1,15 @@
-from __future__ import annotations
-
 import json
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any, Callable, ClassVar
+from logging import LoggerAdapter
+from typing import Any, ClassVar
 
 import pandas as pd
+from pydantic import BaseModel
 
+from bunq_ynab_connect.data.metadata import Metadata
 from bunq_ynab_connect.helpers.general import now
-
-if TYPE_CHECKING:
-    from logging import LoggerAdapter
-
-    from pydantic import BaseModel
-
-    from bunq_ynab_connect.data.metadata import Metadata
 
 
 class AbstractStorage(ABC):
@@ -211,7 +206,7 @@ class AbstractStorage(ABC):
     def rows_to_entities(
         self,
         rows: list[dict],
-        fn: Callable[Any, BaseModel],  # type: ignore[valid-type]
+        fn: Callable,
         *,
         provide_kwargs_as_json: bool = False,
     ) -> list[BaseModel]:

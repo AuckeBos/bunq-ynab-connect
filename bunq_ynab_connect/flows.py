@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
+from datetime import datetime
 
 from kink import di
 from prefect import flow, task
@@ -28,9 +26,6 @@ from bunq_ynab_connect.data.data_extractors.ynab_transaction_extractor import (
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.models.ynab_budget import YnabBudget
 from bunq_ynab_connect.sync_bunq_to_ynab.payment_syncer import PaymentSyncer
-
-if TYPE_CHECKING:
-    from datetime import datetime
 
 
 @task()

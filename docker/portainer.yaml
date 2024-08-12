@@ -26,7 +26,7 @@ services:
     restart: unless-stopped
 
   prefect-server:
-    image: prefecthq/prefect:2.16.3-python3.9
+    image: prefecthq/prefect:2.16.3-python3.10
     container_name: bunqynab_prefect_server
     restart: unless-stopped
     volumes:

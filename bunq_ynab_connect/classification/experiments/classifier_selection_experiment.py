@@ -1,9 +1,9 @@
-from __future__ import annotations
-
-from typing import TYPE_CHECKING, ClassVar
+from logging import LoggerAdapter
+from typing import ClassVar
 
 import numpy as np
 from kink import inject
+from sklearn.base import ClassifierMixin
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import cohen_kappa_score, make_scorer
 from sklearn.model_selection import StratifiedKFold, cross_val_score
@@ -15,14 +15,8 @@ import mlflow
 from bunq_ynab_connect.classification.experiments.base_payment_classification_experiment import (  # noqa: E501
     BasePaymentClassificationExperiment,
 )
+from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from mlflow.client import MlflowClient
-
-if TYPE_CHECKING:
-    from logging import LoggerAdapter
-
-    from sklearn.base import ClassifierMixin
-
-    from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 
 
 class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):

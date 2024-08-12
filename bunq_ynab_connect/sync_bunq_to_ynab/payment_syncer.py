@@ -1,8 +1,7 @@
-from __future__ import annotations
-
 import json
 import os
-from typing import TYPE_CHECKING
+from datetime import datetime
+from logging import LoggerAdapter
 
 import pandas as pd
 import requests
@@ -12,20 +11,15 @@ from mlserver.codecs import PandasCodec
 from ynab import TransactionDetail
 from ynab.configuration import Configuration
 
+from bunq_ynab_connect.clients.ynab_client import YnabClient
+from bunq_ynab_connect.data.bunq_account_to_ynab_account_mapper import (
+    BunqAccountToYnabAccountMapper,
+)
+from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.models.bunq_account import BunqAccount
 from bunq_ynab_connect.models.bunq_payment import BunqPayment
-
-if TYPE_CHECKING:
-    from datetime import datetime
-    from logging import LoggerAdapter
-
-    from bunq_ynab_connect.clients.ynab_client import YnabClient
-    from bunq_ynab_connect.data.bunq_account_to_ynab_account_mapper import (
-        BunqAccountToYnabAccountMapper,
-    )
-    from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
-    from bunq_ynab_connect.models.ynab_account import YnabAccount
-    from bunq_ynab_connect.sync_bunq_to_ynab.payment_queue import PaymentQueue
+from bunq_ynab_connect.models.ynab_account import YnabAccount
+from bunq_ynab_connect.sync_bunq_to_ynab.payment_queue import PaymentQueue
 
 
 class PaymentSyncer:

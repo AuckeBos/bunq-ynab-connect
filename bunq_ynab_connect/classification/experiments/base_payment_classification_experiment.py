@@ -1,12 +1,11 @@
-from __future__ import annotations
-
 import tempfile
 from abc import abstractmethod
+from logging import LoggerAdapter
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import numpy as np
 from kink import inject
+from sklearn.base import ClassifierMixin
 from sklearn.pipeline import Pipeline
 
 import mlflow
@@ -14,14 +13,8 @@ from bunq_ynab_connect.classification.budget_category_encoder import (
     BudgetCategoryEncoder,
 )
 from bunq_ynab_connect.classification.feature_extractor import FeatureExtractor
+from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.models.matched_transaction import MatchedTransaction
-
-if TYPE_CHECKING:
-    from logging import LoggerAdapter
-
-    from sklearn.base import ClassifierMixin
-
-    from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 
 
 class BasePaymentClassificationExperiment:
