@@ -1,4 +1,4 @@
-FROM python:3.8-bookworm
+FROM python:3.9-bookworm
 LABEL maintainer="Aucke Bos"
 
 # Set user

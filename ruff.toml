@@ -32,8 +32,8 @@ exclude = [
 line-length = 88
 indent-width = 4
 
-# Python 3.8 is the min support version
-target-version = "py38"
+# Python 3.9 is the min support version
+target-version = "py39"
 
 [lint]
 select = ["ALL"]

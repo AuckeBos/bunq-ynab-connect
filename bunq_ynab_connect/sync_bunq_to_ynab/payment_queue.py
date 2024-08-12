@@ -1,6 +1,6 @@
+from collections.abc import Generator
 from contextlib import contextmanager
 from logging import LoggerAdapter
-from typing import Generator
 
 from kink import inject
 
