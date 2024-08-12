@@ -1,4 +1,3 @@
-version: '3.7'
 services:
   mongodb:
     image: mongo:4.2.0
@@ -36,7 +35,7 @@ services:
     environment:
       - PREFECT_SERVER_API_HOST=${PREFECT_SERVER_API_HOST}
       # If you want to access Prefect Server from anywhere other than the Docker host machine, you will need to change
-      # PREFECT_UI_URL and PREFECT_API_URL to match the external hostname/IP used to load the  UI in your web browser.      
+      # PREFECT_UI_URL and PREFECT_API_URL to match the external hostname/IP used to load the  UI in your web browser.
       - PREFECT_API_URL=${PREFECT_API_URL_FOR_SERVER}
       - PREFECT_UI_URL=${PREFECT_API_URL_FOR_SERVER}
     ports:
@@ -45,7 +44,7 @@ services:
   prefect-agent:
     build:
       context: ../
-      dockerfile: docker/Dockerfile  
+      dockerfile: docker/Dockerfile
     container_name: bunqynab_prefect_agent
     restart: unless-stopped
     env_file:
@@ -56,7 +55,7 @@ services:
       - ../bunq_ynab_connect:/home/bunqynab/bunq_ynab_connect
       - ../config:/home/bunqynab/config
       # Docker sock needed to be able to restart the mlserver container
-      - /var/run/docker.sock:/var/run/docker.sock       
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - prefect-server
     command: "/bin/sh -c /home/bunqynab/entrypoint.sh"
@@ -70,19 +69,19 @@ services:
     restart: unless-stopped
 
   mlflow:
-      image: ghcr.io/mlflow/mlflow:v2.6.0
-      container_name: bunqynab_mlflow
-      ports:
-        - "12003:5000"
-      volumes:
-        - ../mlflow:/mlflow
-      command: mlflow server --backend-store-uri sqlite:////mlflow/mlflow.db --host 0.0.0.0 --artifacts-destination /mlflow/artifacts
-      restart: unless-stopped
-    
+    image: ghcr.io/mlflow/mlflow:v2.6.0
+    container_name: bunqynab_mlflow
+    ports:
+      - "12003:5000"
+    volumes:
+      - ../mlflow:/mlflow
+    command: mlflow server --backend-store-uri sqlite:////mlflow/mlflow.db --host 0.0.0.0 --artifacts-destination /mlflow/artifacts
+    restart: unless-stopped
+
   mlserver:
     build:
       context: ../
-      dockerfile: docker/Dockerfile  
+      dockerfile: docker/Dockerfile
     container_name: bunqynab_mlserver
     env_file:
       - ../.docker-env
@@ -95,10 +94,15 @@ services:
   # Temporary solution to restart mlserver daily. Since Prefect agent has no access to the docker socket
   mlserver_restarter:
     image: docker:cli
-    volumes: 
+    volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
 
-    command: ["/bin/sh", "-c", "while true; do sleep 86400; docker restart bunqynab_mlserver; done"]
+    command:
+      [
+        "/bin/sh",
+        "-c",
+        "while true; do sleep 86400; docker restart bunqynab_mlserver; done",
+      ]
     restart: unless-stopped
 
 volumes:

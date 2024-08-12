@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from datetime import datetime
 from logging import LoggerAdapter
-from typing import Iterable
 
 import pandas as pd
 from kink import inject
