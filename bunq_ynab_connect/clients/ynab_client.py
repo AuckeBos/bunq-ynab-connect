@@ -1,20 +1,14 @@
-from __future__ import annotations
-
 import os
-from typing import TYPE_CHECKING
+from datetime import datetime
+from logging import LoggerAdapter
 
 import ynab
 from kink import inject
 from ynab import ApiClient, TransactionDetail
+from ynab.models.account import Account
+from ynab.models.budget_summary import BudgetSummary
 
-if TYPE_CHECKING:
-    from datetime import datetime
-    from logging import LoggerAdapter
-
-    from ynab.models.account import Account
-    from ynab.models.budget_summary import BudgetSummary
-
-    from bunq_ynab_connect.models.ynab_account import YnabAccount
+from bunq_ynab_connect.models.ynab_account import YnabAccount
 
 
 @inject

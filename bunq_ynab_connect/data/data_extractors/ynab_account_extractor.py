@@ -1,18 +1,12 @@
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
+from logging import LoggerAdapter
 
 from kink import inject
 
+from bunq_ynab_connect.clients.ynab_client import YnabClient
 from bunq_ynab_connect.data.data_extractors.abstract_extractor import AbstractExtractor
+from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.models.ynab_account import YnabAccount
 from bunq_ynab_connect.models.ynab_budget import YnabBudget
-
-if TYPE_CHECKING:
-    from logging import LoggerAdapter
-
-    from bunq_ynab_connect.clients.ynab_client import YnabClient
-    from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 
 
 class YnabAccountExtractor(AbstractExtractor):

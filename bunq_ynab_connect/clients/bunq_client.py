@@ -1,35 +1,28 @@
-from __future__ import annotations
-
 import os
 import platform
-from typing import TYPE_CHECKING
+from datetime import datetime
+from logging import LoggerAdapter
 
 from bunq import ApiEnvironmentType, Pagination
 from bunq.sdk.context.api_context import ApiContext
 from bunq.sdk.context.bunq_context import BunqContext
 from bunq.sdk.model.generated import endpoint
+from bunq.sdk.model.generated.endpoint import (
+    BunqResponseMonetaryAccountList,
+    BunqResponsePaymentList,
+    MonetaryAccount,
+    MonetaryAccountBank,
+    MonetaryAccountJoint,
+    MonetaryAccountLight,
+    MonetaryAccountSavings,
+    Payment,
+)
 from dateutil.parser import parse
 from kink import inject
 
+from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.helpers.config import BUNQ_CONFIG_FILE
 from bunq_ynab_connect.helpers.general import get_public_ip
-
-if TYPE_CHECKING:
-    from datetime import datetime
-    from logging import LoggerAdapter
-
-    from bunq.sdk.model.generated.endpoint import (
-        BunqResponseMonetaryAccountList,
-        BunqResponsePaymentList,
-        MonetaryAccount,
-        MonetaryAccountBank,
-        MonetaryAccountJoint,
-        MonetaryAccountLight,
-        MonetaryAccountSavings,
-        Payment,
-    )
-
-    from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 
 
 @inject

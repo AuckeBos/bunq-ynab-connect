@@ -1,18 +1,14 @@
-from __future__ import annotations
-
 import pickle
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from kink import di
+from sklearn.base import ClassifierMixin
+from sklearn.calibration import LabelEncoder
 
 import mlflow
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from mlflow.pyfunc import PythonModel, PythonModelContext
-
-if TYPE_CHECKING:
-    from sklearn.base import ClassifierMixin
-    from sklearn.calibration import LabelEncoder
 
 
 class DeployableMlflowModel(PythonModel):
@@ -54,7 +50,7 @@ class DeployableMlflowModel(PythonModel):
                 "input": payment,
                 "prediction": prediction,
             }
-            for payment, prediction in zip(payments, predictions)
+            for payment, prediction in zip(payments, predictions, strict=True)
         ]
         storage = di[AbstractStorage]
         storage.upsert("payment_classifications", data)

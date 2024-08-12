@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import ClassVar
 
 import numpy as np
@@ -26,7 +24,7 @@ class FeatureExtractor(BaseEstimator, TransformerMixin):
 
     feature_names: list[str] = None
 
-    def fit(self, X: list[dict], _: list | None = None) -> FeatureExtractor:  # noqa: N803
+    def fit(self, X: list[dict], _: list | None = None) -> "FeatureExtractor":  # noqa: N803
         """Fit the feature extractor on a list of bunq payments.
 
         - Fit the TFIDF encoder on the description column.

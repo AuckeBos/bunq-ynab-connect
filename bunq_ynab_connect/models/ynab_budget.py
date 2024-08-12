@@ -1,16 +1,9 @@
-from __future__ import annotations
-
 from datetime import datetime
-from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, validator
 
+from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.helpers.general import date_to_datetime
-
-if TYPE_CHECKING:
-    from datetime import datetime
-
-    from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 
 
 class YnabBudget(BaseModel):

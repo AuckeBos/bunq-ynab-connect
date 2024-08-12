@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import Any, ClassVar
 
 from interpret.glassbox import ExplainableBoostingClassifier
 from kink import inject
@@ -18,12 +16,11 @@ from bunq_ynab_connect.classification.experiments.base_payment_classification_ex
     BasePaymentClassificationExperiment,
 )
 
-if TYPE_CHECKING:
-    from logging import LoggerAdapter
+from logging import LoggerAdapter
 
-    import numpy as np
+import numpy as np
 
-    from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
+from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 
 
 class ClassifierTuningExperiment(BasePaymentClassificationExperiment):

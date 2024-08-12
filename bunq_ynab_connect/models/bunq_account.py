@@ -1,12 +1,9 @@
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
+from typing import Optional
 
 from kink import inject
 from pydantic import BaseModel
 
-if TYPE_CHECKING:
-    from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
+from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 
 
 class BunqAccount(BaseModel):
@@ -42,7 +39,7 @@ class BunqAccount(BaseModel):
 
     @staticmethod
     @inject
-    def by_iban(storage: AbstractStorage, iban: str) -> BunqAccount | None:
+    def by_iban(storage: AbstractStorage, iban: str) -> Optional["BunqAccount"]:
         """Get a Bunq account by IBAN."""
         accounts = storage.get_as_entity(
             "bunq_accounts", BunqAccount, provide_kwargs_as_json=False

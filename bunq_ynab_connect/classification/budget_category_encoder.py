@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Any
 
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -17,7 +15,7 @@ class BudgetCategoryEncoder(BaseEstimator, TransformerMixin):
     def __init__(self):
         self.encoder = LabelEncoder()
 
-    def fit(self, y: list[dict]) -> BudgetCategoryEncoder:
+    def fit(self, y: list[dict]) -> "BudgetCategoryEncoder":
         categories = [transaction["category_name"] for transaction in y]
         self.encoder.fit(categories)
         return self
