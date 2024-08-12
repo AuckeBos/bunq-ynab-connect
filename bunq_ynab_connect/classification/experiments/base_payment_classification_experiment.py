@@ -54,7 +54,7 @@ class BasePaymentClassificationExperiment:
         with tempfile.TemporaryDirectory() as dir_:
             filename = f"{name}.txt"
             path = Path(dir_) / filename
-            with path.open() as file:
+            with path.open("w+") as file:
                 ids = [t.match_id for t in transactions]
                 file.write("\n".join(ids))
             mlflow.log_artifact(path)
