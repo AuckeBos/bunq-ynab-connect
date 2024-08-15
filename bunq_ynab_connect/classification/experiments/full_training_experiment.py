@@ -1,4 +1,5 @@
 from logging import LoggerAdapter
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -65,10 +66,10 @@ class FullTrainingExperiment(BasePaymentClassificationExperiment):
         mlflow.sklearn.log_model(classifier, "model")
         object_to_mlflow(self.label_encoder, "label_encoder")
 
-        artifact_uri = mlflow.active_run().info.artifact_uri
+        artifact_uri = Path(mlflow.active_run().info.artifact_uri)
         artifacts = {
-            "model_path": artifact_uri + "/model",
-            "label_encoder_path": artifact_uri + "/label_encoder",
+            "model_path": str(artifact_uri / "model"),
+            "label_encoder_path": str(artifact_uri / "label_encoder"),
         }
         input_example = [X_train[0]]
         mlflow.pyfunc.log_model(

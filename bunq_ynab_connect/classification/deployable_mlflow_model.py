@@ -1,7 +1,9 @@
 import pickle
+from logging import LoggerAdapter
 from pathlib import Path
 from typing import Any
 
+import pandas as pd
 from kink import di
 from sklearn.base import ClassifierMixin
 from sklearn.calibration import LabelEncoder
@@ -18,8 +20,8 @@ class DeployableMlflowModel(PythonModel):
     During prediction, it stores the predictions in the database.
     """
 
-    model: ClassifierMixin
-    label_encoder: LabelEncoder
+    model: ClassifierMixin | None = None
+    label_encoder: LabelEncoder | None = None
 
     def load_context(self, context: PythonModelContext) -> None:
         """Load the classifier and label encoder from the mlflow artifacts."""
@@ -30,12 +32,20 @@ class DeployableMlflowModel(PythonModel):
 
     def predict(
         self,
-        _: PythonModelContext,
+        context: PythonModelContext,
         model_input: list,
         __: dict[str, Any] | None = None,
     ) -> list[str]:
         """Predict, and log the predictions in the database."""
-        data = model_input.to_dict("records")
+        if isinstance(model_input, pd.DataFrame):
+            data = model_input.to_dict("records")
+        if not self.model:
+            logger = di[LoggerAdapter]
+            logger.warning(
+                "Model context not loaded. Cannot make predictions. Context: %s",
+                context,
+            )
+            return [None]
         predictions = self.model.predict(data)
         predictions = predictions.tolist()
         self.log_predictions(data, predictions)
