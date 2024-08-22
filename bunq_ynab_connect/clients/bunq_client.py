@@ -103,7 +103,9 @@ class BunqClient:
             return True
         earliest_payment = payment_list_response.value[-1]
         earliest_payment_date = parse(earliest_payment.created)
-        return earliest_payment_date > last_runmoment
+        return earliest_payment_date.replace(tzinfo=None) > last_runmoment.replace(
+            tzinfo=None
+        )
 
     def get_payments_for_account(
         self, account: MonetaryAccountBank, last_runmoment: datetime | None = None
@@ -135,7 +137,12 @@ class BunqClient:
                 break
         # Remove payments after last runmoment
         if last_runmoment:
-            payments = [p for p in payments if parse(p.created) > last_runmoment]
+            payments = [
+                p
+                for p in payments
+                if parse(p.created).replace(tzinfo=None)
+                > last_runmoment.replace(tzinfo=None)
+            ]
         if len(payments) > 0:
             self.logger.info(
                 "Loaded %s payments for account %s", len(payments), account_id
