@@ -57,7 +57,7 @@ def extract() -> None:
 def sync_payment_queue() -> None:
     """Sync all payements in the payment queue."""
     syncer = PaymentSyncer()
-    syncer.sync_queue()
+    syncer.sync()
 
 
 @flow
