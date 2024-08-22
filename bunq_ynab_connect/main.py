@@ -44,7 +44,7 @@ def extract() -> None:
 def sync_payments() -> None:
     """Sync payments from bunq to YNAB."""
     syncer = PaymentSyncer()
-    syncer.sync_queue()
+    syncer.sync()
 
 
 @cli.command()
