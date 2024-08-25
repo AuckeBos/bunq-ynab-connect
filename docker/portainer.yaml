@@ -6,10 +6,13 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     ports:
-      - 12005:27017
+      - 27017:27017
     volumes:
       - bunq_ynab_connect_data:/data/db
     restart: unless-stopped
+    networks:
+      - traefik
+
   mongo-express:
     image: mongo-express:latest
     container_name: bunqynab_mongo_ui
@@ -24,9 +27,11 @@ services:
     depends_on:
       - mongodb
     restart: unless-stopped
+    networks:
+      - traefik    
 
   prefect-server:
-    image: prefecthq/prefect:2.16.3-python3.10
+    image: prefecthq/prefect:2.20.4-python3.12
     container_name: bunqynab_prefect_server
     restart: unless-stopped
     volumes:
@@ -35,18 +40,20 @@ services:
     environment:
       - PREFECT_SERVER_API_HOST=${PREFECT_SERVER_API_HOST}
       # If you want to access Prefect Server from anywhere other than the Docker host machine, you will need to change
-      # PREFECT_UI_URL and PREFECT_API_URL to match the external hostname/IP used to load the  UI in your web browser.
+      # PREFECT_UI_URL and PREFECT_API_URL to match the external hostname/IP used to load the  UI in your web browser.      
       - PREFECT_API_URL=${PREFECT_API_URL_FOR_SERVER}
       - PREFECT_UI_URL=${PREFECT_API_URL_FOR_SERVER}
     ports:
       - 12002:4200
+    networks:
+      - traefik      
 
   prefect-agent:
     image: index.docker.io/auckebos/bunq-ynab-connect:latest
     container_name: bunqynab_prefect_agent
     restart: unless-stopped
     ports:
-      - "12004:8787"
+      - "12004:8787"    
     env_file:
       - stack.env
     depends_on:
@@ -56,6 +63,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - bunq_ynab_connect_prefect_agent:/home/bunqynab
     command: "/bin/sh -c /home/bunqynab/entrypoint.sh"
+    networks:
+      - traefik    
 
   watchtower:
     image: containrrr/watchtower
@@ -64,6 +73,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --interval 3600 bunqynab_prefect_agent
     restart: unless-stopped
+    networks:
+      - traefik    
 
   mlflow:
     image: ghcr.io/mlflow/mlflow:v2.6.0
@@ -74,6 +85,8 @@ services:
       - ./mlflow:/mlflow
     command: mlflow server --backend-store-uri sqlite:////mlflow/mlflow.db --host 0.0.0.0 --artifacts-destination /mlflow/artifacts
     restart: unless-stopped
+    networks:
+      - traefik    
 
   mlserver:
     image: index.docker.io/auckebos/bunq-ynab-connect:latest
@@ -81,25 +94,43 @@ services:
     env_file:
       - stack.env
     ports:
-      - "12006:8080"
+      - "12005:8080"
     volumes:
       - ./config:/home/bunqynab/config
     command: "mlserver start /home/bunqynab/config/mlserver"
-
+    networks:
+      - traefik    
+    
   # Temporary solution to restart mlserver daily. Since Prefect agent has no access to the docker socket
   mlserver_restarter:
     image: docker:cli
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
 
-    command:
-      [
-        "/bin/sh",
-        "-c",
-        "while true; do sleep 86400; docker restart bunqynab_mlserver; done",
-      ]
+    command: ["/bin/sh", "-c", "while true; do sleep 86400; docker restart bunqynab_mlserver; done"]
     restart: unless-stopped
+    networks:
+      - traefik    
 
+  callback:
+    image: index.docker.io/auckebos/bunq-ynab-connect:latest
+    container_name: bunqynab_callback_server
+    volumes:
+      - ./config:/home/bunqynab/config    
+    env_file:
+      - stack.env
+    command: "uvicorn bunq_ynab_connect.sync_bunq_to_ynab.callback_server:app --host 0.0.0.0"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.callback.rule=Host(`${BUNQ_CALLBACK_HOST}`)"
+      - "traefik.http.routers.callback.entrypoints=websecure"
+      - "traefik.http.routers.callback.tls.certresolver=${RESOLVER_NAME}"
+      - "traefik.http.routers.callback.tls=true"
+      - "traefik.http.services.app.loadbalancer.server.port=8000"
+    depends_on:
+      - mongodb      
+    networks:
+      - traefik
 volumes:
   bunq_ynab_connect_data:
   bunq_ynab_connect_prefect:
@@ -107,4 +138,7 @@ volumes:
 
 networks:
   default:
-    name: bunq-ynab-network
+    name: bunqynab_network
+  traefik:
+    name: traefik
+    external: true

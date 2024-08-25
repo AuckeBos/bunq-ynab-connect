@@ -16,7 +16,15 @@
         {
             "label": "Docker up",
             "type": "shell",
-            "command": "docker-compose -f docker/development.yml --env-file ./.docker-env -p bunqynab up",
+            "command": "docker compose -f docker/development.yml --env-file ./.docker-env -p bunqynab up --build",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Traefik up",
+            "type": "shell",
+            "command": "docker compose -f docker/traefik.yml --env-file ./.docker-env -p traefik up",
             "options": {
                 "cwd": "${workspaceFolder}"
             }
