@@ -51,6 +51,7 @@ ignore = [
     "D203", # No blank line before class
     "D213", # Multi line summary first line
     "I001", # Unsorted imports. Somehow fails during build, while sorts are OK. Temp disable to succeed build.
+    "ERA001", # Commented code
 ] 
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
