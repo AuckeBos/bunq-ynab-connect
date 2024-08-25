@@ -3,6 +3,7 @@ import platform
 from datetime import datetime
 from logging import LoggerAdapter
 
+import pytz
 from bunq import ApiEnvironmentType, Pagination
 from bunq.sdk.context.api_context import ApiContext
 from bunq.sdk.context.bunq_context import BunqContext
@@ -102,10 +103,8 @@ class BunqClient:
         if not last_runmoment:
             return True
         earliest_payment = payment_list_response.value[-1]
-        earliest_payment_date = parse(earliest_payment.created)
-        return earliest_payment_date.replace(tzinfo=None) > last_runmoment.replace(
-            tzinfo=None
-        )
+        earliest_payment_date = parse(earliest_payment.created).replace(tzinfo=pytz.UTC)
+        return earliest_payment_date > last_runmoment
 
     def get_payments_for_account(
         self, account: MonetaryAccountBank, last_runmoment: datetime | None = None
@@ -140,8 +139,7 @@ class BunqClient:
             payments = [
                 p
                 for p in payments
-                if parse(p.created).replace(tzinfo=None)
-                > last_runmoment.replace(tzinfo=None)
+                if parse(p.created).replace(tzinfo=pytz.UTC) > last_runmoment
             ]
         if len(payments) > 0:
             self.logger.info(
