@@ -9,6 +9,7 @@ from bunq.sdk.model.generated.endpoint import MonetaryAccountBank, Payment
 
 from bunq_ynab_connect.clients.bunq_client import BunqClient
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
+from bunq_ynab_connect.helpers.general import now
 
 ACCOUNT_ID_FOR_TESTING = 4023038
 
@@ -37,8 +38,7 @@ def test_get_payments(client: BunqClient) -> None:  # noqa: D103
         # do stuff
         payments = client.get_payments_for_account(
             account,
-            last_runmoment=datetime.datetime.now(tz=datetime.timezone.utc)
-            - datetime.timedelta(weeks=1),
+            last_runmoment=now() - datetime.timedelta(weeks=1),
         )
     # Assert
     assert len(payments) > 0
