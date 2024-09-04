@@ -10,10 +10,9 @@ All flows are defined in [flows.py](/bunq_ynab_connect/flows.py). All deployment
 - `train`. Runs on sunday at 02:00. Trains one model for each budget. Before doing so, extracts all payments, and maps them to transactions in Ynab. Runs 2 experiments. The first one selects the model that fits best with some default params. The second one selects the best configuration with a grid search. Deploys the model to MLServer if it performs better than the current model. Note that the trained model is available the next day, since the [MLServer restarter](/docs/infrastructure.md#mlserver-restarter) restarts the MLServer container daily.
 - `sync_payment`. A flow to debug the syncing of a single payment. Can be triggered manually.
 - `exchange_pat`. A flow to exchange the Bunq PAT token for a config file. Should only be used if the external IP of the server has changed, and the Bunq PAT is restricted to the old IP. If this is the case:
-    - In the Bunq app, update the existing token to allow all IP's. Needed to be able to use it once more.
-    - Create a new PAT.
+    - Create a new PAT in the Bunq app.
     - Run this flow, with the PAT as parameter.
-    - The new PAT is exchanged for a config file, which is restricted to the new IP.
+        - The new PAT is exchanged for a config file, which is restricted to the new IP.
     - Remove the old PAT from the Bunq app.
 
 # Logging

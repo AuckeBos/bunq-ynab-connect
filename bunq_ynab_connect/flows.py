@@ -114,5 +114,5 @@ def train() -> None:
 @flow
 def exchange_pat(pat: str) -> None:
     """Exchange a new PAT for a new API context."""
-    client = di[BunqClient]
+    client = BunqClient()
     client.exchange_pat(pat)

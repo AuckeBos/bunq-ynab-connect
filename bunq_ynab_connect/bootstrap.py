@@ -12,6 +12,7 @@ from pymongo import MongoClient
 from pymongo.database import Database
 from ynab.models.account import Account
 
+from bunq_ynab_connect.clients.bunq_client import BunqClient
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.data.storage.mongo_storage import MongoStorage
 from bunq_ynab_connect.helpers.config import (
@@ -71,6 +72,8 @@ def bootstrap_di() -> None:
 
     # Set the MongoStorage as the default storage
     di[AbstractStorage] = lambda _di: MongoStorage()
+    
+    di[BunqClient] = lambda _: BunqClient().load_api_context()
 
 
 def monkey_patch_ynab() -> None:
