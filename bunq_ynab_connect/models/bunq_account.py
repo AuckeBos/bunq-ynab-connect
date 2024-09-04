@@ -18,7 +18,7 @@ class BunqAccount(BaseModel):
     description: str | None
     display_name: str | None
     id: int | None
-    monetary_account_profile: dict | None
+    monetary_account_profile: dict | float | None
     public_uuid: str | None
     setting: dict | None
     status: str | None
