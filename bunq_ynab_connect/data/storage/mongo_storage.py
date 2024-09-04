@@ -120,8 +120,8 @@ class MongoStorage(AbstractStorage):
         try:
             self.client.server_info()
         except Exception as e:
-            self.logger.exception()
             msg = "Could not connect to MongoDB. Is the server running?"
+            self.logger.exception(msg)
             raise RuntimeError(msg) from e
 
     def set_indexes(self) -> None:

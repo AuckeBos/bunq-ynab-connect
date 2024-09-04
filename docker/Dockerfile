@@ -1,4 +1,4 @@
-FROM python:3.10-bookworm
+FROM python:3.12-bookworm
 LABEL maintainer="Aucke Bos"
 
 # Set user
@@ -13,22 +13,19 @@ RUN apt update && \
 RUN apt-get install -y --no-install-recommends build-essential
 RUN apt install -y gcc
 RUN chmod -R 755 /home/$USERNAME
-# Install poetry
-RUN pip install poetry
-RUN poetry config virtualenvs.create false 
 # Copy files
-COPY --chown=bunqynab:bunqynab ./pyproject.toml ./poetry.lock ./docker/*.sh ./README.md /home/bunqynab/
+COPY --chown=bunqynab:bunqynab ./pyproject.toml ./requirements.lock ./docker/*.sh ./README.md /home/bunqynab/
 RUN chmod +x /home/bunqynab/*.sh
 RUN chown -R bunqynab:bunqynab /home/bunqynab
 
 # Install deps
 WORKDIR /home/bunqynab
-RUN poetry install --no-interaction --no-ansi --no-dev --no-root
-# Install own package
+RUN PYTHONDONTWRITEBYTECODE=1 pip install --no-cache-dir -r requirements.lock
+
+# Install self
 COPY --chown=bunqynab:bunqynab ./bunq_ynab_connect /home/bunqynab/bunq_ynab_connect
-RUN poetry install --no-interaction --no-ansi --only-root
+RUN pip install -e .
+
 ENV USERNAME=bunqynab
 USER $USERNAME
 CMD ["/bin/bash", "./entrypoint.sh"]
-
-# todo: manual build wheel voor gevent once, then install from wheel. 

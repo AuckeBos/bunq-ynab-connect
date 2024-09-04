@@ -1,6 +1,5 @@
 from typing import Any, ClassVar
 
-from interpret.glassbox import ExplainableBoostingClassifier
 from kink import inject
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.metrics import cohen_kappa_score, make_scorer
@@ -59,10 +58,6 @@ class ClassifierTuningExperiment(BasePaymentClassificationExperiment):
             "alpha": [0.01, 0.1, 1],
             "learning_rate": ["adaptive"],
             "learning_rate_init": [0.001],
-        },
-        ExplainableBoostingClassifier().__class__.__name__: {
-            "max_bins": [128, 256, 512],
-            "learning_rate": [0.01, 0.1, 0.5],
         },
     }
 

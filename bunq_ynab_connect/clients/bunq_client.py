@@ -26,7 +26,6 @@ from bunq_ynab_connect.helpers.config import BUNQ_CONFIG_FILE
 from bunq_ynab_connect.helpers.general import get_public_ip
 
 
-@inject
 class BunqClient:
     """Extractor for bunq payments.
 
@@ -48,9 +47,8 @@ class BunqClient:
     def __init__(self, storage: AbstractStorage, logger: LoggerAdapter) -> None:
         self.storage = storage
         self.logger = logger
-        self._load_api_context()
 
-    def _load_api_context(self) -> None:
+    def load_api_context(self) -> "BunqClient":
         """Initialize context, ran on init.
 
         - Check if bunq config file exists, if not, create it
@@ -61,6 +59,7 @@ class BunqClient:
         context.ensure_session_active()
         context.save(str(BUNQ_CONFIG_FILE))
         BunqContext.load_api_context(context)
+        return self
 
     def _check_api_context(self, pat: str | None = None) -> None:
         """Check if the bunq config file exists, if not, create it.
