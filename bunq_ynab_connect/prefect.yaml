@@ -14,13 +14,13 @@ deployments:
   - name: sync
     version: 2023.08.30.1
     description: Extract all data and sync to Ynab
+    entrypoint: flows:sync
+    parameters: {}
     schedules:
       - cron: 00 06-23 * * *
         timezone: Europe/Amsterdam
         day_or: true
-        active: true
-    entrypoint: flows:sync
-    parameters: {}
+        active: true    
     work_pool:
       name: docker-pool
       work_queue_name: default
@@ -71,6 +71,8 @@ deployments:
       work_queue_name: default
     schedules:
       - cron: 0 2 * * 0
+        timezone: Europe/Amsterdam
+        active: true          
     timezone: Europe/Amsterdam
     day_or: true
     active: true
