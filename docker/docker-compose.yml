@@ -71,7 +71,7 @@ services:
     container_name: bunqynab_watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 3600 bunqynab_prefect_agent
+    command: --interval 300 bunqynab_prefect_agent
     restart: unless-stopped
     networks:
       - traefik    
