@@ -12,19 +12,19 @@ from bunq_ynab_connect.data.storage.mongo_storage import MongoStorage
 from bunq_ynab_connect.data.table_metadata import TableMetadata
 
 
-@pytest.fixture()
+@pytest.fixture
 def mongo() -> mongomock.MongoClient:
     """Return a mongomock client."""
     return mongomock.MongoClient()
 
 
-@pytest.fixture()
+@pytest.fixture
 def metadata() -> Metadata:
     """Return a mock metadata object."""
     return Mock(spec=Metadata)
 
 
-@pytest.fixture()
+@pytest.fixture
 def mongo_storage(monkeypatch, mongo, metadata) -> MongoStorage:  # noqa: ANN001
     """Return a MongoStorage object."""
     monkeypatch.setattr(MongoStorage, "set_indexes", Mock())

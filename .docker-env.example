@@ -3,8 +3,9 @@ MONGO_URI=mongodb://mongodb:27017
 MONGO_DB=bunq_ynab_connect
 MONGO_USER=mongo
 MONGO_PASSWORD=MYPASSWORD
-# Bunq OTP
+# Bunq
 BUNQ_ONETIME_TOKEN=MYOTP
+BUNQ_CALLBACK_HOST="example.com"
 # YNAB
 YNAB_TOKEN=MYTOKEN
 # You should probably set it to the day of first deployment
@@ -20,3 +21,9 @@ PREFECT_API_URL_FOR_SERVER=http://127.0.0.1:12002/api
 MLFLOW_TRACKING_URI=http://mlflow:5000/
 # MLServer
 MLSERVER_URL="http://bunqynab_mlserver:8080"
+
+# Traefik
+## API token when using Cloudflare
+CF_DNS_API_TOKEN=MY_TOKEN
+RESOLVER_NAME=myresolver
+LETSENCRYPT_EMAIL=email@example.com

@@ -1,0 +1,33 @@
+services:
+  reverse-proxy:
+    image: traefik:v3.1
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.websecure.address=:443"
+      - "--entryPoints.web.address=:80"
+      - "--certificatesResolvers.${RESOLVER_NAME}.acme.caServer=https://acme-v02.api.letsencrypt.org/directory"
+      - "--certificatesResolvers.${RESOLVER_NAME}.acme.email=${LETSENCRYPT_EMAIL}"
+      - "--certificatesResolvers.${RESOLVER_NAME}.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesResolvers.${RESOLVER_NAME}.acme.dnschallenge=true"
+      - "--certificatesResolvers.${RESOLVER_NAME}.acme.dnschallenge.provider=cloudflare"
+    env_file:
+      - ../.docker-env
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock
+
+    networks:
+      - traefik
+
+volumes:
+  letsencrypt:
+networks:
+  traefik:
+    name: traefik
+    external: true

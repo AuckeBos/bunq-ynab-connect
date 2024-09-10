@@ -16,6 +16,7 @@ from bunq_ynab_connect.clients.bunq_client import BunqClient
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.data.storage.mongo_storage import MongoStorage
 from bunq_ynab_connect.helpers.config import (
+    BUNQ_CALLBACK_INDEX,
     CACHE_DIR,
     CONFIG_DIR,
     LOGS_DIR,
@@ -72,8 +73,8 @@ def bootstrap_di() -> None:
 
     # Set the MongoStorage as the default storage
     di[AbstractStorage] = lambda _di: MongoStorage()
-    
     di[BunqClient] = lambda _: BunqClient().load_api_context()
+    di[BUNQ_CALLBACK_INDEX] = os.getenv("BUNQ_CALLBACK_HOST")
 
 
 def monkey_patch_ynab() -> None:

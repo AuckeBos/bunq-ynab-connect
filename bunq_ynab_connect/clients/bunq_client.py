@@ -1,3 +1,4 @@
+import json
 import os
 import platform
 from datetime import datetime
@@ -7,6 +8,7 @@ import pytz
 from bunq import ApiEnvironmentType, Pagination
 from bunq.sdk.context.api_context import ApiContext
 from bunq.sdk.context.bunq_context import BunqContext
+from bunq.sdk.http.api_client import ApiClient
 from bunq.sdk.model.generated import endpoint
 from bunq.sdk.model.generated.endpoint import (
     BunqResponseMonetaryAccountList,
@@ -20,12 +22,30 @@ from bunq.sdk.model.generated.endpoint import (
 )
 from dateutil.parser import parse
 from kink import inject
+from pydantic import BaseModel
 
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.helpers.config import BUNQ_CONFIG_FILE
 from bunq_ynab_connect.helpers.general import get_public_ip
 
 
+class Callback(BaseModel):
+    """Pydantic model for a callback."""
+
+    notification_target: str
+    category: str
+
+    @staticmethod
+    def from_api_response(response: dict) -> "Callback":
+        return Callback(
+            notification_target=response["NotificationFilterUrl"][
+                "notification_target"
+            ],
+            category=response["NotificationFilterUrl"]["category"],
+        )
+
+
+@inject
 class BunqClient:
     """Extractor for bunq payments.
 
@@ -184,3 +204,43 @@ class BunqClient:
         self.logger.warning(
             "Token traded. Make sure to remove the old token in the app"
         )
+
+    def add_callback(self, url: str) -> None:
+        if self._callback_exists(url):
+            return
+        self.logger.info("Adding callback for %s", url)
+        callbacks = self._get_callbacks()
+        callbacks.append(Callback(notification_target=url, category="MUTATION"))
+        data = {"notification_filters": [c.dict() for c in callbacks]}
+        self.api_client.post(self.callback_api_endpoint, json.dumps(data).encode(), {})
+
+    def _callback_exists(self, url: str) -> bool:
+        return any(c.notification_target == url for c in self._get_callbacks())
+
+    def _get_callbacks(self) -> list[Callback]:
+        response_raw = self.api_client.get(self.callback_api_endpoint, {}, {})
+        return [
+            Callback.from_api_response(c)
+            for c in json.loads(response_raw.body_bytes.decode())["Response"]
+        ]
+
+    def remove_callback(self, url: str) -> None:
+        if not self._callback_exists(url):
+            return
+        self.logger.info("Removing callback for %s", url)
+        callbacks = self._get_callbacks()
+        callbacks = [c for c in callbacks if c.notification_target != url]
+        data = {"notification_filters": [c.dict() for c in callbacks]}
+        self.api_client.post(self.callback_api_endpoint, json.dumps(data).encode(), {})
+
+    @property
+    def api_client(self) -> ApiClient:
+        return ApiClient(BunqContext.api_context())
+
+    @property
+    def callback_api_endpoint(self) -> str:
+        return f"/user/{self.user_id}/notification-filter-url"
+
+    @property
+    def user_id(self) -> int:
+        return BunqContext.user_context().user_id
