@@ -5,13 +5,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: pipx install poetry
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
-          cache: "poetry"
-      - run: poetry install
-      - run: poetry run ruff check .
-      - run: poetry run pytest
+          python-version: "3.12"
+          cache: "pip"
+      - run: pip install -r requirements-dev.lock
+      - run: ruff check .
+      - run: pytest
         env:
           PYTEST_ADDOPTS: "--color=yes"
