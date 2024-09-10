@@ -30,6 +30,9 @@ With portainer up and running, create a new stack, using [portainer.yaml](docker
 - `PREFECT_*` define some urls for prefect. You probably don't need to change these. You can find more info on these in the prefect docs.
 - `MLFLOW_TRACKING_URI` is the location of your MLFlow server. Again, probably no need to change this.
 - `MLSERVER_URL` is the location of your MLServer.
+- `CF_DNS_API_TOKEN` Cloudflare API token. Used by [Traefik](/docs/infrastructure.md#traefik) if DNS provider is Cloudflare.
+- `RESOLVER_NAME` See [Infrastructure](/docs/infrastructure.md#traefik).
+- `LETSENCRYPT_EMAIL` See [Infrastructure](/docs/infrastructure.md#traefik).
 
 Before you can start syncing, you must define what Ynab budgets and accounts belong to what Bunq accounts.
 
@@ -38,7 +41,7 @@ The link between these two is created using the description of your Ynab account
 
 
 ## Usage
-Prefect is used for orchestration and monitoring. This is therefor your best starting point to start syncing. Open it on [http://localhost:12002](http://localhost:12002) (or your servers' IP). You'll find the active deployments in the [deployments](http://localhost:12002/deployments) tab. Thw two most important deployments are:
+Prefect is used for orchestration and monitoring. This is therefor your best starting point to start syncing. Open it on [http://localhost:12002](http://localhost:12002) (or your servers' IP). You'll find the active deployments in the [deployments](http://localhost:12002/deployments) tab. The two most important deployments are:
 - `sync`. It runs ourly, and syncs all unsynced transactions. It keeps track of everything in your MongoDB (which you can access at [http://localhost:12001](http://localhost:12001)), so rerunning the sync will not create duplicates.
 - `train`. It runs weekly, and trains a classification model on your personal transactions and budget. 
 
