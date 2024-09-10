@@ -14,14 +14,14 @@ from bunq_ynab_connect.helpers.general import now
 ACCOUNT_ID_FOR_TESTING = 4023038
 
 
-@pytest.fixture()
+@pytest.fixture
 def client() -> BunqClient:
     """Return a BunqClient with a mocked storage and logger."""
     return BunqClient(storage=Mock(spec=AbstractStorage), logger=getLogger("test"))
 
 
 @pytest.mark.skip(reason="Not working in CI/CD")
-def test_get_accounts(client: BunqClient) -> None:  # noqa: D103
+def test_get_accounts(client: BunqClient) -> None:
     # Arrange
     # Act
     accounts = client.get_accounts()
@@ -30,7 +30,7 @@ def test_get_accounts(client: BunqClient) -> None:  # noqa: D103
 
 
 @pytest.mark.skip(reason="Not working in CI/CD")
-def test_get_payments(client: BunqClient) -> None:  # noqa: D103
+def test_get_payments(client: BunqClient) -> None:
     # Arrange
     # Act
     account = MonetaryAccountBank.from_json(json.dumps({}))

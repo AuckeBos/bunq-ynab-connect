@@ -20,7 +20,7 @@ def ensure_callback_exists(bunq_callback: str, client: BunqClient) -> None:
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator:
+async def lifespan(app: FastAPI) -> AsyncGenerator:  # noqa: ARG001
     """Ensure the callback url is registered in Bunq, before the server starts."""
     ensure_callback_exists()
     logger = di[LoggerAdapter]

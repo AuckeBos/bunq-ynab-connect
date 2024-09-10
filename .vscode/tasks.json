@@ -41,7 +41,7 @@
         {
             "label": "Lint: Ruff",
             "type": "shell",
-            "command": "poetry run ruff check",
+            "command": "ruff check",
             "options": {
                 "cwd": "${workspaceFolder}"
             },

@@ -40,10 +40,10 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
     CLASSIFIERS: ClassVar[list[ClassifierMixin]] = [
         DecisionTreeClassifier(),
         RandomForestClassifier(),
-        # GradientBoostingClassifier(), # noqa: ERA001
+        # GradientBoostingClassifier(),
         GaussianNB(),
         MLPClassifier(max_iter=1000),
-        # ExplainableBoostingClassifier(), # noqa: ERA001
+        # ExplainableBoostingClassifier(),
     ]
 
     @inject
