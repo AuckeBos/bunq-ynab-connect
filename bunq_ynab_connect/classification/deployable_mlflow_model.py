@@ -39,6 +39,8 @@ class DeployableMlflowModel(PythonModel):
         """Predict, and log the predictions in the database."""
         if isinstance(model_input, pd.DataFrame):
             data = model_input.to_dict("records")
+        else:
+            data = model_input
         if not self.model:
             logger = di[LoggerAdapter]
             logger.warning(
