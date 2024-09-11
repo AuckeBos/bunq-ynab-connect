@@ -12,17 +12,22 @@ from pymongo import MongoClient
 from pymongo.database import Database
 from ynab.models.account import Account
 
+from bunq_ynab_connect.clients.bunq.base_client import BunqEnvironment
 from bunq_ynab_connect.clients.bunq_client import BunqClient
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.data.storage.mongo_storage import MongoStorage
 from bunq_ynab_connect.helpers.config import (
     BUNQ_CALLBACK_INDEX,
+    BUNQ_CONFIG_DIR,
+    BUNQ_CONFIG_INDEX,
+    BUNQ_ONETIME_API_TOKEN_INDEX,
     CACHE_DIR,
     CONFIG_DIR,
     LOGS_DIR,
     LOGS_FILE,
     MLSERVER_CONFIG_DIR,
 )
+from bunq_ynab_connect.helpers.json_dict import JsonDict
 
 
 def _load_env() -> None:
@@ -53,7 +58,7 @@ def _get_logger(name: str) -> logging.LoggerAdapter:
 
 def bootstrap_di() -> None:
     """Inject dependencies into the dependency injection container."""
-    for dir_ in [LOGS_DIR, CACHE_DIR, CONFIG_DIR, MLSERVER_CONFIG_DIR]:
+    for dir_ in [LOGS_DIR, CACHE_DIR, CONFIG_DIR, MLSERVER_CONFIG_DIR, BUNQ_CONFIG_DIR]:
         Path.mkdir(dir_, exist_ok=True, parents=True)
     # Env
     _load_env()
@@ -73,8 +78,15 @@ def bootstrap_di() -> None:
 
     # Set the MongoStorage as the default storage
     di[AbstractStorage] = lambda _di: MongoStorage()
-    di[BunqClient] = lambda _: BunqClient().load_api_context()
+    di[BunqClient] = lambda _: BunqClient()
     di[BUNQ_CALLBACK_INDEX] = os.getenv("BUNQ_CALLBACK_HOST")
+    di[BUNQ_ONETIME_API_TOKEN_INDEX] = os.getenv("BUNQ_ONETIME_TOKEN")
+
+    bunq_environment = BunqEnvironment(os.getenv("BUNQ_ENVIRONMENT", "SANDBOX"))
+    di[BunqEnvironment] = bunq_environment
+    di[BUNQ_CONFIG_INDEX] = JsonDict(
+        path=Path(BUNQ_CONFIG_DIR / f"bunq_{bunq_environment.name}.cfg")
+    )
 
 
 def monkey_patch_ynab() -> None:

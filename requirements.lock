@@ -10,8 +10,6 @@
 #   universal: false
 
 -e file:.
-aenum==2.2.6
-    # via bunq-sdk
 aiofiles==24.1.0
     # via mlserver
 aiohappyeyeballs==2.4.0
@@ -50,8 +48,6 @@ blinker==1.8.2
     # via flask
 brotli==1.1.0
     # via geventhttpclient
-bunq-sdk==1.14.18
-    # via bunq-ynab-connect
 cachetools==5.5.0
     # via google-auth
     # via mlflow-skinny
@@ -67,8 +63,6 @@ certifi==2024.8.30
 cffi==1.17.1
     # via cryptography
     # via gevent
-chardet==3.0.4
-    # via bunq-sdk
 charset-normalizer==3.3.2
     # via requests
 click==8.1.7
@@ -323,8 +317,6 @@ pyasn1-modules==0.4.0
     # via google-auth
 pycparser==2.22
     # via cffi
-pycryptodomex==3.20.0
-    # via bunq-sdk
 pydantic==1.10.18
     # via bunq-ynab-connect
     # via fastapi
@@ -381,7 +373,6 @@ regex==2024.7.24
     # via dateparser
 requests==2.32.3
     # via apprise
-    # via bunq-sdk
     # via databricks-sdk
     # via docker
     # via kubernetes
@@ -416,8 +407,6 @@ setuptools==74.1.2
     # via zope-interface
 shellingham==1.5.4
     # via typer
-simplejson==3.19.3
-    # via bunq-sdk
 six==1.16.0
     # via geventhttpclient
     # via kubernetes
@@ -486,7 +475,6 @@ tzlocal==5.2
 ujson==5.10.0
     # via prefect
 urllib3==1.26.20
-    # via bunq-sdk
     # via distributed
     # via docker
     # via kubernetes

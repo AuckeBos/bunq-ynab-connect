@@ -1,15 +1,11 @@
-import json
-import time
 from logging import LoggerAdapter
 
-from bunq.sdk.model.generated.endpoint import (
-    MonetaryAccountBank,
-)
 from kink import inject
 
 from bunq_ynab_connect.clients.bunq_client import BunqClient
 from bunq_ynab_connect.data.data_extractors.abstract_extractor import AbstractExtractor
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
+from bunq_ynab_connect.models.bunq_account import BunqAccount
 from bunq_ynab_connect.sync_bunq_to_ynab.payment_queue import PaymentQueue
 
 
@@ -47,14 +43,13 @@ class BunqPaymentExtractor(AbstractExtractor):
         Loads all payments from all accounts
         """
         accounts = self.storage.get_as_entity(
-            "bunq_accounts", MonetaryAccountBank.from_json, provide_kwargs_as_json=True
+            "bunq_accounts", BunqAccount, provide_kwargs_as_json=False
         )
         payments = []
         for account in accounts:
-            time.sleep(1)
             payments.extend(
                 self.client.get_payments_for_account(account, self.last_runmoment)
             )
         for payment in payments:
-            self.payment_queue.add(payment.id_)
-        return [json.loads(pay.to_json()) for pay in payments]
+            self.payment_queue.add(payment["id"])
+        return payments

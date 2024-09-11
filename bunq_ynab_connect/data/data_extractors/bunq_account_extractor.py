@@ -1,4 +1,3 @@
-import json
 from logging import LoggerAdapter
 
 from kink import inject
@@ -29,5 +28,4 @@ class BunqAccountExtractor(AbstractExtractor):
         self.client = client
 
     def load(self) -> list[dict]:
-        accounts = self.client.get_accounts()
-        return [json.loads(a.to_json()) for a in accounts]
+        return self.client.get_accounts()
