@@ -31,7 +31,7 @@ services:
       - traefik
 
   prefect-server:
-    image: prefecthq/prefect:2.20.4-python3.12
+    image: prefecthq/prefect:3.0.1-python3.12
     container_name: bunqynab_prefect_server
     restart: unless-stopped
     volumes:
@@ -80,7 +80,7 @@ services:
       - traefik
 
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.6.0
+    image: ghcr.io/mlflow/mlflow:v2.16.0
     container_name: bunqynab_mlflow
     ports:
       - "12003:5000"
