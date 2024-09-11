@@ -34,7 +34,7 @@ async def process_payment(payment: BunqPayment, storage: AbstractStorage) -> Non
     storage.upsert("bunq_payments", [payment.dict()])
     flow_run = await run_deployment(
         name="sync-payment/sync_payment",
-        parameters={"payment_id": payment.id},
+        parameters={"payment_id": payment.id, "skip_if_synced": True},
         timeout=0,
     )
     logger = di[LoggerAdapter]

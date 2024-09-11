@@ -49,10 +49,11 @@ def sync_payments() -> None:
 
 @cli.command()
 @click.argument("payment_id", type=int)
-def sync_payment(payment_id: int) -> None:
+@click.argument("skip_if_synced", type=bool, default=True)
+def sync_payment(payment_id: int, skip_if_synced: bool) -> None:  # noqa: FBT001
     """Sync a single payment from bunq to YNAB."""
     syncer = PaymentSyncer()
-    syncer.sync_payment(payment_id)
+    syncer.sync_payment(payment_id, skip_if_synced=skip_if_synced)
 
 
 @cli.command()

@@ -1,5 +1,6 @@
 from collections.abc import Generator
 from contextlib import contextmanager
+from datetime import datetime
 from logging import LoggerAdapter
 
 from kink import inject
@@ -53,6 +54,15 @@ class PaymentQueue:
             "synced_at": now(),
         }
         self.storage.upsert(self.TABLE_NAME, [data])
+
+    def synced_at(self, payment_id: str) -> datetime | None:
+        item = self.storage.find_one(
+            self.TABLE_NAME, {("payment_id", "eq", payment_id)}
+        )
+        return None if not item else item["synced_at"]
+
+    def is_yet_synced(self, payment_id: str) -> bool:
+        return self.synced_at(payment_id) is not None
 
     def __bool__(self) -> bool:
         """To support the usage of the queue in a while loop."""

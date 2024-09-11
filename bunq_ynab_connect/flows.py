@@ -61,10 +61,10 @@ def sync_payment_queue() -> None:
 
 
 @flow
-def sync_payment(payment_id: int) -> None:
+def sync_payment(payment_id: int, skip_if_synced: bool) -> None:  # noqa: FBT001
     """Sync a single payment from bunq to YNAB."""
     syncer = PaymentSyncer()
-    syncer.sync_payment(payment_id)
+    syncer.sync_payment(payment_id, skip_if_synced=skip_if_synced)
 
 
 @flow
