@@ -180,7 +180,7 @@ class PaymentSyncer:
 
         self.client.create_transaction(transaction, account.budget_id)
 
-    def sync_payment(self, payment_id: int) -> None:
+    def sync_payment(self, payment_id: int, *, skip_if_synced: bool = True) -> None:
         """Sync a payment from Bunq to YNAB.
 
         - Load the payment from the database
@@ -190,6 +190,7 @@ class PaymentSyncer:
         Parameters
         ----------
             payment_id: The id of the payment to sync
+            skip_if_synced: If True, skip the payment if it has already been synced
 
 
         """
@@ -197,6 +198,19 @@ class PaymentSyncer:
         if payment is None:
             msg = f"Could not find payment with id {payment_id}"
             raise ValueError(msg)
+        if self.queue.is_yet_synced(payment_id):
+            if skip_if_synced:
+                self.logger.info(
+                    "Payment %s already synced at %s, skipping",
+                    payment_id,
+                    self.queue.synced_at(payment_id),
+                )
+                return
+            self.logger.warning(
+                "Payment %s already synced at %s, force syncing",
+                payment_id,
+                self.queue.synced_at(payment_id),
+            )
         payment = self.storage.rows_to_entities([payment], BunqPayment)[0]
         account_id = payment.monetary_account_id
         if account_id not in self.account_map:
@@ -224,6 +238,15 @@ class PaymentSyncer:
         from_date: datetime | None = None,
         to_date: datetime | None = None,
     ) -> None:
+        """Force sync all payments for a specific account. Even if already synced.
+
+        Parameters
+        ----------
+            iban: The IBAN of the account to sync
+            from_date: The date from which to sync payments
+            to_date: The date until which to sync payments
+
+        """
         if account := BunqAccount.by_iban(iban=iban):
             query = [("monetary_account_id", "eq", account.id)]
             if from_date:
@@ -238,6 +261,6 @@ class PaymentSyncer:
             payments = self.storage.find("bunq_payments", query)
             self.logger.info("Found %s payments for account %s", len(payments), iban)
             for payment in payments:
-                self.sync_payment(payment["id"])
+                self.sync_payment(payment["id"], skip_if_synced=False)
         else:
             self.logger.exception("Could not find account with IBAN %s", iban)

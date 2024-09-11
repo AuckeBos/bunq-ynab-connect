@@ -28,7 +28,7 @@ services:
       - mongodb
     restart: unless-stopped
     networks:
-      - traefik    
+      - traefik
 
   prefect-server:
     image: prefecthq/prefect:2.20.4-python3.12
@@ -96,7 +96,7 @@ services:
     ports:
       - "12005:8080"
     volumes:
-      - ./config:/home/bunqynab/config
+      - bunq_ynab_config:/home/bunqynab/config
     command: "mlserver start /home/bunqynab/config/mlserver"
     networks:
       - traefik    
@@ -116,7 +116,7 @@ services:
     image: index.docker.io/auckebos/bunq-ynab-connect:latest
     container_name: bunqynab_callback_server
     volumes:
-      - ./config:/home/bunqynab/config    
+      - bunq_ynab_config:/home/bunqynab/config
     env_file:
       - stack.env
     command: "uvicorn bunq_ynab_connect.sync_bunq_to_ynab.callback_server:app --host 0.0.0.0"
