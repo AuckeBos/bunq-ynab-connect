@@ -16,7 +16,7 @@
         {
             "label": "Docker up",
             "type": "shell",
-            "command": "docker compose -f docker/development.yml --env-file ./.docker-env -p bunqynab up --build",
+            "command": "docker compose -f docker/development.yml --env-file ./.docker-env -p bunqynab up",
             "options": {
                 "cwd": "${workspaceFolder}"
             }
