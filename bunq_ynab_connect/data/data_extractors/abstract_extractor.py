@@ -5,7 +5,6 @@ from logging import LoggerAdapter
 
 import pandas as pd
 from kink import inject
-from prefect import task
 
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.helpers.general import now
@@ -46,7 +45,6 @@ class AbstractExtractor(ABC):
         """Load the data from the source."""
         raise NotImplementedError
 
-    @task(task_run_name="extract_{self.destination}")
     def extract(self) -> None:
         """Extract the data from the bunq API, and save it in self.data.
 
