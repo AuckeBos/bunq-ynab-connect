@@ -7,7 +7,8 @@ from pathlib import Path
 
 from dotenv import find_dotenv, load_dotenv
 from kink import di
-from prefect import get_run_logger
+from prefect.exceptions import MissingContextError
+from prefect.logging import get_logger, get_run_logger
 from pymongo import MongoClient
 from pymongo.database import Database
 from ynab.models.account import Account
@@ -42,8 +43,8 @@ def _get_logger(name: str) -> logging.LoggerAdapter:
     """
     try:
         logger = get_run_logger()
-    except Exception:  # noqa: BLE001
-        logger = logging.getLogger(name)
+    except MissingContextError:
+        logger = get_logger(name)
         log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         Path.mkdir(LOGS_DIR, exist_ok=True, parents=True)
         fhandler = logging.FileHandler(filename=LOGS_FILE, mode="a")
@@ -52,6 +53,7 @@ def _get_logger(name: str) -> logging.LoggerAdapter:
         fhandler.setFormatter(formatter)
         logger.addHandler(fhandler)
         logger.addHandler(stdout_handler)
+        logger.warning("Bad prefect logger;", exc_info=True)
     logger.setLevel(logging.DEBUG)
     return logger
 
@@ -64,7 +66,8 @@ def bootstrap_di() -> None:
     _load_env()
 
     # Logging
-    di[logging.LoggerAdapter] = lambda _: _get_logger("logger")
+    # Use factory, to retry getting the prefect logger each time
+    di.factories[logging.LoggerAdapter] = lambda _: _get_logger("logger")
 
     # MongoDB
     di[MongoClient] = lambda _di: MongoClient(

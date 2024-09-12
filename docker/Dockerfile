@@ -24,7 +24,7 @@ RUN PYTHONDONTWRITEBYTECODE=1 pip install --no-cache-dir -r requirements.lock
 
 # Install self
 COPY --chown=bunqynab:bunqynab ./bunq_ynab_connect /home/bunqynab/bunq_ynab_connect
-RUN pip install -e .
+RUN PYTHONDONTWRITEBYTECODE=1 pip install --no-cache-dir -e .
 
 ENV USERNAME=bunqynab
 USER $USERNAME

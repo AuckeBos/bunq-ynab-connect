@@ -2,8 +2,10 @@
 Prefect is used for orchestration. Any code that should run periodically, should be deployed as a Prefect flow. Moreover, any ad-hoc flows which should be easily manually triggered, should also be deployed as a Prefect flow. The prefect frontend is used as entrypoint to the production server. 
 
 # Deployments
-All flows are defined in [flows.py](/bunq_ynab_connect/flows.py). All deployments use this file as entrypoint. The deployments themselves are defined in [prefect.yaml](/bunq_ynab_connect/prefect.yaml). The `prefect-agent` deploys it to the server upon boot. The following deployments exist:
+All flows are defined in [flows.py](/bunq_ynab_connect/flows.py). All deployments use this file as entrypoint. 
+We use the simplest way to deploy the flows: [the prefect serve method](https://docs-3.prefect.io/3.0/deploy/run-flows-in-local-processes). `flows.py` exposes a `work` method, which is called in the [entrypoint](/docker//entrypoint.sh). It serves all flows and includes the required schedules. 
 
+The following flows exist:
 - `extract`. Does not run automatically. Extracts all unextracted payments from bunq. The payments are added to the payment queue, which can be processed using the PaymentSyncer, with flow `sync_payement_queue`.
 - `sync_payment_queue`. Does not run automatically. Syncs all unsynced payments in the payment queue to YNAB.
 - `sync`. Runs hourly between hours 6 and 23. Runs `extract` and `sync_payment_queue` in sequence.

@@ -27,9 +27,9 @@ The Dockerfile is described by:
 - Python as a base image
 - Setting up a user, folders and permissions
 - Installing some required packages using apt-get
-- Install poetry
 - Copy the required files, and install the pyproject.toml file. 
-- Run the entrypoint. It deploys all deployments in [prefect.yaml](/bunq_ynab_connect/prefect.yaml) to the server, and starts a worker.
+- Install required dependencies
+- Run the entrypoint. This serves all flows, using the [serve method](https://docs-3.prefect.io/3.0/deploy/run-flows-in-local-processes). 
 
 ### Watchtower
 `watchtower` is a container that watches for changes in the `prefect-agent` container. When a change is detected, it pulls the new image, and restarts the container. This is used for an easy deployment mechanism. The [deploy.yaml](/.github/workflows/deploy.yaml) workflow builds the container upon every merge, and pushes it to Docker Hub. The watchtower container then pulls the new image, and restarts the `prefect-agent` container. 
