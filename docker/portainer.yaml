@@ -1,21 +1,21 @@
 services:
   mongodb:
     image: mongo:4.2.0
-    container_name: bunqynab_mongodb
+    container_name: bunqynab_mongodb_2
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     ports:
       - 27017:27017
     volumes:
-      - bunq_ynab_connect_data:/data/db
+      - bunq_ynab_connect_data_2:/data/db
     restart: unless-stopped
     networks:
       - traefik
 
   mongo-express:
     image: mongo-express:latest
-    container_name: bunqynab_mongo_ui
+    container_name: bunqynab_mongo_ui_2
     ports:
       - 12001:8081
     environment:
@@ -32,10 +32,10 @@ services:
 
   prefect-server:
     image: prefecthq/prefect:2.20.4-python3.11
-    container_name: bunqynab_prefect_server
+    container_name: bunqynab_prefect_server_2
     restart: unless-stopped
     volumes:
-      - bunq_ynab_connect_prefect:/root/.prefect
+      - bunq_ynab_connect_prefect_2:/root/.prefect
     entrypoint: ["/opt/prefect/entrypoint.sh", "prefect", "server", "start"]
     environment:
       - PREFECT_SERVER_API_HOST=${PREFECT_SERVER_API_HOST}
@@ -50,14 +50,14 @@ services:
 
   prefect-agent:
     image: index.docker.io/auckebos/bunq-ynab-connect:latest
-    container_name: bunqynab_prefect_agent
+    container_name: bunqynab_prefect_agent_2
     restart: unless-stopped
     ports:
       - "12004:8787"    
     depends_on:
       - prefect-server
     volumes:
-      - bunq_ynab_config:/home/bunqynab/config
+      - bunq_ynab_config_2:/home/bunqynab/config
       # Docker sock needed to be able to restart the mlserver container
       - /var/run/docker.sock:/var/run/docker.sock
     command: "/bin/sh -c /home/bunqynab/entrypoint.sh"
@@ -66,7 +66,7 @@ services:
 
   watchtower:
     image: containrrr/watchtower
-    container_name: bunqynab_watchtower
+    container_name: bunqynab_watchtower_2
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --interval 300 bunqynab_prefect_agent
@@ -76,7 +76,7 @@ services:
 
   mlflow:
     image: ghcr.io/mlflow/mlflow:v2.16.0
-    container_name: bunqynab_mlflow
+    container_name: bunqynab_mlflow_2
     ports:
       - "12003:5000"
     volumes:
@@ -88,20 +88,20 @@ services:
 
   mlserver:
     image: index.docker.io/auckebos/bunq-ynab-connect:latest
-    container_name: bunqynab_mlserver
+    container_name: bunqynab_mlserver_2
     ports:
       - "12005:8080"
     volumes:
-      - bunq_ynab_config:/home/bunqynab/config
+      - bunq_ynab_config_2:/home/bunqynab/config
     command: "mlserver start /home/bunqynab/config/mlserver"
     networks:
       - traefik    
 
   callback:
     image: index.docker.io/auckebos/bunq-ynab-connect:latest
-    container_name: bunqynab_callback_server
+    container_name: bunqynab_callback_server_2
     volumes:
-      - bunq_ynab_config:/home/bunqynab/config
+      - bunq_ynab_config_2:/home/bunqynab/config
     command: "uvicorn bunq_ynab_connect.sync_bunq_to_ynab.callback_server:app --host 0.0.0.0"
     labels:
       - "traefik.enable=true"
@@ -115,9 +115,9 @@ services:
     networks:
       - traefik
 volumes:
-  bunq_ynab_connect_data:
-  bunq_ynab_connect_prefect:
-  bunq_ynab_config:
+  bunq_ynab_connect_data_2:
+  bunq_ynab_connect_prefect_2:
+  bunq_ynab_config_2:
 
 networks:
   default:
