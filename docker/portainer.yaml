@@ -54,8 +54,6 @@ services:
     restart: unless-stopped
     ports:
       - "12004:8787"    
-    env_file:
-      - stack.env
     depends_on:
       - prefect-server
     volumes:
@@ -91,8 +89,6 @@ services:
   mlserver:
     image: index.docker.io/auckebos/bunq-ynab-connect:latest
     container_name: bunqynab_mlserver
-    env_file:
-      - stack.env
     ports:
       - "12005:8080"
     volumes:
@@ -106,8 +102,6 @@ services:
     container_name: bunqynab_callback_server
     volumes:
       - bunq_ynab_config:/home/bunqynab/config
-    env_file:
-      - stack.env
     command: "uvicorn bunq_ynab_connect.sync_bunq_to_ynab.callback_server:app --host 0.0.0.0"
     labels:
       - "traefik.enable=true"
