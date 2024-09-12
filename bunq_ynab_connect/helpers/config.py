@@ -19,4 +19,5 @@ CACHE_DIR = PROJECT_DIR / ".." / "cache"
 LOGS_FILE = LOGS_DIR / "logs.log"
 MLSERVER_CONFIG_DIR = CONFIG_DIR / "mlserver/models"
 
-MLSERVER_MODEL_URL_INDEX = "mlserver_model_url"
+MLSERVER_PREDICTION_URL_INDEX = "mlserver_model_url"
+MLSERVER_REPOSITORY_URL_INDEX = "mlserver_repository_url"

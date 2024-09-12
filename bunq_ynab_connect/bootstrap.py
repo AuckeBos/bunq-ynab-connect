@@ -27,7 +27,8 @@ from bunq_ynab_connect.helpers.config import (
     LOGS_DIR,
     LOGS_FILE,
     MLSERVER_CONFIG_DIR,
-    MLSERVER_MODEL_URL_INDEX,
+    MLSERVER_PREDICTION_URL_INDEX,
+    MLSERVER_REPOSITORY_URL_INDEX,
 )
 from bunq_ynab_connect.helpers.json_dict import JsonDict
 
@@ -92,8 +93,15 @@ def bootstrap_di() -> None:
         path=Path(BUNQ_CONFIG_DIR / f"bunq_{bunq_environment.name}.cfg")
     )
     # Model serving config
-    di[MLSERVER_MODEL_URL_INDEX] = "{server_url}/v2/models/{{budget_id}}/infer".format(
-        server_url=os.getenv("MLSERVER_URL")
+    di[MLSERVER_PREDICTION_URL_INDEX] = (
+        "{server_url}/v2/models/{{budget_id}}/infer".format(
+            server_url=os.getenv("MLSERVER_URL")
+        )
+    )
+    di[MLSERVER_REPOSITORY_URL_INDEX] = (
+        "{server_url}/v2/repository/models/{{budget_id}}".format(
+            server_url=os.getenv("MLSERVER_URL")
+        )
     )
 
 
@@ -137,7 +145,7 @@ def import_mlserver_windows_friendly(logger: logging.LoggerAdapter) -> None:
         subprocess.Popen(install_cmd, shell=True, stdout=subprocess.DEVNULL)  # noqa: S602
         logger.info("Good mlserver reinstall;")
     finally:
-        from mlserver.codecs import PandasCodec
+        from mlserver.codecs import PandasCodec  # noqa: F401
 
         logger.info("Good mlserver import;")
 

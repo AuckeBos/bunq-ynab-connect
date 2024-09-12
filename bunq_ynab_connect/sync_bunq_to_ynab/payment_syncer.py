@@ -50,7 +50,7 @@ class PaymentSyncer:
     prediction_url: str
 
     @inject
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         logger: LoggerAdapter,
         storage: AbstractStorage,

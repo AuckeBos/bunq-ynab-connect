@@ -59,9 +59,9 @@ services:
     depends_on:
       - prefect-server
     volumes:
+      - bunq_ynab_config:/home/bunqynab/config
       # Docker sock needed to be able to restart the mlserver container
       - /var/run/docker.sock:/var/run/docker.sock
-      - bunq_ynab_connect_prefect_agent:/home/bunqynab
     command: "/bin/sh -c /home/bunqynab/entrypoint.sh"
     networks:
       - traefik    
@@ -100,17 +100,6 @@ services:
     command: "mlserver start /home/bunqynab/config/mlserver"
     networks:
       - traefik    
-    
-  # Temporary solution to restart mlserver daily. Since Prefect agent has no access to the docker socket
-  mlserver_restarter:
-    image: docker:cli
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-
-    command: ["/bin/sh", "-c", "while true; do sleep 86400; docker restart bunqynab_mlserver; done"]
-    restart: unless-stopped
-    networks:
-      - traefik    
 
   callback:
     image: index.docker.io/auckebos/bunq-ynab-connect:latest
@@ -134,7 +123,7 @@ services:
 volumes:
   bunq_ynab_connect_data:
   bunq_ynab_connect_prefect:
-  bunq_ynab_connect_prefect_agent:
+  bunq_ynab_config:
 
 networks:
   default:
