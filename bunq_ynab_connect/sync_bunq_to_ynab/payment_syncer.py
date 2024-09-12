@@ -1,4 +1,3 @@
-import json
 import os
 from datetime import datetime
 from logging import LoggerAdapter
@@ -35,8 +34,8 @@ class PaymentSyncer:
         mapper: The mapper to use to map Bunq accounts to YNAB accounts.
         queue: The queue to use to get the payments to sync.
         account_map: A map from Bunq account id to YNAB account.
-        prediction_base_url: The base url of the ML server to use to predict categories.
-            Read from env.
+        prediction_base_url: The url ofr the MLServerm odle to use to predict categories
+            contains var "budget_id" to be replaced with the budget id.
 
     """
 
@@ -48,7 +47,7 @@ class PaymentSyncer:
     client: YnabClient
     queue: PaymentQueue
     account_map: dict
-    prediction_base_url: str
+    prediction_url: str
 
     @inject
     def __init__(
@@ -58,6 +57,7 @@ class PaymentSyncer:
         client: YnabClient,
         mapper: BunqAccountToYnabAccountMapper,
         queue: PaymentQueue,
+        mlserver_model_url: str,
     ):
         self.logger = logger
         self.storage = storage
@@ -65,7 +65,7 @@ class PaymentSyncer:
         self.mapper = mapper
         self.queue = queue
         self.account_map = mapper.map()
-        self.prediction_base_url = f"{os.getenv('MLSERVER_URL')}/v2/models"
+        self.prediction_url = mlserver_model_url
 
     def sanity_check_payment(self, payment: BunqPayment) -> bool:
         """Do a sanity check on the payment. Payment should not be synced if the fails.
@@ -140,16 +140,21 @@ class PaymentSyncer:
         """
         try:
             invalid_categories = ["Split (Multiple Categories)..."]
-            endpoint = f"{self.prediction_base_url}/{account.budget_id}/infer"
-            payment_as_dict = json.loads(payment.json())
-            request = PandasCodec.encode_request(
-                pd.DataFrame.from_dict([payment_as_dict])
+            endpoint = self.prediction_url.format(budget_id=account.budget_id)
+            response = requests.post(
+                endpoint,
+                data=PandasCodec.encode_request(
+                    pd.DataFrame.from_dict([payment.model_dump()])
+                )
+                .model_dump_json()
+                .encode(),
+                timeout=10,
             )
-            response = requests.post(endpoint, json=request.dict(), timeout=10)
             response.raise_for_status()
             prediction = response.json()["outputs"][0]["data"][0]
             if prediction in invalid_categories:
                 msg = f"Invalid category predicted: {prediction}"
+                self.logger.exception(msg)
                 raise ValueError(msg)  # noqa: TRY301
             self.logger.info(
                 "Predicted category %s for payment %s", prediction, payment.id

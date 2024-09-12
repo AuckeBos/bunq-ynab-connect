@@ -27,6 +27,7 @@ from bunq_ynab_connect.helpers.config import (
     LOGS_DIR,
     LOGS_FILE,
     MLSERVER_CONFIG_DIR,
+    MLSERVER_MODEL_URL_INDEX,
 )
 from bunq_ynab_connect.helpers.json_dict import JsonDict
 
@@ -81,14 +82,18 @@ def bootstrap_di() -> None:
 
     # Set the MongoStorage as the default storage
     di[AbstractStorage] = lambda _di: MongoStorage()
+    # Bunq config
     di[BunqClient] = lambda _: BunqClient()
     di[BUNQ_CALLBACK_INDEX] = os.getenv("BUNQ_CALLBACK_HOST")
     di[BUNQ_ONETIME_API_TOKEN_INDEX] = os.getenv("BUNQ_ONETIME_TOKEN")
-
     bunq_environment = BunqEnvironment(os.getenv("BUNQ_ENVIRONMENT", "SANDBOX"))
     di[BunqEnvironment] = bunq_environment
     di[BUNQ_CONFIG_INDEX] = JsonDict(
         path=Path(BUNQ_CONFIG_DIR / f"bunq_{bunq_environment.name}.cfg")
+    )
+    # Model serving config
+    di[MLSERVER_MODEL_URL_INDEX] = "{server_url}/v2/models/{{budget_id}}/infer".format(
+        server_url=os.getenv("MLSERVER_URL")
     )
 
 

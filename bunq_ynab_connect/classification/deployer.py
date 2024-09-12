@@ -1,4 +1,5 @@
 import json
+from functools import cached_property
 from logging import LoggerAdapter
 
 from kink import inject
@@ -8,6 +9,7 @@ import mlflow
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.helpers.config import MLSERVER_CONFIG_DIR
 from mlflow.entities.model_registry.model_version import ModelVersion
+from mlflow.exceptions import RestException
 from mlflow.tracking import MlflowClient
 
 
@@ -21,6 +23,7 @@ class Deployer:
     storage: AbstractStorage
     logger: LoggerAdapter
     client: MlflowClient
+    PRODUCTION_ALIAS = "production"
 
     @inject
     def __init__(self, budget_id: str, storage: AbstractStorage, logger: LoggerAdapter):
@@ -72,12 +75,10 @@ class Deployer:
 
     def create_mlserver_config(self) -> None:
         """Create the config file for mlserver, such that it can serve the model."""
-        model_uri = f"models:/{self.budget_id}/Production"
-
         data = {
             "name": self.budget_id,
             "implementation": "mlserver_mlflow.MLflowRuntime",
-            "parameters": {"uri": model_uri},
+            "parameters": {"uri": self.model_uri(self.budget_id)},
         }
         dir_ = MLSERVER_CONFIG_DIR / self.budget_id
         dir_.mkdir(exist_ok=True)
@@ -86,13 +87,15 @@ class Deployer:
             json.dump(data, f)
         self.logger.info("Created mlserver config at %s", destination)
 
+    def model_uri(self, budget_id: str) -> str:
+        return f"models:/{budget_id}@{self.PRODUCTION_ALIAS}"
+
     def transition_model(self, model: ModelVersion) -> None:
         """Transition the model to production."""
-        self.client.transition_model_version_stage(
+        self.client.set_registered_model_alias(
             name=model.name,
+            alias=self.PRODUCTION_ALIAS,
             version=model.version,
-            stage="Production",
-            archive_existing_versions=True,
         )
 
     def run_is_better(self, new_model: ModelVersion) -> bool:
@@ -104,14 +107,9 @@ class Deployer:
         - If the new run is better, return True, else False
         """
         # Existing model
-        existing_model_versions = self.client.get_latest_versions(
-            self.budget_id, stages=["Production"]
-        )
-        if not existing_model_versions:
-            self.logger.info("No existing model found")
+        if not self.existing_model:
             return True
-        existing_model: ModelVersion = existing_model_versions[0]
-        existing_run = mlflow.get_run(existing_model.run_id)
+        existing_run = mlflow.get_run(self.existing_model.run_id)
         existing_score = existing_run.data.metrics["cohen_kappa"]
 
         # New run
@@ -122,3 +120,15 @@ class Deployer:
             return True
         self.logger.info("New model is worse: %s <= %s", new_score, existing_score)
         return False
+
+    @cached_property
+    def existing_model(self) -> ModelVersion | None:
+        """Get the existing model."""
+        try:
+            return self.client.get_model_version_by_alias(
+                name=self.budget_id, alias=self.PRODUCTION_ALIAS
+            )
+
+        except RestException:
+            self.logger.exception("Could not load existing model")
+            return None
