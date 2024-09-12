@@ -227,6 +227,7 @@ class PaymentSyncer:
             return
         ynab_account: YnabAccount = self.account_map[account_id]
         self.create_transaction(payment, ynab_account)
+        self.queue.mark_synced(payment_id)
 
     def sync(self) -> None:
         """Sync all payments in the queue from Bunq to YNAB."""
