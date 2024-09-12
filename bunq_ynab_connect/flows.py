@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 from kink import di
 from prefect import flow, serve, task
 from prefect.client.schemas.schedules import CronSchedule
-from prefect.futures import wait
 from prefect_dask.task_runners import DaskTaskRunner
 
 from bunq_ynab_connect.classification.deployer import Deployer
@@ -49,7 +48,8 @@ def extract() -> None:
         YnabAccountExtractor(),
         YnabTransactionExtractor(),
     ]
-    wait(extractor.extract.submit() for extractor in extractors)
+    for extractor in extractors:
+        extractor.extract()
 
 
 @flow

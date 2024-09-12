@@ -53,7 +53,7 @@ def _get_logger(name: str) -> logging.LoggerAdapter:
         fhandler.setFormatter(formatter)
         logger.addHandler(fhandler)
         logger.addHandler(stdout_handler)
-        logger.warning("Bad prefect logger;", exc_info=True)
+        logger.warning("Bad prefect logger;")
     logger.setLevel(logging.DEBUG)
     return logger
 

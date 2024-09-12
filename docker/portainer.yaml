@@ -31,7 +31,7 @@ services:
       - traefik
 
   prefect-server:
-    image: prefecthq/prefect:3.0.1-python3.11
+    image: prefecthq/prefect:2.20.4-python3.11
     container_name: bunqynab_prefect_server
     restart: unless-stopped
     volumes:
@@ -97,7 +97,7 @@ services:
       - "12005:8080"
     volumes:
       - bunq_ynab_config:/home/bunqynab/config
-    command: "/bin/sh -c /home/bunqynab/entrypoint_mlserver.sh"
+    command: "mlserver start /home/bunqynab/config/mlserver"
     networks:
       - traefik    
     
