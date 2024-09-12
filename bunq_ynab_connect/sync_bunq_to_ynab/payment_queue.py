@@ -47,7 +47,7 @@ class PaymentQueue:
             raise IndexError(msg)
         return payment["payment_id"]
 
-    def mark_as_synced(self, payment_id: str) -> None:
+    def mark_synced(self, payment_id: str) -> None:
         """Mark a payment as synced."""
         data = {
             "payment_id": payment_id,
@@ -86,7 +86,7 @@ class PaymentQueue:
         payment_id = self.get_payment_id()
         try:
             yield payment_id
-            self.mark_as_synced(payment_id)
+            self.mark_synced(payment_id)
         except Exception:
             self.logger.exception("Error processing payment %s", payment_id)
             raise
