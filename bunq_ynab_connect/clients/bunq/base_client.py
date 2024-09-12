@@ -168,8 +168,9 @@ class BaseClient:
                 "Pagination" not in response
                 or "older_url" not in pagination
                 or not pagination["older_url"]
-                or continue_loading_pages is None
-                or not continue_loading_pages(last_page)
+            ) or (
+                continue_loading_pages is not None
+                and not continue_loading_pages(last_page)
             )
             if not done:
                 endpoint = pagination["older_url"]
