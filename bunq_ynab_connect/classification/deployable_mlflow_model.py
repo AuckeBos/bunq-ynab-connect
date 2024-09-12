@@ -33,7 +33,7 @@ class DeployableMlflowModel(PythonModel):
     def predict(
         self,
         context: PythonModelContext,
-        model_input: list,
+        model_input: pd.DataFrame | list[dict],
         __: dict[str, Any] | None = None,
     ) -> list[str]:
         """Predict, and log the predictions in the database."""

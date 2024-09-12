@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 from dotenv import find_dotenv, load_dotenv
-from kink import di
+from kink import di, inject
 from prefect.exceptions import MissingContextError
 from prefect.logging import get_logger, get_run_logger
 from pymongo import MongoClient
@@ -27,6 +27,8 @@ from bunq_ynab_connect.helpers.config import (
     LOGS_DIR,
     LOGS_FILE,
     MLSERVER_CONFIG_DIR,
+    MLSERVER_PREDICTION_URL_INDEX,
+    MLSERVER_REPOSITORY_URL_INDEX,
 )
 from bunq_ynab_connect.helpers.json_dict import JsonDict
 
@@ -81,14 +83,25 @@ def bootstrap_di() -> None:
 
     # Set the MongoStorage as the default storage
     di[AbstractStorage] = lambda _di: MongoStorage()
+    # Bunq config
     di[BunqClient] = lambda _: BunqClient()
     di[BUNQ_CALLBACK_INDEX] = os.getenv("BUNQ_CALLBACK_HOST")
     di[BUNQ_ONETIME_API_TOKEN_INDEX] = os.getenv("BUNQ_ONETIME_TOKEN")
-
     bunq_environment = BunqEnvironment(os.getenv("BUNQ_ENVIRONMENT", "SANDBOX"))
     di[BunqEnvironment] = bunq_environment
     di[BUNQ_CONFIG_INDEX] = JsonDict(
         path=Path(BUNQ_CONFIG_DIR / f"bunq_{bunq_environment.name}.cfg")
+    )
+    # Model serving config
+    di[MLSERVER_PREDICTION_URL_INDEX] = (
+        "{server_url}/v2/models/{{budget_id}}/infer".format(
+            server_url=os.getenv("MLSERVER_URL")
+        )
+    )
+    di[MLSERVER_REPOSITORY_URL_INDEX] = (
+        "{server_url}/v2/repository/models/{{budget_id}}".format(
+            server_url=os.getenv("MLSERVER_URL")
+        )
     )
 
 
@@ -112,3 +125,33 @@ def monkey_patch_ynab() -> None:
             setattr(self, f"_{attribute}", value)  # noqa: B023
 
         setattr(Account, attribute, fixed_setter)
+
+
+@inject
+def import_mlserver_windows_friendly(logger: logging.LoggerAdapter) -> None:
+    """MLServer has issues on windows. It seems a reinstall solves the issue.
+
+    https://github.com/SeldonIO/MLServer/issues/1022
+    """
+    try:
+        import mlserver  # noqa: F401
+
+        logger.info("Good mlserver import;")
+    except Exception:  # noqa: BLE001
+        import subprocess
+
+        logger.warning("Bad mlserver import; trying to install mlserver")
+        install_cmd = "pip install mlserver"
+        subprocess.Popen(install_cmd, shell=True, stdout=subprocess.DEVNULL)  # noqa: S602
+        logger.info("Good mlserver reinstall;")
+    finally:
+        from mlserver.codecs import PandasCodec  # noqa: F401
+
+        logger.info("Good mlserver import;")
+
+
+def monkey_patch_mlserver() -> None:
+    """Fix an issue with mlserver, where datetime fiels cannot be encoded."""
+    from mlserver.codecs.numpy import _NumpyToDatatype
+
+    _NumpyToDatatype["M"] = "BYTES"
