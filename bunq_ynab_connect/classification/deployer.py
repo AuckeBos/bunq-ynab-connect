@@ -1,11 +1,9 @@
 import json
-from collections.abc import Generator
-from contextlib import contextmanager
 from logging import LoggerAdapter
 
 from kink import inject
-from requests import post
 
+import docker
 import mlflow
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.helpers.config import MLSERVER_CONFIG_DIR
@@ -64,8 +62,8 @@ class Deployer:
         existing_model = self.existing_model
         if self.is_better_than(new_model, existing_model):
             self.transition_model(new_model)
-            with self.reload_mlserver_model():
-                self.create_mlserver_config()
+            self.create_mlserver_config()
+            self.restart_mlserver()
             self.logger.info("Model deployed")
         else:
             self.logger.info("Model not deployed")
@@ -89,7 +87,7 @@ class Deployer:
             )
 
         except RestException:
-            self.logger.exception("Could not load existing model")
+            self.logger.exception("Could not load existing model", exc_info=False)  # noqa: LOG007
             return None
 
     def is_better_than(
@@ -117,21 +115,22 @@ class Deployer:
             version=model.version,
         )
 
-    @contextmanager
-    def reload_mlserver_model(self) -> Generator:
-        """Context manager to temporarily unload the model in mlserver."""
-        url = self.mlserver_repository_url.format(budget_id=self.budget_id)
-        post(
-            f"{url}/unload",
-            timeout=5,
-        )
-        self.logger.info("Unloaded model %s", self.budget_id)
-        yield
-        post(
-            f"{url}/load",
-            timeout=5,
-        )
-        self.logger.info("Loaded model %s", self.budget_id)
+    def restart_mlserver(self) -> None:
+        """Restart the mlserver service.
+
+        Currently not working. When running inside an agent, it seems
+        we have no access to the docker socket, hence the restart fails.
+        Added restart_container to compose, to restart mlserver container daily
+        """
+        try:
+            client = docker.DockerClient(base_url="unix://var/run/docker.sock")
+            if container := client.containers.get("bunqynab_mlserver"):
+                container.restart()
+                self.logger.info("Restarted mlserver")
+            else:
+                self.logger.info("No mlserver container found, mlserver not restarted")
+        except Exception:
+            self.logger.exception("Error restarting mlserver")
 
     def create_mlserver_config(self) -> None:
         """Create the config file for mlserver, such that it can serve the model."""

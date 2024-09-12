@@ -11,9 +11,6 @@ from sklearn.model_selection import (
 )
 
 import mlflow
-from bunq_ynab_connect.classification.deployable_mlflow_model import (
-    DeployableMlflowModel,
-)
 from bunq_ynab_connect.classification.experiments.base_payment_classification_experiment import (  # noqa: E501
     BasePaymentClassificationExperiment,
 )
@@ -63,18 +60,19 @@ class FullTrainingExperiment(BasePaymentClassificationExperiment):
         y_pred = classifier.predict(X_test)
         score = cohen_kappa_score(y_test, y_pred)
         mlflow.log_metric("cohen_kappa", score)
-        mlflow.sklearn.log_model(classifier, "model")
+        mlflow.sklearn.log_model(classifier, "classifier")
         object_to_mlflow(self.label_encoder, "label_encoder")
 
         artifact_uri = Path(mlflow.active_run().info.artifact_uri)
         artifacts = {
-            "model_path": str(artifact_uri / "model"),
+            "model_path": str(artifact_uri / "classifier"),
             "label_encoder_path": str(artifact_uri / "label_encoder"),
         }
         input_example = [X_train[0]]
+        path = Path(__file__).parents[1] / "deployable_mlflow_model.py"
         mlflow.pyfunc.log_model(
-            artifact_path="deployable_model",
-            python_model=DeployableMlflowModel(),
+            artifact_path="model",
+            python_model=path,
             artifacts=artifacts,
             input_example=input_example,
             registered_model_name=self.budget_id,

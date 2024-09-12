@@ -7,6 +7,7 @@ import requests
 from dateutil import parser
 from kink import inject
 from mlserver.codecs import PandasCodec
+from pydantic import BaseModel
 from ynab import TransactionDetail
 from ynab.configuration import Configuration
 
@@ -19,6 +20,13 @@ from bunq_ynab_connect.models.bunq_account import BunqAccount
 from bunq_ynab_connect.models.bunq_payment import BunqPayment
 from bunq_ynab_connect.models.ynab_account import YnabAccount
 from bunq_ynab_connect.sync_bunq_to_ynab.payment_queue import PaymentQueue
+
+
+class Prediction(BaseModel):
+    """Model for the prediction response from the ML server."""
+
+    category_name: str
+    category_id: str
 
 
 class PaymentSyncer:
@@ -123,7 +131,7 @@ class PaymentSyncer:
             flag_color=self.FLAG_COLOR,
             approved=False,
             local_vars_configuration=configuration,
-            category_name=self.decide_category(payment, account),
+            category_id=self.decide_category(payment, account),
         )
 
     def decide_category(self, payment: BunqPayment, account: YnabAccount) -> str:
@@ -151,13 +159,16 @@ class PaymentSyncer:
                 timeout=10,
             )
             response.raise_for_status()
-            prediction = response.json()["outputs"][0]["data"][0]
-            if prediction in invalid_categories:
-                msg = f"Invalid category predicted: {prediction}"
+            prediction = Prediction(**response.json()["outputs"][0]["data"][0])
+
+            if prediction.category_name in invalid_categories:
+                msg = f"Invalid category predicted: {prediction.category_name}"
                 self.logger.exception(msg)
                 raise ValueError(msg)  # noqa: TRY301
             self.logger.info(
-                "Predicted category %s for payment %s", prediction, payment.id
+                "Predicted category %s for payment %s",
+                prediction.category_name,
+                payment.id,
             )
         except Exception:
             self.logger.exception(
@@ -165,7 +176,7 @@ class PaymentSyncer:
             )
             return None
         else:
-            return prediction
+            return prediction.category_id
 
     def create_transaction(self, payment: BunqPayment, account: YnabAccount) -> None:
         """Create a YNAB transaction from a Bunq payment and create it in YNAB.

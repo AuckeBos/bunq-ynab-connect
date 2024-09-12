@@ -3,13 +3,17 @@ from logging import LoggerAdapter
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pandas as pd
 from kink import di
 from sklearn.base import ClassifierMixin
-from sklearn.calibration import LabelEncoder
 
 import mlflow
+from bunq_ynab_connect.classification.budget_category_encoder import (
+    BudgetCategoryEncoder,
+)
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
+from mlflow.models import set_model
 from mlflow.pyfunc import PythonModel, PythonModelContext
 
 
@@ -21,12 +25,11 @@ class DeployableMlflowModel(PythonModel):
     """
 
     model: ClassifierMixin | None = None
-    label_encoder: LabelEncoder | None = None
+    label_encoder: BudgetCategoryEncoder | None = None
 
     def load_context(self, context: PythonModelContext) -> None:
         """Load the classifier and label encoder from the mlflow artifacts."""
-        model_path = context.artifacts["model_path"]
-        self.model = mlflow.sklearn.load_model(model_path)
+        self.model = mlflow.sklearn.load_model(context.artifacts["model_path"])
         with Path.open(context.artifacts["label_encoder_path"], "rb") as file:
             self.label_encoder = pickle.load(file)
 
@@ -35,7 +38,7 @@ class DeployableMlflowModel(PythonModel):
         context: PythonModelContext,
         model_input: pd.DataFrame | list[dict],
         __: dict[str, Any] | None = None,
-    ) -> list[str]:
+    ) -> list[dict]:
         """Predict, and log the predictions in the database."""
         if isinstance(model_input, pd.DataFrame):
             data = model_input.to_dict("records")
@@ -48,10 +51,17 @@ class DeployableMlflowModel(PythonModel):
                 context,
             )
             return [None]
-        predictions = self.model.predict(data)
-        predictions = predictions.tolist()
+        predictions = [
+            {
+                "category_name": self.label_encoder.id_to_name[prediction],
+                "category_id": prediction,
+            }
+            for prediction in self.label_encoder.inverse_transform(
+                self.model.predict(data).tolist()
+            )
+        ]
         self.log_predictions(data, predictions)
-        return self.label_encoder.inverse_transform(predictions)
+        return np.array(predictions)
 
     # TODO: Do this async
     # TODO: Add model version identifier
@@ -65,4 +75,7 @@ class DeployableMlflowModel(PythonModel):
             for payment, prediction in zip(payments, predictions, strict=True)
         ]
         storage = di[AbstractStorage]
-        storage.upsert("payment_classifications", data)
+        storage.insert("payment_classifications", data)
+
+
+set_model(DeployableMlflowModel())
