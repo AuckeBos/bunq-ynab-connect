@@ -7,22 +7,28 @@ from pathlib import Path
 
 from dotenv import find_dotenv, load_dotenv
 from kink import di
-from prefect import get_run_logger
+from prefect.exceptions import MissingContextError
+from prefect.logging import get_logger, get_run_logger
 from pymongo import MongoClient
 from pymongo.database import Database
 from ynab.models.account import Account
 
+from bunq_ynab_connect.clients.bunq.base_client import BunqEnvironment
 from bunq_ynab_connect.clients.bunq_client import BunqClient
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.data.storage.mongo_storage import MongoStorage
 from bunq_ynab_connect.helpers.config import (
     BUNQ_CALLBACK_INDEX,
+    BUNQ_CONFIG_DIR,
+    BUNQ_CONFIG_INDEX,
+    BUNQ_ONETIME_API_TOKEN_INDEX,
     CACHE_DIR,
     CONFIG_DIR,
     LOGS_DIR,
     LOGS_FILE,
     MLSERVER_CONFIG_DIR,
 )
+from bunq_ynab_connect.helpers.json_dict import JsonDict
 
 
 def _load_env() -> None:
@@ -37,8 +43,8 @@ def _get_logger(name: str) -> logging.LoggerAdapter:
     """
     try:
         logger = get_run_logger()
-    except Exception:  # noqa: BLE001
-        logger = logging.getLogger(name)
+    except MissingContextError:
+        logger = get_logger(name)
         log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         Path.mkdir(LOGS_DIR, exist_ok=True, parents=True)
         fhandler = logging.FileHandler(filename=LOGS_FILE, mode="a")
@@ -47,19 +53,21 @@ def _get_logger(name: str) -> logging.LoggerAdapter:
         fhandler.setFormatter(formatter)
         logger.addHandler(fhandler)
         logger.addHandler(stdout_handler)
+        logger.warning("Bad prefect logger;", exc_info=True)
     logger.setLevel(logging.DEBUG)
     return logger
 
 
 def bootstrap_di() -> None:
     """Inject dependencies into the dependency injection container."""
-    for dir_ in [LOGS_DIR, CACHE_DIR, CONFIG_DIR, MLSERVER_CONFIG_DIR]:
+    for dir_ in [LOGS_DIR, CACHE_DIR, CONFIG_DIR, MLSERVER_CONFIG_DIR, BUNQ_CONFIG_DIR]:
         Path.mkdir(dir_, exist_ok=True, parents=True)
     # Env
     _load_env()
 
     # Logging
-    di[logging.LoggerAdapter] = lambda _: _get_logger("logger")
+    # Use factory, to retry getting the prefect logger each time
+    di.factories[logging.LoggerAdapter] = lambda _: _get_logger("logger")
 
     # MongoDB
     di[MongoClient] = lambda _di: MongoClient(
@@ -73,8 +81,15 @@ def bootstrap_di() -> None:
 
     # Set the MongoStorage as the default storage
     di[AbstractStorage] = lambda _di: MongoStorage()
-    di[BunqClient] = lambda _: BunqClient().load_api_context()
+    di[BunqClient] = lambda _: BunqClient()
     di[BUNQ_CALLBACK_INDEX] = os.getenv("BUNQ_CALLBACK_HOST")
+    di[BUNQ_ONETIME_API_TOKEN_INDEX] = os.getenv("BUNQ_ONETIME_TOKEN")
+
+    bunq_environment = BunqEnvironment(os.getenv("BUNQ_ENVIRONMENT", "SANDBOX"))
+    di[BunqEnvironment] = bunq_environment
+    di[BUNQ_CONFIG_INDEX] = JsonDict(
+        path=Path(BUNQ_CONFIG_DIR / f"bunq_{bunq_environment.name}.cfg")
+    )
 
 
 def monkey_patch_ynab() -> None:

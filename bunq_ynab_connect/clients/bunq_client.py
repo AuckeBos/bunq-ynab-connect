@@ -1,32 +1,16 @@
-import json
-import os
-import platform
 from datetime import datetime
+from functools import partial
 from logging import LoggerAdapter
 
 import pytz
-from bunq import ApiEnvironmentType, Pagination
-from bunq.sdk.context.api_context import ApiContext
-from bunq.sdk.context.bunq_context import BunqContext
-from bunq.sdk.http.api_client import ApiClient
-from bunq.sdk.model.generated import endpoint
-from bunq.sdk.model.generated.endpoint import (
-    BunqResponseMonetaryAccountList,
-    BunqResponsePaymentList,
-    MonetaryAccount,
-    MonetaryAccountBank,
-    MonetaryAccountJoint,
-    MonetaryAccountLight,
-    MonetaryAccountSavings,
-    Payment,
-)
 from dateutil.parser import parse
 from kink import inject
 from pydantic import BaseModel
 
+from bunq_ynab_connect.clients.bunq.base_client import BaseClient
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
-from bunq_ynab_connect.helpers.config import BUNQ_CONFIG_FILE
-from bunq_ynab_connect.helpers.general import get_public_ip
+from bunq_ynab_connect.helpers.json_dict import JsonDict
+from bunq_ynab_connect.models.bunq_account import BunqAccount
 
 
 class Callback(BaseModel):
@@ -45,183 +29,161 @@ class Callback(BaseModel):
         )
 
 
-@inject
 class BunqClient:
-    """Extractor for bunq payments.
+    """Client to expose specific bunq API calls.
 
-    Loads all payments from all accounts.
+    Uses the BaseClient to make requests.
 
     Attributes
     ----------
-        storage: The storage to use
-        logger: The logger to use
-        PAYMENTS_PER_PAGE: The amount of payments to load per page
+        storage (AbstractStorage): The storage.
+        logger (LoggerAdapter): The logger.
+        base_client (BaseClient): The base client, used to make requests.
+        bunq_config (JsonDict): The bunq config file, stored as json.
+        ITEMS_PER_PAGE (int): The amount of items to load per page
+            for paginated requests.
 
     """
 
     storage: AbstractStorage
     logger: LoggerAdapter
-    PAYMENTS_PER_PAGE: int = 50
+    base_client: BaseClient
+    bunq_config: JsonDict
+    ITEMS_PER_PAGE: int = 100
 
     @inject
-    def __init__(self, storage: AbstractStorage, logger: LoggerAdapter) -> None:
+    def __init__(
+        self,
+        storage: AbstractStorage,
+        logger: LoggerAdapter,
+        base_client: BaseClient,
+        bunq_config: JsonDict,
+    ) -> None:
         self.storage = storage
         self.logger = logger
-
-    def load_api_context(self) -> "BunqClient":
-        """Initialize context, ran on init.
-
-        - Check if bunq config file exists, if not, create it
-        - Create ApiContext from bunq config file
-        """
-        self._check_api_context()
-        context = ApiContext.restore(str(BUNQ_CONFIG_FILE))
-        context.ensure_session_active()
-        context.save(str(BUNQ_CONFIG_FILE))
-        BunqContext.load_api_context(context)
-        return self
-
-    def _check_api_context(self, pat: str | None = None) -> None:
-        """Check if the bunq config file exists, if not, create it.
-
-        If the pat is provided as param, always create it
-        """
-        if pat or not BUNQ_CONFIG_FILE.is_file():
-            self.logger.info("Trading onetime token for bunq config file")
-            onetime_token = pat or os.getenv("BUNQ_ONETIME_TOKEN")
-            if not onetime_token:
-                self.logger.error("No bunq onetime token found")
-                msg = "Please set your your bunq API key as BUNQ_ONETIME_TOKEN"
-                raise ValueError(msg)
-            description = f"bunqynab_{platform.node()}"
-
-            env = ApiEnvironmentType.PRODUCTION
-            ips = [get_public_ip()]
-
-            try:
-                context = ApiContext.create(env, onetime_token, description, ips)
-                context.save(str(BUNQ_CONFIG_FILE))
-            except Exception as e:
-                msg = "Could not create _bunq config"
-                self.logger.exception(msg)
-                raise OSError(msg) from e
-            self.logger.info("Created bunq config file")
+        self.base_client = base_client
+        self.bunq_config = bunq_config
 
     def _should_continue_loading_payments(
         self,
-        payment_list_response: BunqResponsePaymentList,
+        last_page: list,
         last_runmoment: datetime | None = None,
     ) -> bool:
         """Check if should load more payments.
 
-        - If there is no previous page, return False
-        - If the earliest payment is older than the last runmoment, return False
+        If the oldest payment of the last page is newer than the last runmoment,
+        we should continue loading payments older payments.
         """
-        if not payment_list_response.pagination.has_previous_page():
-            return False
         if not last_runmoment:
             return True
-        earliest_payment = payment_list_response.value[-1]
-        earliest_payment_date = parse(earliest_payment.created).replace(tzinfo=pytz.UTC)
-        return earliest_payment_date > last_runmoment
+        earliest_payment = last_page[-1]
+        created_at = parse(earliest_payment["Payment"]["created"]).replace(
+            tzinfo=pytz.UTC
+        )
+        return created_at > last_runmoment
 
     def get_payments_for_account(
-        self, account: MonetaryAccountBank, last_runmoment: datetime | None = None
-    ) -> list[Payment]:
+        self, account: BunqAccount, last_runmoment: datetime | None = None
+    ) -> list[dict]:
         """Get the payments of an account.
 
         If the last runmoment is provided, only payments after that moment are loaded.
         """
-        account_id = account.id_
-        payments = []
-        page_count = self.PAYMENTS_PER_PAGE
-        pagination = Pagination()
-        pagination.count = page_count
-
-        # For first query, only param is the count param
-        params = pagination.url_params_count_only
-        # Loop over pages
-        while True:
-            query_result = endpoint.Payment.list(
-                monetary_account_id=account_id, params=params
-            )
-            # Convert to dict
-            current_payments = query_result.value
-            payments.extend(current_payments)
-            if self._should_continue_loading_payments(query_result, last_runmoment):
-                # Use previous_page since ordering is new to old
-                params = query_result.pagination.url_params_previous_page
-            else:
-                break
-        # Remove payments after last runmoment
+        user_id = self.user_id
+        payments: list[dict] = self.base_client.get_paginated(
+            endpoint="user/{user_id}/monetary-account/{account_id}/payment",
+            user_id=user_id,
+            account_id=account.id,
+            page_size=self.ITEMS_PER_PAGE,
+            continue_loading_pages=partial(
+                self._should_continue_loading_payments, last_runmoment=last_runmoment
+            ),
+        )
+        # Remove payments after last runmoment, and flatten
         if last_runmoment:
             payments = [
-                p
+                p["Payment"]
                 for p in payments
-                if parse(p.created).replace(tzinfo=pytz.UTC) > last_runmoment
+                if parse(p["Payment"]["created"]).replace(tzinfo=pytz.UTC)
+                > last_runmoment
             ]
         if len(payments) > 0:
             self.logger.info(
-                "Loaded %s payments for account %s", len(payments), account_id
+                "Loaded %s payments for account %s", len(payments), account.id
             )
         return payments
 
     def get_accounts(
         self,
-    ) -> list[
-        MonetaryAccountLight
-        | MonetaryAccount
-        | MonetaryAccountSavings
-        | MonetaryAccountJoint
-    ]:
-        pagination = Pagination()
-        pagination.count = 100
-        params = pagination.url_params_count_only
+    ) -> list[dict]:
+        """Get all bunq accounts for the user."""
         try:
-            response: BunqResponseMonetaryAccountList = endpoint.MonetaryAccount.list(
-                params=params
+            accounts: list[dict] = self.base_client.get_paginated(
+                endpoint="user/{user_id}/monetary-account",
+                user_id=self.user_id,
+                page_size=self.ITEMS_PER_PAGE,
             )
-            accounts = [a.get_referenced_object() for a in response.value]
+            accounts = [v for account in accounts for v in account.values()]
             self.logger.info("Loaded %s bunq accounts", len(accounts))
         except Exception as e:
             msg = "Could not load bunq accounts"
             self.logger.exception(msg)
-            raise OSError(msg) from e
+            raise ValueError(msg) from e
         else:
             return accounts
 
     def exchange_pat(self, pat: str) -> None:
-        """Trade a PAT for a key.
+        """Trade a PAT for a new bunq config file.
 
-        Needed when the IP address of the host changes.
-        Note this only works of the old key is temporarily allows all IPs.
+        Remove some config variables, to enforce an exchange.
         """
+        old_config = self.bunq_config.data
+        config = old_config.copy()
+        config["api_token"] = pat
+        del config["installation_context"]
+        del config["session_context"]
+        self.bunq_config.save(config)
         try:
-            self._check_api_context(pat)
-        except Exception:
-            self.logger.exception("Could not trade the PAT")
-            return
+            self.base_client.session_activator.ensure_session_active()
+        except Exception as e:
+            self.bunq_config.save(old_config)
+            msg = "Could not trade PAT for new bunq config"
+            self.logger.exception(msg)
+            raise ValueError(msg) from e
+
         self.logger.warning(
             "Token traded. Make sure to remove the old token in the app"
         )
 
     def add_callback(self, url: str) -> None:
+        """Add a callback to the bunq API."""
         if self._callback_exists(url):
             return
         self.logger.info("Adding callback for %s", url)
         callbacks = self._get_callbacks()
         callbacks.append(Callback(notification_target=url, category="MUTATION"))
-        data = {"notification_filters": [c.dict() for c in callbacks]}
-        self.api_client.post(self.callback_api_endpoint, json.dumps(data).encode(), {})
+        self._set_callbacks(callbacks)
+
+    def _set_callbacks(self, callbacks: list[Callback]) -> None:
+        self.base_client.post(
+            endpoint="/user/{user_id}/notification-filter-url",
+            user_id=self.user_id,
+            data={"notification_filters": [c.dict() for c in callbacks]},
+        )
 
     def _callback_exists(self, url: str) -> bool:
         return any(c.notification_target == url for c in self._get_callbacks())
 
     def _get_callbacks(self) -> list[Callback]:
-        response_raw = self.api_client.get(self.callback_api_endpoint, {}, {})
         return [
-            Callback.from_api_response(c)
-            for c in json.loads(response_raw.body_bytes.decode())["Response"]
+            Callback(
+                notification_target=c["NotificationFilterUrl"]["notification_target"],
+                category=c["NotificationFilterUrl"]["category"],
+            )
+            for c in self.base_client.get(
+                endpoint="/user/{user_id}/notification-filter-url",
+                user_id=self.user_id,
+            )["Response"]
         ]
 
     def remove_callback(self, url: str) -> None:
@@ -230,17 +192,10 @@ class BunqClient:
         self.logger.info("Removing callback for %s", url)
         callbacks = self._get_callbacks()
         callbacks = [c for c in callbacks if c.notification_target != url]
-        data = {"notification_filters": [c.dict() for c in callbacks]}
-        self.api_client.post(self.callback_api_endpoint, json.dumps(data).encode(), {})
-
-    @property
-    def api_client(self) -> ApiClient:
-        return ApiClient(BunqContext.api_context())
-
-    @property
-    def callback_api_endpoint(self) -> str:
-        return f"/user/{self.user_id}/notification-filter-url"
+        self._set_callbacks(callbacks)
 
     @property
     def user_id(self) -> int:
-        return BunqContext.user_context().user_id
+        if not self.bunq_config["session_context.user_person_id.id"]:
+            self.base_client.session_activator.ensure_session_active()
+        return self.bunq_config["session_context.user_person_id.id"]

@@ -1,7 +1,10 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from kink import di
-from prefect import flow, task
+from prefect import flow, serve, task
+from prefect.client.schemas.schedules import CronSchedule
+from prefect.futures import wait
 from prefect_dask.task_runners import DaskTaskRunner
 
 from bunq_ynab_connect.classification.deployer import Deployer
@@ -27,30 +30,26 @@ from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.models.ynab_budget import YnabBudget
 from bunq_ynab_connect.sync_bunq_to_ynab.payment_syncer import PaymentSyncer
 
-
-@task()
-def run_extractors(extractor_classes: list) -> None:
-    """Run the provided extractors serially."""
-    for extractor_class in extractor_classes:
-        extractor = extractor_class()
-        extractor.extract()
+if TYPE_CHECKING:
+    from bunq_ynab_connect.data.data_extractors.abstract_extractor import (
+        AbstractExtractor,
+    )
 
 
-@flow(validate_parameters=False)
+@flow
 def extract() -> None:
     """Run all extractors.
 
     Run Bunq and YNAB extractors in parallel.
     """
-    extractors = [
+    extractors: list[AbstractExtractor] = [
         BunqAccountExtractor(),
         BunqPaymentExtractor(),
         YnabBudgetExtractor(),
         YnabAccountExtractor(),
         YnabTransactionExtractor(),
     ]
-    for extractor in extractors:
-        extractor.extract()
+    wait(extractor.extract.submit() for extractor in extractors)
 
 
 @flow
@@ -116,3 +115,51 @@ def exchange_pat(pat: str) -> None:
     """Exchange a new PAT for a new API context."""
     client = BunqClient()
     client.exchange_pat(pat)
+
+
+def work() -> None:
+    """Create a deployment for each flow, and serve all of them."""
+    serve(
+        sync.to_deployment(
+            name="sync",
+            description="Extract all data and sync to Ynab",
+            version="2024.09.12",
+            schedules=[
+                CronSchedule(
+                    cron="00 06-23 * * *", timezone="Europe/Amsterdam", day_or=True
+                )
+            ],
+        ),
+        extract.to_deployment(
+            name="extract",
+            description="Extract Bunq & Ynab data",
+            version="2024.09.12",
+        ),
+        sync_payment_queue.to_deployment(
+            name="sync_payment_queue",
+            description="Sync all queued payments to Ynab",
+            version="2024.09.12",
+        ),
+        sync_payment.to_deployment(
+            name="sync_payment",
+            description="Sync a single payment to Ynab",
+            version="2024.09.12",
+            parameters={"skip_if_synced": True},
+        ),
+        sync_payments_of_account.to_deployment(
+            name="sync_payments_of_account",
+            description="Force sync payemnts of one iban within a date range",
+            version="2024.09.12",
+        ),
+        train.to_deployment(
+            name="train",
+            description="Train one classifier for each budget",
+            version="2024.09.12",
+            schedules=[CronSchedule(cron="0 2 * * 0", timezone="Europe/Amsterdam")],
+        ),
+        exchange_pat.to_deployment(
+            name="exchange_pat",
+            description="Exchange a PAT for a Bunq config file",
+            version="2024.09.12",
+        ),
+    )

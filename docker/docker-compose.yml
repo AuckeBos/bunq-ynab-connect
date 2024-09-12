@@ -31,7 +31,7 @@ services:
       - traefik    
 
   prefect-server:
-    image: prefecthq/prefect:2.20.4-python3.12
+    image: prefecthq/prefect:3.0.1-python3.11
     container_name: bunqynab_prefect_server
     restart: unless-stopped
     volumes:
@@ -77,16 +77,16 @@ services:
       - traefik    
 
   mlflow:
-      image: ghcr.io/mlflow/mlflow:v2.6.0
-      container_name: bunqynab_mlflow
-      ports:
-        - "12003:5000"
-      volumes:
-        - ../mlflow:/mlflow
-      command: mlflow server --backend-store-uri sqlite:////mlflow/mlflow.db --host 0.0.0.0 --artifacts-destination /mlflow/artifacts
-      restart: unless-stopped
-      networks:
-        - traefik      
+    image: ghcr.io/mlflow/mlflow:v2.16.0
+    container_name: bunqynab_mlflow
+    ports:
+      - "12003:5000"
+    volumes:
+      - ../mlflow:/mlflow
+    command: mlflow server --backend-store-uri sqlite:////mlflow/mlflow.db --host 0.0.0.0 --artifacts-destination /mlflow/artifacts
+    restart: unless-stopped
+    networks:
+      - traefik      
 
   mlserver:
     image: index.docker.io/auckebos/bunq-ynab-connect:latest
@@ -97,7 +97,7 @@ services:
       - "12005:8080"
     volumes:
       - ../config:/home/bunqynab/config
-    command: "mlserver start /home/bunqynab/config/mlserver"
+    command: "/bin/sh -c /home/bunqynab/entrypoint_mlserver.sh"
     networks:
       - traefik    
     
