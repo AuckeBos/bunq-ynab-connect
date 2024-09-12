@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 from dotenv import find_dotenv, load_dotenv
-from kink import di
+from kink import di, inject
 from prefect.exceptions import MissingContextError
 from prefect.logging import get_logger, get_run_logger
 from pymongo import MongoClient
@@ -112,3 +112,33 @@ def monkey_patch_ynab() -> None:
             setattr(self, f"_{attribute}", value)  # noqa: B023
 
         setattr(Account, attribute, fixed_setter)
+
+
+@inject
+def import_mlserver_windows_friendly(logger: logging.LoggerAdapter) -> None:
+    """MLServer has issues on windows. It seems a reinstall solves the issue.
+
+    https://github.com/SeldonIO/MLServer/issues/1022
+    """
+    try:
+        import mlserver  # noqa: F401
+
+        logger.info("Good mlserver import;")
+    except Exception:  # noqa: BLE001
+        import subprocess
+
+        logger.warning("Bad mlserver import; trying to install mlserver")
+        install_cmd = "pip install mlserver"
+        subprocess.Popen(install_cmd, shell=True, stdout=subprocess.DEVNULL)  # noqa: S602
+        logger.info("Good mlserver reinstall;")
+    finally:
+        from mlserver.codecs import PandasCodec
+
+        logger.info("Good mlserver import;")
+
+
+def monkey_patch_mlserver() -> None:
+    """Fix an issue with mlserver, where datetime fiels cannot be encoded."""
+    from mlserver.codecs.numpy import _NumpyToDatatype
+
+    _NumpyToDatatype["M"] = "BYTES"
