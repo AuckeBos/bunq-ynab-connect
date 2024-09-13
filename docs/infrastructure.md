@@ -40,6 +40,11 @@ The Dockerfile is described by:
 ### MLServer
 `mlserver` is a container that hosts the MLServer. It is used to serve models. It retrieves the Models from the `mlflow` container, and makes makes them available as REST endpoints to other containers in the network (ie the `prefect-agent`). Whenever a payment is to be synced, a request to `mlserver` is made to classify it with the correct model. Swagger docs are available at [http://192.168.0.4:12006/v2/docs#/](http://192.168.0.4:12006/v2/docs#/)
 
+### MLServer restarter
+A temporary solution to the following problem:
+A deployment trains a new model for each budget weekly. If the new model has a better performance then the existing model, it is promoted to Production. MLServer needs to be restarted to load the new model. However, the `prefect-agent` container does not have access to the docker socket on the host, so it cannot restart the `mlserver` container. 
+This container uses the docker cli to restart the `mlserver` container daily. 
+
 ### Callback server
 `callback` allows near-realtime syncing of Bunq Payments to Ynab. It exposes a Fastapi server, and registers itself as a Callback with Bunq. Bunq will POST any payment made to this URL, and the server will sync it to YNAB directly. Without this container, payments are synced hourly, using the [sync flow](./orchestration.md#deployments).
 

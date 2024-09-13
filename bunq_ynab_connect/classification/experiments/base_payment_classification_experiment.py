@@ -88,8 +88,8 @@ class BasePaymentClassificationExperiment:
             y: Array of categories as integers
 
         """
-        X = np.array([t.bunq_payment.dict() for t in transactions])  # noqa: N806
-        y = np.array([t.ynab_transaction.dict() for t in transactions])
+        X = np.array([t.bunq_payment.model_dump() for t in transactions])  # noqa: N806
+        y = np.array([t.ynab_transaction.model_dump() for t in transactions])
         y = self.label_encoder.fit_transform(y)
         return X, y
 

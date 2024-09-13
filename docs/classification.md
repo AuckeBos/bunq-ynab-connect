@@ -22,4 +22,4 @@ During the `train` flow, a [Trainer](/bunq_ynab_connect/classification/trainer.p
 - Check if the new model is better. Do not transtition it. The new version is stored, but not promoted.
 - Else: Archive the old model, transition the new model to production.
 - Create a config file for MLServer. This config file links to the Production stage of the model for this budget. Hence the URL will not change after first creation.
-- Use the [Model Repository](https://mlserver.readthedocs.io/en/latest/examples/model-repository/README.html) to reload the model.
+- `[Currently not working]` Restart MLServer. MLServer loads the models into memory, therefor if a new model is in the production stage, MLServer will not pick it up until it is restarted. Because the `prefect-agent` container has no access to the Docker CLI on the host, restarting the `mlserver` container fails. This is currently resolved by the [MLServer restarter](/docs/infrastructure.md#mlserver-restarter), which restarts the MLServer container daily.

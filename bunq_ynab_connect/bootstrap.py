@@ -2,7 +2,6 @@
 
 import logging
 import os
-import sys
 from pathlib import Path
 
 from dotenv import find_dotenv, load_dotenv
@@ -25,7 +24,6 @@ from bunq_ynab_connect.helpers.config import (
     CACHE_DIR,
     CONFIG_DIR,
     LOGS_DIR,
-    LOGS_FILE,
     MLSERVER_CONFIG_DIR,
     MLSERVER_PREDICTION_URL_INDEX,
     MLSERVER_REPOSITORY_URL_INDEX,
@@ -47,14 +45,6 @@ def _get_logger(name: str) -> logging.LoggerAdapter:
         logger = get_run_logger()
     except MissingContextError:
         logger = get_logger(name)
-        log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        Path.mkdir(LOGS_DIR, exist_ok=True, parents=True)
-        fhandler = logging.FileHandler(filename=LOGS_FILE, mode="a")
-        stdout_handler = logging.StreamHandler(sys.stdout)
-        formatter = logging.Formatter(log_fmt)
-        fhandler.setFormatter(formatter)
-        logger.addHandler(fhandler)
-        logger.addHandler(stdout_handler)
         logger.warning("Bad prefect logger;")
     logger.setLevel(logging.DEBUG)
     return logger
