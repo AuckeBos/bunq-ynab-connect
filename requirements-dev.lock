@@ -360,6 +360,8 @@ protobuf==4.25.4
     # via opentelemetry-proto
 psutil==6.0.0
     # via distributed
+psycopg2==2.9.9
+    # via bunq-ynab-connect
 py-grpc-prometheus==0.8.0
     # via mlserver
 pyarrow==17.0.0
@@ -377,6 +379,7 @@ pydantic==2.7.1
     # via mlserver
     # via prefect
     # via pydantic-settings
+    # via sqlmodel
 pydantic-core==2.18.2
     # via prefect
     # via pydantic
@@ -494,6 +497,9 @@ sqlalchemy==2.0.34
     # via alembic
     # via mlflow
     # via prefect
+    # via sqlmodel
+sqlmodel==0.0.22
+    # via bunq-ynab-connect
 sqlparse==0.5.1
     # via mlflow-skinny
 starlette==0.36.3
