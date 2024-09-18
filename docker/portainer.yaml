@@ -62,7 +62,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     command: "/bin/sh -c /home/bunqynab/entrypoint.sh"
     networks:
-      - traefik    
+      - traefik
+    env_file:
+      - stack.env      
 
   watchtower:
     image: containrrr/watchtower
@@ -91,6 +93,8 @@ services:
     container_name: bunqynab_mlserver_2
     ports:
       - "12005:8080"
+    env_file:
+      - stack.env      
     volumes:
       - bunq_ynab_config_2:/home/bunqynab/config
     command: "mlserver start /home/bunqynab/config/mlserver"
@@ -100,6 +104,8 @@ services:
   callback:
     image: index.docker.io/auckebos/bunq-ynab-connect:latest
     container_name: bunqynab_callback_server_2
+    env_file:
+      - stack.env    
     volumes:
       - bunq_ynab_config_2:/home/bunqynab/config
     command: "uvicorn bunq_ynab_connect.sync_bunq_to_ynab.callback_server:app --host 0.0.0.0"
