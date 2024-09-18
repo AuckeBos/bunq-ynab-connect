@@ -109,7 +109,7 @@ services:
       - "traefik.http.routers.callback.entrypoints=websecure"
       - "traefik.http.routers.callback.tls.certresolver=${RESOLVER_NAME}"
       - "traefik.http.routers.callback.tls=true"
-      - "traefik.http.services.app.loadbalancer.server.port=8000"
+      - "traefik.http.services.callback.loadbalancer.server.port=8000"
     depends_on:
       - mongodb      
     networks:
