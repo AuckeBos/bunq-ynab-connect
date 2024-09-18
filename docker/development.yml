@@ -13,6 +13,17 @@ services:
     networks:
       - traefik
 
+  postgres:
+    image: 'postgres:latest'
+    ports:
+      - 15432:5432
+    env_file:
+      - ../.docker-env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - traefik      
+
   mongo-express:
     image: mongo-express:latest
     container_name: bunqynab_mongo_ui
@@ -29,6 +40,7 @@ services:
     restart: unless-stopped
     networks:
       - traefik
+    
 
   prefect-server:
     image: prefecthq/prefect:2.20.4-python3.11
@@ -148,6 +160,7 @@ services:
 
 volumes:
   bunq_ynab_connect_data:
+  postgres_data:
   bunq_ynab_connect_prefect:
 
 # TODO: Fix issue with network. Currently all containers are on the external traefik network

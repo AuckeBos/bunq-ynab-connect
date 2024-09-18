@@ -2,29 +2,48 @@ from typing import Optional
 
 from kink import inject
 from pydantic import BaseModel
+from sqlmodel import Field, Relationship, SQLModel
 
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 
 
-class BunqAccount(BaseModel):
-    """Represent an account in Bunq."""
+class BunqAliasSchema(BaseModel):
+    id: int | None = Field(primary_key=True, default=None)
+    name: str
+    type: str
+    value: str
 
-    alias: list | None
-    avatar: dict | None
-    balance: dict | None
+
+class BunqAlias(BunqAliasSchema, SQLModel, table=True):
+    # id: int | None = Field(primary_key=True, default=None)
+    bunq_account_id: int | None = Field(default=None, foreign_key="bunqaccount.id")
+    bunq_accounts: list["BunqAccount"] = Relationship(back_populates="aliasses")
+
+
+class BunqAccountBase(BaseModel):
+    id: int | None = Field(primary_key=True, default=None)
+    # alias_id: int | None = Field(default=None, foreign_key="bunqalias.id")
     created: str | None
     currency: str | None
-    daily_limit: dict | None
     description: str | None
     display_name: str | None
-    id: int | None
-    monetary_account_profile: dict | float | None
     public_uuid: str | None
-    setting: dict | None
     status: str | None
     sub_status: str | None
     updated: str | None
     user_id: int | None
+
+
+class BunqAccountSchema(BunqAccountBase):
+    from pydantic import Field
+
+    aliasses: list[BunqAlias] | None = Field(alias="alias", default=None)
+
+
+class BunqAccount(BunqAccountBase, SQLModel, table=True):
+    """Represent an account in Bunq."""
+
+    aliasses: list[BunqAlias] = Relationship(back_populates="bunq_accounts")
 
     @property
     def iban(self) -> str | None:
@@ -32,9 +51,9 @@ class BunqAccount(BaseModel):
 
         It is one of the aliases of the account.
         """
-        for a in self.alias:
-            if a["type"] == "IBAN":
-                return a["value"]
+        for a in self.aliasses:
+            if a.type == "IBAN":
+                return a.value
         return None
 
     @staticmethod

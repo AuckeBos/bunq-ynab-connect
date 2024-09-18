@@ -10,6 +10,7 @@ from prefect.exceptions import MissingContextError
 from prefect.logging import get_logger, get_run_logger
 from pymongo import MongoClient
 from pymongo.database import Database
+from sqlmodel import SQLModel, create_engine
 from ynab.models.account import Account
 
 from bunq_ynab_connect.clients.bunq.base_client import BunqEnvironment
@@ -145,3 +146,18 @@ def monkey_patch_mlserver() -> None:
     from mlserver.codecs.numpy import _NumpyToDatatype
 
     _NumpyToDatatype["M"] = "BYTES"
+
+
+def setup_database():
+    import bunq_ynab_connect.models  # noqa: F401
+
+    di["database"] = create_engine(
+        "postgresql://{username}:{password}@{host}:{port}/{database}".format(
+            username=os.getenv("POSTGRES_USER"),
+            password=os.getenv("POSTGRES_PASSWORD"),
+            host=os.getenv("POSTGRES_HOST"),
+            port=os.getenv("POSTGRES_PORT"),
+            database=os.getenv("POSTGRES_DB"),
+        )
+    )
+    SQLModel.metadata.create_all(di["database"])

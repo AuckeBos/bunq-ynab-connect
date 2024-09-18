@@ -1,7 +1,8 @@
 import click
 from kink import inject
+from sqlalchemy import Engine
+from sqlmodel import Session
 
-from bunq_ynab_connect.classification.trainer import Trainer
 from bunq_ynab_connect.data.data_extractors.bunq_account_extractor import (
     BunqAccountExtractor,
 )
@@ -18,6 +19,7 @@ from bunq_ynab_connect.data.data_extractors.ynab_transaction_extractor import (
     YnabTransactionExtractor,
 )
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
+from bunq_ynab_connect.models.bunq_account import BunqAccount
 from bunq_ynab_connect.sync_bunq_to_ynab.payment_syncer import PaymentSyncer
 
 
@@ -58,10 +60,19 @@ def sync_payment(payment_id: int, skip_if_synced: bool) -> None:  # noqa: FBT001
 
 @cli.command()
 @inject
-def test(storage: AbstractStorage) -> None:  # noqa: ARG001
+def test(storage: AbstractStorage, database: Engine) -> None:  # noqa: ARG001
     """Testing function."""
-    trainer = Trainer(budget_id="my-budget")
-    trainer.train()
+    from sqlmodel import select
+
+    with Session(database) as session:
+        accounts = session.exec(select(BunqAccount)).all()
+        # note: only works with open session
+        aliasses = accounts[0].aliasses
+        test = ""
+    BunqAccountExtractor().extract()
+
+    # trainer = Trainer(budget_id="my-budget")
+    # trainer.train()
 
 
 @cli.command()

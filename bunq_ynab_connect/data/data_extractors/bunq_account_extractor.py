@@ -5,6 +5,7 @@ from kink import inject
 from bunq_ynab_connect.clients.bunq_client import BunqClient
 from bunq_ynab_connect.data.data_extractors.abstract_extractor import AbstractExtractor
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
+from bunq_ynab_connect.models.bunq_account import BunqAccount
 
 
 class BunqAccountExtractor(AbstractExtractor):
@@ -27,5 +28,5 @@ class BunqAccountExtractor(AbstractExtractor):
         super().__init__("bunq_accounts", storage, logger)
         self.client = client
 
-    def load(self) -> list[dict]:
+    def load(self) -> list[BunqAccount]:
         return self.client.get_accounts()

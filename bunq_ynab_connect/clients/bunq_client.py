@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from bunq_ynab_connect.clients.bunq.base_client import BaseClient
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.helpers.json_dict import JsonDict
-from bunq_ynab_connect.models.bunq_account import BunqAccount
+from bunq_ynab_connect.models.bunq_account import BunqAccount, BunqAccountSchema
 
 
 class Callback(BaseModel):
@@ -115,15 +115,19 @@ class BunqClient:
 
     def get_accounts(
         self,
-    ) -> list[dict]:
+    ) -> list[BunqAccountSchema]:
         """Get all bunq accounts for the user."""
         try:
-            accounts: list[dict] = self.base_client.get_paginated(
+            accounts_response: list[dict] = self.base_client.get_paginated(
                 endpoint="user/{user_id}/monetary-account",
                 user_id=self.user_id,
                 page_size=self.ITEMS_PER_PAGE,
             )
-            accounts = [v for account in accounts for v in account.values()]
+            accounts: list[BunqAccountSchema] = [
+                BunqAccountSchema.model_validate(v)
+                for account in accounts_response
+                for v in account.values()
+            ]
             self.logger.info("Loaded %s bunq accounts", len(accounts))
         except Exception as e:
             msg = "Could not load bunq accounts"

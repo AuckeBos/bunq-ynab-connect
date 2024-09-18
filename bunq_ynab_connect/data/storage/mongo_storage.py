@@ -27,14 +27,14 @@ class MongoStorage(AbstractStorage):
     def __init__(
         self,
         client: MongoClient,
-        database: Database,
+        mongo_database: Database,
         metadata: Metadata,
         logger: LoggerAdapter,
     ):
         """Create a connection to the MongoDB database."""
         super().__init__(metadata, logger)
         self.client = client
-        self.database = database
+        self.database = mongo_database
         self.test_connection()
         self.set_indexes()
 
