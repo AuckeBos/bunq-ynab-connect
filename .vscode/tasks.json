@@ -30,6 +30,14 @@
             }
         },
         {
+            "label": "Portainer up",
+            "type": "shell",
+            "command": "docker compose -f docker/portainer_ce.yaml -p portainer up",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },        
+        {
             "label": "Build: Docker",
             "type": "shell",
             "command": "docker buildx build --platform linux/arm64 -t test2 .",
