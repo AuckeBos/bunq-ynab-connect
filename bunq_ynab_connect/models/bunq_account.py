@@ -5,24 +5,21 @@ from pydantic import BaseModel
 from sqlmodel import Field, Relationship, SQLModel
 
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
+from bunq_ynab_connect.models.schema import Schema
+from bunq_ynab_connect.models.table import Table
 
 
-class BunqAliasSchema(BaseModel):
+class BunqAlias(SQLModel, table=True):
     id: int | None = Field(primary_key=True, default=None)
     name: str
     type: str
     value: str
-
-
-class BunqAlias(BunqAliasSchema, SQLModel, table=True):
-    # id: int | None = Field(primary_key=True, default=None)
     bunq_account_id: int | None = Field(default=None, foreign_key="bunqaccount.id")
     bunq_accounts: list["BunqAccount"] = Relationship(back_populates="aliasses")
 
 
 class BunqAccountBase(BaseModel):
     id: int | None = Field(primary_key=True, default=None)
-    # alias_id: int | None = Field(default=None, foreign_key="bunqalias.id")
     created: str | None
     currency: str | None
     description: str | None
@@ -34,13 +31,13 @@ class BunqAccountBase(BaseModel):
     user_id: int | None
 
 
-class BunqAccountSchema(BunqAccountBase):
+class BunqAccountSchema(BunqAccountBase, Schema):
     from pydantic import Field
 
     aliasses: list[BunqAlias] | None = Field(alias="alias", default=None)
 
 
-class BunqAccount(BunqAccountBase, SQLModel, table=True):
+class BunqAccount(BunqAccountBase, Table, table=True):
     """Represent an account in Bunq."""
 
     aliasses: list[BunqAlias] = Relationship(back_populates="bunq_accounts")

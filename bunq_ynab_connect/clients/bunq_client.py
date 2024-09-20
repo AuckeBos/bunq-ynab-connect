@@ -10,7 +10,9 @@ from pydantic import BaseModel
 from bunq_ynab_connect.clients.bunq.base_client import BaseClient
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.helpers.json_dict import JsonDict
-from bunq_ynab_connect.models.bunq_account import BunqAccount, BunqAccountSchema
+from bunq_ynab_connect.models.bunq_account import (
+    BunqAccount,
+)
 
 
 class Callback(BaseModel):
@@ -115,7 +117,7 @@ class BunqClient:
 
     def get_accounts(
         self,
-    ) -> list[BunqAccountSchema]:
+    ) -> list[BunqAccount]:
         """Get all bunq accounts for the user."""
         try:
             accounts_response: list[dict] = self.base_client.get_paginated(
@@ -123,8 +125,9 @@ class BunqClient:
                 user_id=self.user_id,
                 page_size=self.ITEMS_PER_PAGE,
             )
-            accounts: list[BunqAccountSchema] = [
-                BunqAccountSchema.model_validate(v)
+            accounts: list[BunqAccount] = [
+                # Wrapper.model_validate({"item": [v]}).item[0]
+                BunqAccount.from_dict(v)
                 for account in accounts_response
                 for v in account.values()
             ]

@@ -67,7 +67,7 @@ def test(storage: AbstractStorage, database: Engine) -> None:  # noqa: ARG001
     with Session(database) as session:
         accounts = session.exec(select(BunqAccount)).all()
         # note: only works with open session
-        aliasses = accounts[0].aliasses
+        # aliasses = accounts[0].aliasses
         test = ""
     BunqAccountExtractor().extract()
 

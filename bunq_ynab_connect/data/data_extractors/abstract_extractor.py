@@ -10,7 +10,7 @@ from sqlmodel import Session
 
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.helpers.general import now
-from bunq_ynab_connect.models.bunq_account import BunqAccount
+from bunq_ynab_connect.models.schema import Schema
 
 
 class AbstractExtractor(ABC):
@@ -65,10 +65,11 @@ class AbstractExtractor(ABC):
         self.runmoment = now()
         self.logger.info("Extracting %s", self.destination)
         self.last_runmoment = self.storage.get_last_runmoment(self.destination)
-        data = self.load()
+        data: list[Schema] = self.load()
         if self.IS_FULL_LOAD:
             with Session(self.database) as session:
-                new_data = [BunqAccount.model_validate(a) for a in data]
+                new_data = [a.to_sqlmodel() for a in data]
+                # new_data = [BunqAccount.model_validate(a) for a in data]
                 session.add_all(new_data)
                 session.commit()
             data_pd = pd.DataFrame.from_records(data)
