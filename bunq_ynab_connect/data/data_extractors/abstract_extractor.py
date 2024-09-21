@@ -1,16 +1,13 @@
 from abc import ABC, abstractmethod
-from collections.abc import Iterable
 from datetime import datetime
 from logging import LoggerAdapter
 
-import pandas as pd
 from kink import inject
 from sqlalchemy import Engine
-from sqlmodel import Session
 
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.helpers.general import now
-from bunq_ynab_connect.models.schema import Schema
+from bunq_ynab_connect.models.table import Table
 
 
 class AbstractExtractor(ABC):
@@ -50,7 +47,7 @@ class AbstractExtractor(ABC):
         self.database = database
 
     @abstractmethod
-    def load(self) -> Iterable:
+    def load(self) -> list[Table]:
         """Load the data from the source."""
         raise NotImplementedError
 
@@ -65,16 +62,8 @@ class AbstractExtractor(ABC):
         self.runmoment = now()
         self.logger.info("Extracting %s", self.destination)
         self.last_runmoment = self.storage.get_last_runmoment(self.destination)
-        data: list[Schema] = self.load()
-        if self.IS_FULL_LOAD:
-            with Session(self.database) as session:
-                new_data = [a.to_sqlmodel() for a in data]
-                # new_data = [BunqAccount.model_validate(a) for a in data]
-                session.add_all(new_data)
-                session.commit()
-            data_pd = pd.DataFrame.from_records(data)
-            self.storage.overwrite(self.destination, data_pd)
-        else:
-            self.storage.upsert(self.destination, data)
+        data = self.load()
+        fn = "overwrite" if self.IS_FULL_LOAD else "upsert"
+        getattr(data[0].__class__, fn)(data)
         self.logger.info("Extracted %s items from %s", len(data), self.destination)
         self.storage.set_last_runmoment(self.destination, self.runmoment)

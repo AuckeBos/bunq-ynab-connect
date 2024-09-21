@@ -5,7 +5,6 @@ from pydantic import BaseModel
 from sqlmodel import Field, Relationship, SQLModel
 
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
-from bunq_ynab_connect.models.schema import Schema
 from bunq_ynab_connect.models.table import Table
 
 
@@ -31,7 +30,7 @@ class BunqAccountBase(BaseModel):
     user_id: int | None
 
 
-class BunqAccountSchema(BunqAccountBase, Schema):
+class BunqAccountSchema(BunqAccountBase):
     from pydantic import Field
 
     aliasses: list[BunqAlias] | None = Field(alias="alias", default=None)

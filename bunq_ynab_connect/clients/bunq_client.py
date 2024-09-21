@@ -126,7 +126,6 @@ class BunqClient:
                 page_size=self.ITEMS_PER_PAGE,
             )
             accounts: list[BunqAccount] = [
-                # Wrapper.model_validate({"item": [v]}).item[0]
                 BunqAccount.from_dict(v)
                 for account in accounts_response
                 for v in account.values()
