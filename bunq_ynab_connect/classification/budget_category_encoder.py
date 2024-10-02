@@ -1,5 +1,4 @@
-from typing import Any
-
+import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.calibration import LabelEncoder
 
@@ -23,18 +22,13 @@ class BudgetCategoryEncoder(BaseEstimator, TransformerMixin):
     def __init__(self):
         self.encoder = LabelEncoder()
 
-    def fit(self, y: list[dict]) -> "BudgetCategoryEncoder":
-        categories = [transaction["category_id"] for transaction in y]
-        self.id_to_name = {
-            transaction["category_id"]: transaction["category_name"]
-            for transaction in y
-        }
-        self.encoder.fit(categories)
+    def fit(self, y: pd.DataFrame) -> "BudgetCategoryEncoder":
+        self.id_to_name = y.set_index("category_id")["category_name"].to_dict()
+        self.encoder.fit(y["category_id"])
         return self
 
-    def transform(self, y: list[dict]) -> list[int]:
-        categories = [transaction["category_id"] for transaction in y]
-        return self.encoder.transform(categories)
+    def transform(self, y: pd.DataFrame) -> list[int]:
+        return self.encoder.transform(y["category_id"])
 
-    def inverse_transform(self, y: Any) -> list[str]:  # noqa: ANN401
+    def inverse_transform(self, y: pd.DataFrame) -> list[str]:
         return self.encoder.inverse_transform(y)

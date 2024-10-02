@@ -128,6 +128,8 @@ fastapi==0.110.0
     # via mlserver
 fastapi-cli==0.0.5
     # via bunq-ynab-connect
+feature-engine==1.8.1
+    # via bunq-ynab-connect
 flask==3.0.3
     # via mlflow
 fonttools==4.53.1
@@ -266,13 +268,17 @@ multidict==6.1.0
     # via yarl
 numpy==2.1.1
     # via contourpy
+    # via feature-engine
     # via matplotlib
     # via mlflow
     # via mlserver
     # via pandas
+    # via patsy
     # via pyarrow
     # via scikit-learn
     # via scipy
+    # via sklearn-pandas
+    # via statsmodels
     # via tritonclient
 oauthlib==3.2.2
     # via kubernetes
@@ -325,13 +331,19 @@ packaging==24.1
     # via matplotlib
     # via mlflow-skinny
     # via prefect
+    # via statsmodels
 pandas==2.2.2
+    # via feature-engine
     # via mlflow
     # via mlserver
+    # via sklearn-pandas
+    # via statsmodels
 partd==1.4.2
     # via dask
 pathspec==0.12.1
     # via prefect
+patsy==0.5.6
+    # via statsmodels
 pendulum==2.1.2
     # via prefect
 pillow==10.4.0
@@ -450,10 +462,15 @@ ruamel-yaml-clib==0.2.8
     # via ruamel-yaml
 scikit-learn==1.5.2
     # via bunq-ynab-connect
+    # via feature-engine
     # via mlflow
+    # via sklearn-pandas
 scipy==1.14.1
+    # via feature-engine
     # via mlflow
     # via scikit-learn
+    # via sklearn-pandas
+    # via statsmodels
 setuptools==74.1.2
     # via opentelemetry-instrumentation
     # via py-grpc-prometheus
@@ -464,9 +481,12 @@ shellingham==1.5.4
 six==1.16.0
     # via geventhttpclient
     # via kubernetes
+    # via patsy
     # via python-dateutil
     # via rfc3339-validator
     # via ynab
+sklearn-pandas==2.2.0
+    # via bunq-ynab-connect
 smmap==5.0.1
     # via gitdb
 sniffio==1.3.1
@@ -487,6 +507,8 @@ starlette==0.36.3
     # via starlette-exporter
 starlette-exporter==0.23.0
     # via mlserver
+statsmodels==0.14.3
+    # via feature-engine
 tblib==3.0.0
     # via distributed
 text-unidecode==1.3
