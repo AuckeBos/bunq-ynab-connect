@@ -65,7 +65,6 @@ certifi==2024.8.30
     # via httpx
     # via kubernetes
     # via requests
-    # via ynab
 cffi==1.17.1
     # via cryptography
     # via gevent
@@ -377,6 +376,7 @@ pydantic==2.7.1
     # via mlserver
     # via prefect
     # via pydantic-settings
+    # via ynab
 pydantic-core==2.18.2
     # via prefect
     # via pydantic
@@ -418,7 +418,7 @@ pytz==2024.2
     # via prefect
 pytzdata==2020.1
     # via pendulum
-# pywin32==306 (excluded)
+# pywin32==308 (excluded)
     # via docker
 pyyaml==6.0.2
     # via apprise
@@ -480,7 +480,6 @@ six==1.16.0
     # via kubernetes
     # via python-dateutil
     # via rfc3339-validator
-    # via ynab
 smmap==5.0.1
     # via gitdb
 sniffio==1.3.1
@@ -532,6 +531,7 @@ typing-extensions==4.12.2
     # via pydantic-core
     # via sqlalchemy
     # via typer
+    # via ynab
 tzdata==2024.1
     # via pandas
     # via tzlocal
@@ -567,7 +567,7 @@ wrapt==1.16.0
     # via opentelemetry-instrumentation-grpc
 yarl==1.11.1
     # via aiohttp
-ynab==0.0.3
+ynab==1.0.1
     # via bunq-ynab-connect
 zict==3.0.0
     # via distributed
