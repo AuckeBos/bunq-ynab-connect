@@ -4,7 +4,7 @@ from logging import LoggerAdapter
 
 import ynab
 from kink import inject
-from ynab import ApiClient, TransactionDetail
+from ynab import ApiClient, NewTransaction, TransactionDetail
 from ynab.models.account import Account
 from ynab.models.budget_summary import BudgetSummary
 
@@ -89,9 +89,7 @@ class YnabClient:
             )
         return result
 
-    def create_transaction(
-        self, transaction: TransactionDetail, budget_id: str
-    ) -> None:
+    def create_transaction(self, transaction: NewTransaction, budget_id: str) -> None:
         """Add a transaction to a budget."""
         api = ynab.TransactionsApi(self.client)
         try:
