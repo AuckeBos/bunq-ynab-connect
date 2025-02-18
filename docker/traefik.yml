@@ -23,11 +23,12 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
     networks:
-      - traefik
+      - bunq
 
 volumes:
   letsencrypt:
+
 networks:
-  traefik:
-    name: traefik
+  bunq:
+    name: bunq
     external: true

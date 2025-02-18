@@ -2,7 +2,7 @@
 All parts of the project run in Docker containers. This page lists the containers, and their purpose.
 
 ## Containers
-The following containers are defined in the main compose files ([docker-compose.yml](../docker/docker-compose.yml), [development.yml](../docker/development.yml), [portainer.yml](../docker/portainer.yaml)). `development.yml` should be used during development, see [development.md](./development.md). `portainer.yml` should be used in production, see [README.md](../README.md). `docker-compose.yml` is a reference compose. 
+The following containers are defined in the main compose files ([development.yml](../docker/development.yml), [portainer.yml](../docker/portainer.yaml)). `development.yml` should be used during development, see [development.md](./development.md). `portainer.yml` should be used in production, see [README.md](../README.md).
 ### MongoDB
 `mongo` is a MongoDB container. All data is stored in this container. It contains one database, named `bunq_ynab_connect. This stores the following collections:
 - `bunq_accounts`: The list of all accounts in your Bunq account.

@@ -10,8 +10,6 @@ services:
     volumes:
       - bunq_ynab_connect_data:/data/db
     restart: unless-stopped
-    networks:
-      - traefik
 
   mongo-express:
     image: mongo-express:latest
@@ -19,16 +17,14 @@ services:
     ports:
       - 12001:8081
     environment:
-      ME_CONFIG_MONGODB_AUTH_USERNAME: ${MONGO_USER}
-      ME_CONFIG_MONGODB_AUTH_PASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
       ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_USER}
       ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_PASSWORD}
       ME_CONFIG_MONGODB_SERVER: mongodb
     depends_on:
       - mongodb
     restart: unless-stopped
-    networks:
-      - traefik
 
   prefect-server:
     image: prefecthq/prefect:2.20.4-python3.11
@@ -45,8 +41,6 @@ services:
       - PREFECT_UI_URL=${PREFECT_API_URL_FOR_SERVER}
     ports:
       - 12002:4200
-    networks:
-      - traefik
 
   prefect-agent:
     build:
@@ -66,8 +60,6 @@ services:
     depends_on:
       - prefect-server
     command: "/bin/sh -c /home/bunqynab/entrypoint.sh"
-    networks:
-      - traefik
 
   watchtower:
     image: containrrr/watchtower
@@ -76,8 +68,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --interval 300 bunqynab_prefect_agent
     restart: unless-stopped
-    networks:
-      - traefik
 
   mlflow:
     image: ghcr.io/mlflow/mlflow:v2.16.0
@@ -88,8 +78,6 @@ services:
       - ../mlflow:/mlflow
     command: mlflow server --backend-store-uri sqlite:////mlflow/mlflow.db --host 0.0.0.0 --artifacts-destination /mlflow/artifacts
     restart: unless-stopped
-    networks:
-      - traefik
 
   mlserver:
     build:
@@ -104,8 +92,6 @@ services:
       - ../bunq_ynab_connect:/home/bunqynab/bunq_ynab_connect    
       - ../config:/home/bunqynab/config
     command: "mlserver start /home/bunqynab/config/mlserver"
-    networks:
-      - traefik
 
   # Temporary solution to restart mlserver daily. Since Prefect agent has no access to the docker socket
   mlserver_restarter:
@@ -120,8 +106,6 @@ services:
         "while true; do sleep 86400; docker restart bunqynab_mlserver; done",
       ]
     restart: unless-stopped
-    networks:
-      - traefik      
 
   callback:
     build:
@@ -140,22 +124,15 @@ services:
       - "traefik.http.routers.callback.entrypoints=websecure"
       - "traefik.http.routers.callback.tls.certresolver=${RESOLVER_NAME}"
       - "traefik.http.routers.callback.tls=true"
-      - "traefik.http.services.app.loadbalancer.server.port=8000"
+      - "traefik.http.services.callback.loadbalancer.server.port=8000"
     depends_on:
       - mongodb      
-    networks:
-      - traefik
 
 volumes:
   bunq_ynab_connect_data:
   bunq_ynab_connect_prefect:
 
-# TODO: Fix issue with network. Currently all containers are on the external traefik network
-# If all are on default, and callback on both, traefik cannot connect to callback.
-# Solved by connecting all to traefik, but this is not the best solution
+# Make sure the traefik container joins this network too
 networks:
   default:
-    name: bunqynab_network
-  traefik:
-    name: traefik
-    external: true
+    name: bunq
