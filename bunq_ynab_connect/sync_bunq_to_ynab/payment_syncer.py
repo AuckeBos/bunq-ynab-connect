@@ -8,7 +8,7 @@ from dateutil import parser
 from kink import inject
 from mlserver.codecs import PandasCodec
 from pydantic import BaseModel
-from ynab import TransactionDetail
+from ynab import NewTransaction
 from ynab.configuration import Configuration
 
 from bunq_ynab_connect.clients.ynab_client import YnabClient
@@ -98,7 +98,7 @@ class PaymentSyncer:
 
     def payment_to_transaction(
         self, payment: BunqPayment, account: YnabAccount
-    ) -> TransactionDetail:
+    ) -> NewTransaction:
         """Create a YNAB transaction from a Bunq payment.
 
         Use values from the payment to fill in the transaction.
@@ -121,10 +121,10 @@ class PaymentSyncer:
         configuration = Configuration()
         configuration.client_side_validation = False
         amount = int(float(payment.amount["value"]) * 1000)  # Convert to milliunits
-        return TransactionDetail(
+        return NewTransaction(
             account_id=account.id,
             amount=amount,
-            date=payment.created,
+            date=payment.created.date(),
             payee_name=name,
             memo=payment.description,
             cleared=self.CLEARING_STATUS,

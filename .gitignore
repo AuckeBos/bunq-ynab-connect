@@ -165,3 +165,5 @@ cache
 .docker-env
 .prefect
 mlflow
+
+.local
