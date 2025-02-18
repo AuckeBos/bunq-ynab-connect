@@ -70,7 +70,7 @@ class MatchedTransactionsDataset(AbstractDataset):
 
         """
         matches = []
-        for ynab_transaction in ynab_transactions:
+        for ynab_transaction in ynab_transactions[::-1]:
             if not self.sanity_check_ynab_transaction(ynab_transaction):
                 continue
             for bunq_payment in bunq_payments:
