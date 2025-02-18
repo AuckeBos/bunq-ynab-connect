@@ -18,6 +18,7 @@ dependencies = [
     "fastapi",
     "fastapi-cli",
     "prefect",
+    "imbalanced-learn>=0.13.0",
 ]
 readme = "README.md"
 requires-python = ">= 3.11"
