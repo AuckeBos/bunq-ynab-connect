@@ -67,7 +67,12 @@ def cache(logger: LoggerAdapter, ttl: int | None = None) -> Callable:
 def date_to_datetime(_date: date) -> datetime:
     """Convert a date to a datetime."""
     return datetime(
-        _date.year, _date.month, _date.day, tzinfo=pytz.timezone("Europe/Amsterdam")
+        _date.year,
+        _date.month,
+        _date.day,
+        12,
+        00,
+        tzinfo=pytz.timezone("Europe/Amsterdam"),
     )
 
 
