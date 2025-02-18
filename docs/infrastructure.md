@@ -38,7 +38,7 @@ The Dockerfile is described by:
 `mlflow` is a container that hosts the MLFlow server. It is used to track experiments and register models. It is available at [http://localhost:12003](http://localhost:12003).
 
 ### MLServer
-`mlserver` is a container that hosts the MLServer. It is used to serve models. It retrieves the Models from the `mlflow` container, and makes makes them available as REST endpoints to other containers in the network (ie the `prefect-agent`). Whenever a payment is to be synced, a request to `mlserver` is made to classify it with the correct model. Swagger docs are available at [http://192.168.0.4:12006/v2/docs#/](http://192.168.0.4:12006/v2/docs#/)
+`mlserver` is a container that hosts the MLServer. It is used to serve models. It retrieves the Models from the `mlflow` container, and makes makes them available as REST endpoints to other containers in the network (ie the `prefect-agent`). Whenever a payment is to be synced, a request to `mlserver` is made to classify it with the correct model. Swagger docs are available at [http://localhost:12006/v2/docs#/](http://localhost:12006/v2/docs#/)
 
 ### MLServer restarter
 A temporary solution to the following problem:
