@@ -41,10 +41,7 @@ class YnabClient:
             self.logger.error(msg)
             raise ValueError(msg)
 
-        configuration = ynab.Configuration()
-        configuration.api_key["Authorization"] = token
-        configuration.api_key_prefix["Authorization"] = "Bearer"
-        return ApiClient(configuration)
+        return ApiClient(ynab.Configuration(access_token=token))
 
     def get_account_for_budget(self, budget_id: str) -> list[Account]:
         """Load the accounts for a budget."""
