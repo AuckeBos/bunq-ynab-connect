@@ -12,7 +12,10 @@ import mlflow
 from bunq_ynab_connect.classification.budget_category_encoder import (
     BudgetCategoryEncoder,
 )
-from bunq_ynab_connect.classification.feature_extractor import FeatureExtractor
+from bunq_ynab_connect.classification.preprocessing.features import Features
+from bunq_ynab_connect.classification.preprocessing.simple_features import (
+    SimpleFeatures,
+)
 from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
 from bunq_ynab_connect.models.matched_transaction import MatchedTransaction
 
@@ -102,7 +105,7 @@ class BasePaymentClassificationExperiment:
         - Start run and _run
         """
         transactions = self.load_data()
-        experiment_name = self.get_experiment_name()
+        experiment_name = self.experiment_name
         if not len(transactions):
             self.logger.info(
                 "Skipping experiment %s, because no dataset was found", experiment_name
@@ -121,18 +124,28 @@ class BasePaymentClassificationExperiment:
             self._run(X, y)
 
     def create_pipeline(self, classifier: ClassifierMixin) -> Pipeline:
-        feature_extractor = FeatureExtractor()
-        return Pipeline(
+        pipeline = Pipeline(
             [
-                ("feature_extractor", feature_extractor),
                 ("classifier", classifier),
             ]
         )
+        pipeline.set_params(
+            feature_extractor__features=self.features,
+        )
+        return pipeline
 
-    def get_experiment_name(self) -> str:
+    @property
+    def experiment_name(self) -> str:
         return f"{self.__class__.__name__} [{self.budget_id}]"
 
     @abstractmethod
-    def _run(self, X: np.array, y: np.array) -> None:  # noqa: N803
+    def _run(self, X: np.array, y: np.array) -> None:
         """Run the actual experiment on the full set."""
-        raise NotImplementedError
+        ...
+
+    @property
+    def features(self) -> list[Features]:
+        """List of features to use for the experiment."""
+        return [
+            SimpleFeatures(),
+        ]

@@ -99,7 +99,7 @@ class ClassifierSelectionExperiment(BasePaymentClassificationExperiment):
             return None
         client = MlflowClient()
         experiment_id = client.get_experiment_by_name(
-            self.get_experiment_name()
+            self.experiment_name
         ).experiment_id
         runs = client.search_runs(
             experiment_id,

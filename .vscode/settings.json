@@ -8,5 +8,9 @@
             "source.organizeImports": "always",
             "source.unusedImports": "always"
         },
-    }
+        "notebook.codeActionsOnSave": {
+            "notebook.source.organizeImports": "explicit",
+            "notebooks.unusedImports": "explicit",
+        },
+    },
 }

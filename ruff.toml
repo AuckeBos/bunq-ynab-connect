@@ -53,6 +53,7 @@ ignore = [
     "I001", # Unsorted imports. Somehow fails during build, while sorts are OK. Temp disable to succeed build.
     "ERA001", # Commented code
     "D103", # Docstring in public method
+    "N803", # Parameter should be lowercase
 ] 
 
 # Allow fix for all enabled rules (when `--fix`) is provided.

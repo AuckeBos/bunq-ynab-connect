@@ -19,6 +19,9 @@ dependencies = [
     "fastapi-cli",
     "prefect",
     "imbalanced-learn>=0.13.0",
+    "feature-engine>=1.8.3",
+    "xgboost>=2.1.4",
+    "hyperopt>=0.2.7",
 ]
 readme = "README.md"
 requires-python = ">= 3.11"
@@ -34,6 +37,8 @@ dev-dependencies = [
     "mongomock>=4.1.2",
     "bz2file>=0.98",
     "ruff>=0.6.3",
+    "notebook>=7.3.2",
+    "ipykernel>=6.29.5",
 ]
 excluded-dependencies = ["pywin32"]
 

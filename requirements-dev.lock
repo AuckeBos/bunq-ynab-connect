@@ -31,15 +31,26 @@ annotated-types==0.7.0
     # via pydantic
 anyio==4.4.0
     # via httpx
+    # via jupyter-server
     # via prefect
     # via starlette
     # via watchfiles
 apprise==1.9.0
     # via prefect
+argon2-cffi==23.1.0
+    # via jupyter-server
+argon2-cffi-bindings==21.2.0
+    # via argon2-cffi
+arrow==1.3.0
+    # via isoduration
 asgi-lifespan==2.1.0
     # via prefect
 asgiref==3.8.1
     # via opentelemetry-instrumentation-asgi
+asttokens==3.0.0
+    # via stack-data
+async-lru==2.0.4
+    # via jupyterlab
 async-timeout==4.0.3
     # via aiokafka
     # via asyncpg
@@ -49,6 +60,12 @@ attrs==24.2.0
     # via aiohttp
     # via jsonschema
     # via referencing
+babel==2.17.0
+    # via jupyterlab-server
+beautifulsoup4==4.13.3
+    # via nbconvert
+bleach==6.2.0
+    # via nbconvert
 blinker==1.8.2
     # via flask
 brotli==1.1.0
@@ -66,6 +83,7 @@ certifi==2024.8.30
     # via kubernetes
     # via requests
 cffi==1.17.1
+    # via argon2-cffi-bindings
     # via cryptography
     # via gevent
 charset-normalizer==3.3.2
@@ -84,13 +102,18 @@ click==8.1.7
 cloudpickle==3.0.0
     # via dask
     # via distributed
+    # via hyperopt
     # via mlflow-skinny
     # via prefect
 colorama==0.4.6
     # via click
     # via griffe
+    # via ipython
     # via pytest
+    # via tqdm
     # via uvicorn
+comm==0.2.2
+    # via ipykernel
 contourpy==1.3.0
     # via matplotlib
 coolname==2.2.0
@@ -107,6 +130,12 @@ databricks-sdk==0.32.1
     # via mlflow-skinny
 dateparser==1.2.0
     # via prefect
+debugpy==1.8.12
+    # via ipykernel
+decorator==5.1.1
+    # via ipython
+defusedxml==0.7.1
+    # via nbconvert
 deprecated==1.2.14
     # via opentelemetry-api
     # via opentelemetry-exporter-otlp-proto-grpc
@@ -124,21 +153,31 @@ email-validator==2.2.0
 exceptiongroup==1.2.2
     # via prefect
     # via prefect-dask
+executing==2.2.0
+    # via stack-data
 fastapi==0.110.0
     # via bunq-ynab-connect
     # via mlserver
 fastapi-cli==0.0.5
     # via bunq-ynab-connect
+fastjsonschema==2.21.1
+    # via nbformat
+feature-engine==1.8.3
+    # via bunq-ynab-connect
 flask==3.0.3
     # via mlflow
 fonttools==4.53.1
     # via matplotlib
+fqdn==1.5.1
+    # via jsonschema
 frozenlist==1.4.1
     # via aiohttp
     # via aiosignal
 fsspec==2024.9.0
     # via dask
     # via prefect
+future==1.0.0
+    # via hyperopt
 gevent==24.2.1
     # via geventhttpclient
     # via mlserver
@@ -186,16 +225,20 @@ httpcore==1.0.5
 httptools==0.6.1
     # via uvicorn
 httpx==0.27.2
+    # via jupyterlab
     # via prefect
 humanize==4.10.0
     # via jinja2-humanize-extension
     # via prefect
 hyperframe==6.0.1
     # via h2
+hyperopt==0.2.7
+    # via bunq-ynab-connect
 idna==3.8
     # via anyio
     # via email-validator
     # via httpx
+    # via jsonschema
     # via requests
     # via yarl
 imbalanced-learn==0.13.0
@@ -209,28 +252,77 @@ importlib-resources==6.4.5
     # via prefect
 iniconfig==2.0.0
     # via pytest
+ipykernel==6.29.5
+    # via jupyterlab
+ipython==8.32.0
+    # via ipykernel
+isoduration==20.11.0
+    # via jsonschema
 itsdangerous==2.2.0
     # via flask
     # via prefect
+jedi==0.19.2
+    # via ipython
 jinja2==3.1.4
     # via distributed
     # via flask
     # via jinja2-humanize-extension
+    # via jupyter-server
+    # via jupyterlab
+    # via jupyterlab-server
     # via mlflow
+    # via nbconvert
     # via prefect
 jinja2-humanize-extension==0.4.0
     # via prefect
 joblib==1.4.2
     # via imbalanced-learn
     # via scikit-learn
+json5==0.10.0
+    # via jupyterlab-server
 jsonpatch==1.33
     # via prefect
 jsonpointer==3.0.0
     # via jsonpatch
+    # via jsonschema
 jsonschema==4.23.0
+    # via jupyter-events
+    # via jupyterlab-server
+    # via nbformat
     # via prefect
 jsonschema-specifications==2023.12.1
     # via jsonschema
+jupyter-client==8.6.3
+    # via ipykernel
+    # via jupyter-server
+    # via nbclient
+jupyter-core==5.7.2
+    # via ipykernel
+    # via jupyter-client
+    # via jupyter-server
+    # via jupyterlab
+    # via nbclient
+    # via nbconvert
+    # via nbformat
+jupyter-events==0.12.0
+    # via jupyter-server
+jupyter-lsp==2.2.5
+    # via jupyterlab
+jupyter-server==2.15.0
+    # via jupyter-lsp
+    # via jupyterlab
+    # via jupyterlab-server
+    # via notebook
+    # via notebook-shim
+jupyter-server-terminals==0.5.3
+    # via jupyter-server
+jupyterlab==4.3.5
+    # via notebook
+jupyterlab-pygments==0.3.0
+    # via nbconvert
+jupyterlab-server==2.27.3
+    # via jupyterlab
+    # via notebook
 kink==0.8.0
     # via bunq-ynab-connect
 kiwisolver==1.4.7
@@ -250,11 +342,17 @@ markdown-it-py==3.0.0
 markupsafe==2.1.5
     # via jinja2
     # via mako
+    # via nbconvert
     # via werkzeug
 matplotlib==3.9.2
     # via mlflow
+matplotlib-inline==0.1.7
+    # via ipykernel
+    # via ipython
 mdurl==0.1.2
     # via markdown-it-py
+mistune==3.1.1
+    # via nbconvert
 mlflow==2.16.0
     # via bunq-ynab-connect
     # via mlserver-mlflow
@@ -271,17 +369,38 @@ msgpack==1.1.0
 multidict==6.1.0
     # via aiohttp
     # via yarl
+nbclient==0.10.2
+    # via nbconvert
+nbconvert==7.16.6
+    # via jupyter-server
+nbformat==5.10.4
+    # via jupyter-server
+    # via nbclient
+    # via nbconvert
+nest-asyncio==1.6.0
+    # via ipykernel
+networkx==3.4.2
+    # via hyperopt
+notebook==7.3.2
+notebook-shim==0.2.4
+    # via jupyterlab
+    # via notebook
 numpy==2.1.1
     # via contourpy
+    # via feature-engine
+    # via hyperopt
     # via imbalanced-learn
     # via matplotlib
     # via mlflow
     # via mlserver
     # via pandas
+    # via patsy
     # via pyarrow
     # via scikit-learn
     # via scipy
+    # via statsmodels
     # via tritonclient
+    # via xgboost
 oauthlib==3.2.2
     # via kubernetes
     # via requests-oauthlib
@@ -326,26 +445,45 @@ opentelemetry-util-http==0.48b0
 orjson==3.10.7
     # via mlserver
     # via prefect
+overrides==7.7.0
+    # via jupyter-server
 packaging==24.1
     # via aiokafka
     # via dask
     # via distributed
+    # via ipykernel
+    # via jupyter-events
+    # via jupyter-server
+    # via jupyterlab
+    # via jupyterlab-server
     # via matplotlib
     # via mlflow-skinny
     # via mongomock
+    # via nbconvert
     # via prefect
     # via pytest
+    # via statsmodels
 pandas==2.2.2
+    # via feature-engine
     # via mlflow
     # via mlserver
+    # via statsmodels
+pandocfilters==1.5.1
+    # via nbconvert
+parso==0.8.4
+    # via jedi
 partd==1.4.2
     # via dask
 pathspec==0.12.1
     # via prefect
+patsy==1.0.1
+    # via statsmodels
 pendulum==2.1.2
     # via prefect
 pillow==10.4.0
     # via matplotlib
+platformdirs==4.3.6
+    # via jupyter-core
 pluggy==1.5.0
     # via pytest
 prefect==2.20.6
@@ -354,8 +492,11 @@ prefect==2.20.6
 prefect-dask==0.2.10
     # via bunq-ynab-connect
 prometheus-client==0.20.0
+    # via jupyter-server
     # via py-grpc-prometheus
     # via starlette-exporter
+prompt-toolkit==3.0.50
+    # via ipython
 protobuf==4.25.4
     # via googleapis-common-protos
     # via mlflow-skinny
@@ -363,8 +504,13 @@ protobuf==4.25.4
     # via opentelemetry-proto
 psutil==6.0.0
     # via distributed
+    # via ipykernel
+pure-eval==0.2.3
+    # via stack-data
 py-grpc-prometheus==0.8.0
     # via mlserver
+py4j==0.10.9.9
+    # via hyperopt
 pyarrow==17.0.0
     # via mlflow
 pyasn1==0.6.1
@@ -387,6 +533,8 @@ pydantic-core==2.18.2
 pydantic-settings==2.2.1
     # via mlserver
 pygments==2.18.0
+    # via ipython
+    # via nbconvert
     # via rich
 pymongo==4.8.0
     # via bunq-ynab-connect
@@ -394,8 +542,10 @@ pyparsing==3.1.4
     # via matplotlib
 pytest==8.3.3
 python-dateutil==2.9.0.post0
+    # via arrow
     # via croniter
     # via dateparser
+    # via jupyter-client
     # via kubernetes
     # via matplotlib
     # via pandas
@@ -407,6 +557,8 @@ python-dotenv==1.0.1
     # via mlserver
     # via pydantic-settings
     # via uvicorn
+python-json-logger==3.2.1
+    # via jupyter-events
 python-multipart==0.0.9
     # via mlserver
     # via prefect
@@ -424,25 +576,37 @@ pytzdata==2020.1
     # via pendulum
 # pywin32==308 (excluded)
     # via docker
+    # via jupyter-core
+pywinpty==2.0.15
+    # via jupyter-server
+    # via jupyter-server-terminals
+    # via terminado
 pyyaml==6.0.2
     # via apprise
     # via dask
     # via distributed
+    # via jupyter-events
     # via kubernetes
     # via mlflow-skinny
     # via prefect
     # via uvicorn
+pyzmq==26.2.1
+    # via ipykernel
+    # via jupyter-client
+    # via jupyter-server
 readchar==4.2.0
     # via prefect
 referencing==0.35.1
     # via jsonschema
     # via jsonschema-specifications
+    # via jupyter-events
 regex==2024.9.11
     # via dateparser
 requests==2.32.3
     # via apprise
     # via databricks-sdk
     # via docker
+    # via jupyterlab-server
     # via kubernetes
     # via mlflow-skinny
     # via requests-oauthlib
@@ -450,7 +614,12 @@ requests-oauthlib==2.0.0
     # via apprise
     # via kubernetes
 rfc3339-validator==0.1.4
+    # via jsonschema
+    # via jupyter-events
     # via prefect
+rfc3986-validator==0.1.1
+    # via jsonschema
+    # via jupyter-events
 rich==13.8.1
     # via prefect
     # via typer
@@ -466,16 +635,24 @@ ruamel-yaml-clib==0.2.8
 ruff==0.6.4
 scikit-learn==1.5.2
     # via bunq-ynab-connect
+    # via feature-engine
     # via imbalanced-learn
     # via mlflow
     # via sklearn-compat
 scipy==1.14.1
+    # via feature-engine
+    # via hyperopt
     # via imbalanced-learn
     # via mlflow
     # via scikit-learn
+    # via statsmodels
+    # via xgboost
+send2trash==1.8.3
+    # via jupyter-server
 sentinels==1.0.0
     # via mongomock
 setuptools==74.1.2
+    # via jupyterlab
     # via opentelemetry-instrumentation
     # via py-grpc-prometheus
     # via zope-event
@@ -484,6 +661,7 @@ shellingham==1.5.4
     # via typer
 six==1.16.0
     # via geventhttpclient
+    # via hyperopt
     # via kubernetes
     # via python-dateutil
     # via rfc3339-validator
@@ -498,24 +676,35 @@ sniffio==1.3.1
     # via prefect
 sortedcontainers==2.4.0
     # via distributed
+soupsieve==2.6
+    # via beautifulsoup4
 sqlalchemy==2.0.34
     # via alembic
     # via mlflow
     # via prefect
 sqlparse==0.5.1
     # via mlflow-skinny
+stack-data==0.6.3
+    # via ipython
 starlette==0.36.3
     # via fastapi
     # via starlette-exporter
 starlette-exporter==0.23.0
     # via mlserver
+statsmodels==0.14.4
+    # via feature-engine
 tblib==3.0.0
     # via distributed
+terminado==0.18.1
+    # via jupyter-server
+    # via jupyter-server-terminals
 text-unidecode==1.3
     # via python-slugify
 threadpoolctl==3.5.0
     # via imbalanced-learn
     # via scikit-learn
+tinycss2==1.4.0
+    # via bleach
 toml==0.10.2
     # via prefect
 toolz==0.12.1
@@ -524,16 +713,41 @@ toolz==0.12.1
     # via partd
 tornado==6.4.1
     # via distributed
+    # via ipykernel
+    # via jupyter-client
+    # via jupyter-server
+    # via jupyterlab
+    # via notebook
+    # via terminado
+tqdm==4.67.1
+    # via hyperopt
+traitlets==5.14.3
+    # via comm
+    # via ipykernel
+    # via ipython
+    # via jupyter-client
+    # via jupyter-core
+    # via jupyter-events
+    # via jupyter-server
+    # via jupyterlab
+    # via matplotlib-inline
+    # via nbclient
+    # via nbconvert
+    # via nbformat
 tritonclient==2.46.0
     # via mlserver
 typer==0.12.5
     # via fastapi-cli
     # via prefect
+types-python-dateutil==2.9.0.20241206
+    # via arrow
 typing-extensions==4.12.2
     # via aiokafka
     # via aiosqlite
     # via alembic
+    # via beautifulsoup4
     # via fastapi
+    # via ipython
     # via kink
     # via opentelemetry-sdk
     # via prefect
@@ -549,6 +763,8 @@ tzlocal==5.2
     # via dateparser
 ujson==5.10.0
     # via prefect
+uri-template==1.3.0
+    # via jsonschema
 urllib3==2.2.2
     # via distributed
     # via docker
@@ -564,7 +780,15 @@ waitress==3.0.0
     # via mlflow
 watchfiles==0.24.0
     # via uvicorn
+wcwidth==0.2.13
+    # via prompt-toolkit
+webcolors==24.11.1
+    # via jsonschema
+webencodings==0.5.1
+    # via bleach
+    # via tinycss2
 websocket-client==1.8.0
+    # via jupyter-server
     # via kubernetes
 websockets==13.0.1
     # via prefect
@@ -575,6 +799,8 @@ wrapt==1.16.0
     # via deprecated
     # via opentelemetry-instrumentation
     # via opentelemetry-instrumentation-grpc
+xgboost==2.1.4
+    # via bunq-ynab-connect
 yarl==1.11.1
     # via aiohttp
 ynab==1.0.1

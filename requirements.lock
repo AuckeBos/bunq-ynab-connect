@@ -83,11 +83,13 @@ click==8.1.7
 cloudpickle==3.0.0
     # via dask
     # via distributed
+    # via hyperopt
     # via mlflow-skinny
     # via prefect
 colorama==0.4.6
     # via click
     # via griffe
+    # via tqdm
     # via uvicorn
 contourpy==1.3.0
     # via matplotlib
@@ -127,6 +129,8 @@ fastapi==0.110.0
     # via mlserver
 fastapi-cli==0.0.5
     # via bunq-ynab-connect
+feature-engine==1.8.3
+    # via bunq-ynab-connect
 flask==3.0.3
     # via mlflow
 fonttools==4.53.1
@@ -137,6 +141,8 @@ frozenlist==1.4.1
 fsspec==2024.9.0
     # via dask
     # via prefect
+future==1.0.0
+    # via hyperopt
 gevent==24.2.1
     # via geventhttpclient
     # via mlserver
@@ -190,6 +196,8 @@ humanize==4.10.0
     # via prefect
 hyperframe==6.0.1
     # via h2
+hyperopt==0.2.7
+    # via bunq-ynab-connect
 idna==3.8
     # via anyio
     # via email-validator
@@ -266,17 +274,24 @@ msgpack==1.1.0
 multidict==6.1.0
     # via aiohttp
     # via yarl
+networkx==3.4.2
+    # via hyperopt
 numpy==2.1.1
     # via contourpy
+    # via feature-engine
+    # via hyperopt
     # via imbalanced-learn
     # via matplotlib
     # via mlflow
     # via mlserver
     # via pandas
+    # via patsy
     # via pyarrow
     # via scikit-learn
     # via scipy
+    # via statsmodels
     # via tritonclient
+    # via xgboost
 oauthlib==3.2.2
     # via kubernetes
     # via requests-oauthlib
@@ -328,13 +343,18 @@ packaging==24.1
     # via matplotlib
     # via mlflow-skinny
     # via prefect
+    # via statsmodels
 pandas==2.2.2
+    # via feature-engine
     # via mlflow
     # via mlserver
+    # via statsmodels
 partd==1.4.2
     # via dask
 pathspec==0.12.1
     # via prefect
+patsy==1.0.1
+    # via statsmodels
 pendulum==2.1.2
     # via prefect
 pillow==10.4.0
@@ -356,6 +376,8 @@ psutil==6.0.0
     # via distributed
 py-grpc-prometheus==0.8.0
     # via mlserver
+py4j==0.10.9.9
+    # via hyperopt
 pyarrow==17.0.0
     # via mlflow
 pyasn1==0.6.1
@@ -454,13 +476,18 @@ ruamel-yaml-clib==0.2.8
     # via ruamel-yaml
 scikit-learn==1.5.2
     # via bunq-ynab-connect
+    # via feature-engine
     # via imbalanced-learn
     # via mlflow
     # via sklearn-compat
 scipy==1.14.1
+    # via feature-engine
+    # via hyperopt
     # via imbalanced-learn
     # via mlflow
     # via scikit-learn
+    # via statsmodels
+    # via xgboost
 setuptools==74.1.2
     # via opentelemetry-instrumentation
     # via py-grpc-prometheus
@@ -470,6 +497,7 @@ shellingham==1.5.4
     # via typer
 six==1.16.0
     # via geventhttpclient
+    # via hyperopt
     # via kubernetes
     # via python-dateutil
     # via rfc3339-validator
@@ -495,6 +523,8 @@ starlette==0.36.3
     # via starlette-exporter
 starlette-exporter==0.23.0
     # via mlserver
+statsmodels==0.14.4
+    # via feature-engine
 tblib==3.0.0
     # via distributed
 text-unidecode==1.3
@@ -510,6 +540,8 @@ toolz==0.12.1
     # via partd
 tornado==6.4.1
     # via distributed
+tqdm==4.67.1
+    # via hyperopt
 tritonclient==2.46.0
     # via mlserver
 typer==0.12.5
@@ -561,6 +593,8 @@ wrapt==1.16.0
     # via deprecated
     # via opentelemetry-instrumentation
     # via opentelemetry-instrumentation-grpc
+xgboost==2.1.4
+    # via bunq-ynab-connect
 yarl==1.11.1
     # via aiohttp
 ynab==1.0.1
