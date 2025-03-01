@@ -10,15 +10,21 @@ class DescriptionFeatures(Features):
 
     tfidf_features: TfidfVectorizer | None
     max_features: int
+    enabled: bool
 
-    def __init__(self, max_features: int | None = None):
+    def __init__(self, max_features: int | None = None, enabled: bool = True):
         self.max_features = max_features
+        self.enabled = enabled
 
     def fit(self, X: list[BunqPayment], _) -> pd.DataFrame:
+        if not self.enabled:
+            return self
         self.fit_tfidf_features(X)
         return self
 
     def transform(self, X: list[BunqPayment]) -> pd.DataFrame:
+        if not self.enabled:
+            return pd.DataFrame(index=range(len(X)))
         features = self.tfidf_features.transform([payment.description for payment in X])
         return pd.DataFrame(
             features.todense(), columns=self.tfidf_features.get_feature_names_out()
