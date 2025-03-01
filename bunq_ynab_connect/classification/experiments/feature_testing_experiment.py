@@ -4,6 +4,10 @@ import numpy as np
 from hyperopt.pyll.base import scope
 from sklearn.pipeline import FeatureUnion
 
+from bunq_ynab_connect.classification.preprocessing.alias_features import AliasFeatures
+from bunq_ynab_connect.classification.preprocessing.counterparty_similarity_features import (
+    CounterpartySimilarityFeatures,
+)
 from bunq_ynab_connect.classification.preprocessing.over_sampler import OverSampler
 from bunq_ynab_connect.classification.preprocessing.under_sampler import UnderSampler
 from bunq_ynab_connect.models.bunq_payment import BunqPayment
@@ -28,6 +32,7 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import (
     StratifiedKFold,
+    StratifiedShuffleSplit,
     cross_validate,
 )
 
@@ -35,7 +40,6 @@ import mlflow
 from bunq_ynab_connect.classification.experiments.base_payment_classification_experiment import (  # noqa: E501
     BasePaymentClassificationExperiment,
 )
-from bunq_ynab_connect.classification.preprocessing.alias_features import AliasFeatures
 from bunq_ynab_connect.classification.preprocessing.description_features import (
     DescriptionFeatures,
 )
@@ -71,44 +75,80 @@ class FeatureTestingExperiment(BasePaymentClassificationExperiment):
         ),
     ]
 
+    def score_cv(self, pipeline: Pipeline, X: np.ndarray, y: np.ndarray) -> float:
+        k_fold = StratifiedKFold(
+            n_splits=self.N_FOLDS, shuffle=True, random_state=self.RANDOM_STATE
+        )
+        scores = cross_validate(
+            pipeline,
+            X,
+            y,
+            cv=k_fold,
+            n_jobs=-1,
+            scoring={
+                "f1_macro": make_scorer(f1_score, average="macro"),
+                "f1_micro": make_scorer(f1_score, average="micro"),
+                "f1_weighted": make_scorer(f1_score, average="weighted"),
+                "accuracy": make_scorer(accuracy_score),
+                "balanced_accuracy": make_scorer(balanced_accuracy_score),
+            },
+            return_train_score=True,
+        )
+        for type_ in ["train", "test"]:
+            for metric in [
+                "accuracy",
+                "f1_macro",
+                "f1_micro",
+                "f1_weighted",
+                "balanced_accuracy",
+            ]:
+                mlflow.log_metric(
+                    f"{type_}_{metric}", np.mean(scores[f"{type_}_{metric}"])
+                )
+        return -np.mean(scores["test_f1_macro"])
+
+    def score_single(self, pipeline: Pipeline, X: np.ndarray, y: np.ndarray) -> float:
+        splitter = StratifiedShuffleSplit(n_splits=1, test_size=0.1)
+        train_index, test_index = next(splitter.split(X, y))
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        pipeline.fit(X_train, y_train)
+        y_train_pred = pipeline.predict(X_train)
+        y_pred = pipeline.predict(X_test)
+        mlflow.log_metrics(
+            {
+                "test_accuracy": accuracy_score(y_test, y_pred),
+                "test_f1_macro": f1_score(y_test, y_pred, average="macro"),
+                "test_f1_micro": f1_score(y_test, y_pred, average="micro"),
+                "test_f1_weighted": f1_score(y_test, y_pred, average="weighted"),
+                "test_balanced_accuracy": balanced_accuracy_score(y_test, y_pred),
+                "train_accuracy": accuracy_score(y_train, y_train_pred),
+                "train_f1_macro": f1_score(y_train, y_train_pred, average="macro"),
+                "train_f1_micro": f1_score(y_train, y_train_pred, average="micro"),
+                "train_f1_weighted": f1_score(
+                    y_train, y_train_pred, average="weighted"
+                ),
+                "train_balanced_accuracy": balanced_accuracy_score(
+                    y_train, y_train_pred
+                ),
+            }
+        )
+        return -f1_score(y_test, y_pred, average="macro")
+
     def tune_single_classifier(self, X: np.ndarray, y: np.ndarray) -> None:
+        mlflow.sklearn.autolog(disable=True)
+
         def objective(params: dict) -> dict:
             with mlflow.start_run(nested=True):
                 classifier: ClassifierMixin = eval(params["classifier"])()
                 pipeline = self.create_pipeline(classifier)
                 pipeline.set_params(**params["parameters"])
                 mlflow.log_params(pipeline.get_params())
-                k_fold = StratifiedKFold(
-                    n_splits=self.N_FOLDS, shuffle=True, random_state=self.RANDOM_STATE
-                )
-                scores = cross_validate(
-                    pipeline,
-                    X,
-                    y,
-                    cv=k_fold,
-                    n_jobs=-1,
-                    scoring={
-                        "f1_macro": make_scorer(f1_score, average="macro"),
-                        "f1_micro": make_scorer(f1_score, average="micro"),
-                        "f1_weighted": make_scorer(f1_score, average="weighted"),
-                        "accuracy": make_scorer(accuracy_score),
-                        "balanced_accuracy": make_scorer(balanced_accuracy_score),
-                    },
-                    return_train_score=True,
-                )
-                for type_ in ["train", "test"]:
-                    for metric in [
-                        "accuracy",
-                        "f1_macro",
-                        "f1_micro",
-                        "f1_weighted",
-                        "balanced_accuracy",
-                    ]:
-                        mlflow.log_metric(
-                            f"{type_}_{metric}", np.mean(scores[f"{type_}_{metric}"])
-                        )
+                # result = self.score_cv(pipeline, X, y)
+                result = self.score_single(pipeline, X, y)
+
                 return {
-                    "loss": -np.mean(scores["test_f1_macro"]),
+                    "loss": result,
                     "status": STATUS_OK,
                 }
 
@@ -122,24 +162,40 @@ class FeatureTestingExperiment(BasePaymentClassificationExperiment):
                         "feature_extractor__description_features__max_features": scope.int(
                             hp.uniform(
                                 "max_features",
-                                100,
-                                2000,
+                                750,
+                                3000,
                             )
                         ),
-                        "classifier__max_depth": scope.int(
-                            hp.uniform("max_depth", 5, 500)
+                        "feature_extractor__description_features__enabled": hp.choice(
+                            "descriptions_enabled",
+                            [True],
                         ),
-                        "classifier__min_samples_split": scope.int(
-                            hp.uniform("min_samples_split", 2, 100)
+                        "feature_extractor__alias_features__top_categories": hp.uniformint(
+                            "alias_top_categories", 20, 80
+                        ),
+                        "feature_extractor__alias_features__enabled": hp.choice(
+                            "alias_enabled",
+                            [False],
+                        ),
+                        "feature_extractor__counterparty_similarity_features__top_categories": hp.uniformint(
+                            "counterparty_top_categories", 20, 80
+                        ),
+                        "feature_extractor__counterparty_similarity_features__enabled": hp.choice(
+                            "counterparty_enabled",
+                            [True, False],
+                        ),
+                        "classifier__max_depth": hp.uniformint("max_depth", 50, 500),
+                        "classifier__min_samples_split": hp.uniformint(
+                            "min_samples_split", 2, 15
                         ),
                         "under_sampler__percentile": hp.uniform(
-                            "under_percentile", 0.0, 1.0
+                            "under_percentile", 0.9, 1.0
                         ),
                         "over_sampler__k_neighbours": scope.int(
                             hp.uniform("k_neighbours", 0, 5)
                         ),
                         "over_sampler__percentile": hp.uniform(
-                            "over_percentile", 0.0, 1.0
+                            "over_percentile", 0.2, 0.8
                         ),
                     },
                 },
@@ -151,8 +207,9 @@ class FeatureTestingExperiment(BasePaymentClassificationExperiment):
             objective,
             space,
             algo=tpe.suggest,
-            max_evals=100,
+            max_evals=500,
             trials=trials,
+            # early_stop_fn=no_progress_loss(25),
         )
         best_config["classifier"] = classifier_options[best_config["classifier"]]
         mlflow.log_params(best_config)
@@ -168,6 +225,10 @@ class FeatureTestingExperiment(BasePaymentClassificationExperiment):
                             ("simple_features", SimpleFeatures()),
                             ("description_features", DescriptionFeatures()),
                             ("alias_features", AliasFeatures()),
+                            (
+                                "counterparty_similarity_features",
+                                CounterpartySimilarityFeatures(),
+                            ),
                         ]
                     ),
                 ),
@@ -181,4 +242,8 @@ class FeatureTestingExperiment(BasePaymentClassificationExperiment):
         )
 
     def _run(self, X: np.ndarray, y: np.ndarray) -> None:  # noqa: N803
+        # We must be sure that all cats have at least 2 items. Therefor, drop all cats with only 1 item
+        unique, counts = np.unique(y, return_counts=True)
+        X = X[np.isin(y, unique[counts > 1])]
+        y = y[np.isin(y, unique[counts > 1])]
         self.tune_single_classifier(X, y)
