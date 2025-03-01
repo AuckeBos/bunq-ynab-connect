@@ -42,21 +42,6 @@ class OverSampler(BaseOverSampler):
         self.k_neighbours = k_neighbours
         self.percentile = percentile
         self.logger = di[LoggerAdapter]
-        self.ensemble_sampler = Pipeline(
-            steps=[
-                (
-                    "random",
-                    RandomOverSampler(sampling_strategy=self.random_sampler_strategy),
-                ),
-                (
-                    "smote",
-                    SMOTE(
-                        sampling_strategy=self.smote_sampler_strategy,
-                        k_neighbors=k_neighbours,
-                    ),
-                ),
-            ]
-        )
         super().__init__()
 
     def random_sampler_strategy(self, y: np.ndarray) -> dict:
@@ -105,6 +90,21 @@ class OverSampler(BaseOverSampler):
         if self.k_neighbours == 0 or self.percentile == 0.0:
             self.logger.debug("No upsampling needed")
             return X, y
+        self.ensemble_sampler = Pipeline(
+            steps=[
+                (
+                    "random",
+                    RandomOverSampler(sampling_strategy=self.random_sampler_strategy),
+                ),
+                (
+                    "smote",
+                    SMOTE(
+                        sampling_strategy=self.smote_sampler_strategy,
+                        k_neighbors=self.k_neighbours,
+                    ),
+                ),
+            ]
+        )
         result = self.ensemble_sampler.fit_resample(X, y, **params)
         for step_name in self.ensemble_sampler.named_steps:
             self.logger.debug(
