@@ -41,7 +41,7 @@ class Deployer:
     PRODUCTION_ALIAS = "production"
     mlserver_repository_url: str
 
-    SCORE_DECREASE_THRESHOLD = 0.05
+    SCORE_DECREASE_THRESHOLD = 0.025
 
     @inject
     def __init__(

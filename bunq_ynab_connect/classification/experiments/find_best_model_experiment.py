@@ -14,27 +14,11 @@ from sklearn.metrics import (
 from sklearn.model_selection import (
     StratifiedShuffleSplit,
 )
-from sklearn.pipeline import FeatureUnion
 
 import mlflow
 from bunq_ynab_connect.classification.experiments.base_payment_classification_experiment import (  # noqa: E501
     BasePaymentClassificationExperiment,
 )
-from bunq_ynab_connect.classification.preprocessing.alias_features import AliasFeatures
-from bunq_ynab_connect.classification.preprocessing.counterparty_similarity_features import (
-    CounterpartySimilarityFeatures,
-)
-from bunq_ynab_connect.classification.preprocessing.description_features import (
-    DescriptionFeatures,
-)
-from bunq_ynab_connect.classification.preprocessing.dict_to_transaction_transformer import (
-    DictToTransactionTransformer,
-)
-from bunq_ynab_connect.classification.preprocessing.over_sampler import OverSampler
-from bunq_ynab_connect.classification.preprocessing.simple_features import (
-    SimpleFeatures,
-)
-from bunq_ynab_connect.classification.preprocessing.under_sampler import UnderSampler
 from bunq_ynab_connect.helpers.general import object_to_mlflow
 
 
@@ -51,7 +35,7 @@ class FindBestModelExperiment(BasePaymentClassificationExperiment):
 
     """
 
-    MAX_NUMBER_OF_EVALUATIONS = 2
+    MAX_NUMBER_OF_EVALUATIONS = 500
 
     def _run(self, X: np.ndarray, y: np.ndarray) -> None:
         best_config = self._find_best_model(*self._remove_singleton_categories(X, y))
@@ -180,7 +164,7 @@ class FindBestModelExperiment(BasePaymentClassificationExperiment):
             ),
             "feature_extractor__counterparty_similarity_features__enabled": hp.choice(
                 "feature_extractor__counterparty_similarity_features__enabled",
-                [True, False],
+                [True],
             ),
         }
 
@@ -198,41 +182,6 @@ class FindBestModelExperiment(BasePaymentClassificationExperiment):
                 "over_sampler__percentile", 0.2, 0.8
             ),
         }
-
-    def create_pipeline(self, classifier: ClassifierMixin) -> Pipeline:
-        """Create the pipeline with the given classifier.
-
-        - Convert the input to a list of transactions
-        - Extract all features, and concatenate them horizontally
-        - Undersample the majority class
-        - Oversample the minority class
-        - Train the classifier
-        """
-        return Pipeline(
-            [
-                ("to_transaction", DictToTransactionTransformer()),
-                (
-                    "feature_extractor",
-                    FeatureUnion(
-                        transformer_list=[
-                            ("simple_features", SimpleFeatures()),
-                            ("description_features", DescriptionFeatures()),
-                            ("alias_features", AliasFeatures()),
-                            (
-                                "counterparty_similarity_features",
-                                CounterpartySimilarityFeatures(),
-                            ),
-                        ]
-                    ),
-                ),
-                (
-                    "under_sampler",
-                    UnderSampler(),
-                ),
-                ("over_sampler", OverSampler()),
-                ("classifier", classifier),
-            ]
-        )
 
     def _remove_singleton_categories(
         self, X: np.ndarray, y: np.ndarray
