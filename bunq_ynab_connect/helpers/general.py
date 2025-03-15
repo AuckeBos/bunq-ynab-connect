@@ -76,7 +76,7 @@ def date_to_datetime(_date: date) -> datetime:
     )
 
 
-def object_to_mlflow(obj: Any, name: str) -> None:  # noqa: ANN401
+def object_to_mlflow(obj: Any, name: str) -> None:
     """Save an object to an artifact.
 
     - Save the object to a temp pickle file

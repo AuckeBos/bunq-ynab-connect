@@ -53,7 +53,7 @@ class AbstractStorage(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def convert_query(self, query: list[tuple] | None = None) -> Any:  # noqa: ANN401
+    def convert_query(self, query: list[tuple] | None = None) -> Any:
         """Convert a query to the appropriate format for the storage class."""
         raise NotImplementedError
 

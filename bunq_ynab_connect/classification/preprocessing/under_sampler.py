@@ -55,7 +55,7 @@ class UnderSampler(RandomUnderSampler):
         self,
         X: np.ndarray,
         y: np.ndarray,
-        **params: Any,  # noqa: ANN401
+        **params: Any,
     ) -> "UnderSampler":
         """Fit the UnderSampler. Log the undersampled categories."""
         result = super().fit_resample(X, y, **params)

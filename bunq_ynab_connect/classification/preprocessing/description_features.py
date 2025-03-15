@@ -1,3 +1,5 @@
+from typing import Any
+
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -16,7 +18,7 @@ class DescriptionFeatures(Features):
         self.max_features = max_features
         self.enabled = enabled
 
-    def fit(self, X: list[BunqPayment], _) -> pd.DataFrame:
+    def fit(self, X: list[BunqPayment], _: Any) -> pd.DataFrame:
         if not self.enabled:
             return self
         self.fit_tfidf_features(X)

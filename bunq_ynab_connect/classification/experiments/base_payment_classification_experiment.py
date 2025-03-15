@@ -14,13 +14,13 @@ from bunq_ynab_connect.classification.budget_category_encoder import (
     BudgetCategoryEncoder,
 )
 from bunq_ynab_connect.classification.preprocessing.alias_features import AliasFeatures
-from bunq_ynab_connect.classification.preprocessing.counterparty_similarity_features import (
+from bunq_ynab_connect.classification.preprocessing.counterparty_similarity_features import (  # noqa: E501
     CounterpartySimilarityFeatures,
 )
 from bunq_ynab_connect.classification.preprocessing.description_features import (
     DescriptionFeatures,
 )
-from bunq_ynab_connect.classification.preprocessing.dict_to_transaction_transformer import (
+from bunq_ynab_connect.classification.preprocessing.dict_to_transaction_transformer import (  # noqa: E501
     DictToTransactionTransformer,
 )
 from bunq_ynab_connect.classification.preprocessing.over_sampler import OverSampler

@@ -36,5 +36,5 @@ class BudgetCategoryEncoder(BaseEstimator, TransformerMixin):
         categories = [transaction["category_id"] for transaction in y]
         return self.encoder.transform(categories)
 
-    def inverse_transform(self, y: Any) -> list[str]:  # noqa: ANN401
+    def inverse_transform(self, y: Any) -> list[str]:
         return self.encoder.inverse_transform(y)

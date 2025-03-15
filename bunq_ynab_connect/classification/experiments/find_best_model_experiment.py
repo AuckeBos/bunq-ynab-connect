@@ -1,10 +1,10 @@
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import numpy as np
 from hyperopt import STATUS_OK, Trials, fmin, hp, tpe
 from hyperopt.pyll.base import scope
 from imblearn.pipeline import Pipeline
-from sklearn.base import ClassifierMixin
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
     accuracy_score,
@@ -20,6 +20,9 @@ from bunq_ynab_connect.classification.experiments.base_payment_classification_ex
     BasePaymentClassificationExperiment,
 )
 from bunq_ynab_connect.helpers.general import object_to_mlflow
+
+if TYPE_CHECKING:
+    from sklearn.base import ClassifierMixin
 
 
 class FindBestModelExperiment(BasePaymentClassificationExperiment):

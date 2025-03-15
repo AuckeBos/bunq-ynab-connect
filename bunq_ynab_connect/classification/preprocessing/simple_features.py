@@ -1,3 +1,5 @@
+from typing import Any
+
 import pandas as pd
 from feature_engine.datetime import DatetimeFeatures
 from pydantic import Field
@@ -16,7 +18,7 @@ class SimpleFeatures(Features):
 
     date_features: DatetimeFeatures | None = Field(init=False, default=None)
 
-    def fit(self, X: list[BunqPayment], _) -> pd.DataFrame:
+    def fit(self, X: list[BunqPayment], _: Any) -> pd.DataFrame:
         self.fit_date_features(X)
         return self
 

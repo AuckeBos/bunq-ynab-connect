@@ -1,3 +1,5 @@
+from typing import Any
+
 import pandas as pd
 from feature_engine.encoding import StringSimilarityEncoder
 
@@ -20,7 +22,7 @@ class CounterpartySimilarityFeatures(Features):
         self.top_categories = top_categories
         self.enabled = enabled
 
-    def fit(self, X: list[BunqPayment], _) -> "CounterpartySimilarityFeatures":
+    def fit(self, X: list[BunqPayment], _: Any) -> "CounterpartySimilarityFeatures":
         if not self.enabled:
             return self
         self.alias_features = StringSimilarityEncoder(

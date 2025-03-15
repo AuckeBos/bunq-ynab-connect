@@ -14,10 +14,10 @@ class DictToTransactionTransformer(BaseEstimator, TransformerMixin):
     step in a pipeline.
     """
 
-    def fit(self, _: Any, __: Any = None) -> "DictToTransactionTransformer":  # noqa: ANN401
+    def fit(self, _: Any, __: Any = None) -> "DictToTransactionTransformer":
         """No fitting is required."""
         return self
 
-    def transform(self, X: ndarray, _=None) -> list[BunqPayment]:
+    def transform(self, X: ndarray, _: Any = None) -> list[BunqPayment]:
         """Convert the list of dictionaries to a list of BunqPayments."""
         return [BunqPayment(**x) for x in X]

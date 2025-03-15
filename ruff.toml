@@ -54,6 +54,7 @@ ignore = [
     "ERA001", # Commented code
     "D103", # Docstring in public method
     "N803", # Parameter should be lowercase
+    "ANN401", # Allow Any for _
 ] 
 
 # Allow fix for all enabled rules (when `--fix`) is provided.

@@ -91,7 +91,7 @@ class OverSampler(BaseOverSampler):
         self,
         X: np.ndarray,
         y: np.ndarray,
-        **params: Any,  # noqa: ANN401
+        **params: Any,
     ) -> "OverSampler":
         """Fit the OverSampler. Log the upsampled categories."""
         if self.k_neighbours == 0 or self.percentile == 0.0:
