@@ -51,7 +51,7 @@ class BasePaymentClassificationExperiment:
     budget_id: str
     storage: AbstractStorage
     logger: LoggerAdapter
-    parent_run_id: str
+    parent_run_id: str | None = None
     ids: list[str]
     label_encoder: BudgetCategoryEncoder
 
