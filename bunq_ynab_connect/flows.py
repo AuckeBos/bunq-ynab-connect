@@ -85,12 +85,12 @@ def sync_payments_of_account(
 
 
 @task(task_run_name="train_for_budget_{budget_id}")
-def train_for_budget(budget_id: str) -> None:
+def train_for_budget(budget_id: str, max_runs: int) -> None:
     """Run the trainer for a single budget.
 
     Deploy the model after training.
     """
-    trainer = Trainer(budget_id=budget_id)
+    trainer = Trainer(budget_id=budget_id, max_runs=max_runs)
     run_id = trainer.train()
     if run_id:
         deployer = Deployer(budget_id=budget_id)
@@ -98,10 +98,16 @@ def train_for_budget(budget_id: str) -> None:
 
 
 @flow(task_runner=DaskTaskRunner())
-def train() -> None:
+def train(max_runs: int = 250) -> None:
     """Train one classifier for each budget.
 
     Before training, update the feature store, to make sure the latest data is used.
+
+    Parameters
+    ----------
+    max_runs : int
+        Maximum number of runs for hyperopt.
+
     """
     feature_store = FeatureStore()
     feature_store.update()
@@ -109,7 +115,7 @@ def train() -> None:
     storage = di[AbstractStorage]
     budget_ids = YnabBudget.get_budget_ids(storage)
     for budget_id in budget_ids:
-        train_for_budget.submit(budget_id)
+        train_for_budget.submit(budget_id=budget_id, max_runs=max_runs)
 
 
 @flow

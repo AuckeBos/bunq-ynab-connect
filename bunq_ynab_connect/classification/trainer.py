@@ -16,16 +16,19 @@ class Trainer:
     ----------
         logger: LoggerAdapter
         budget_id: ID of the budget to train the classifier for
+        max_runs: Maximum number of runs for hyperopt
 
     """
 
     logger: LoggerAdapter
     budget_id: str
+    max_runs: int
 
     @inject
-    def __init__(self, logger: LoggerAdapter, budget_id: str):
+    def __init__(self, logger: LoggerAdapter, budget_id: str, max_runs: int):
         self.logger = logger
         self.budget_id = budget_id
+        self.max_runs = max_runs
 
     def train(self) -> str:
         """Train the classifier by running an experiment.
@@ -40,8 +43,11 @@ class Trainer:
             Deployer
 
         """
-        self.logger.info("Training for budget %s", self.budget_id)
+        self.logger.info(
+            "Training for budget %s (max %s runs)", self.budget_id, self.max_runs
+        )
 
         experiment = FindBestModelExperiment(budget_id=self.budget_id)
+        experiment.max_runs = self.max_runs
         experiment.run()
         return experiment.parent_run_id

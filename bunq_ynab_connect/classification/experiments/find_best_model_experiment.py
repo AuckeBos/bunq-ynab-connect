@@ -34,11 +34,11 @@ class FindBestModelExperiment(BasePaymentClassificationExperiment):
 
     Attributes
     ----------
-        MAX_NUMBER_OF_EVALUATIONS: Maximum number of evaluations to run.
+        max_runs: Maximum number of evaluations to run.
 
     """
 
-    MAX_NUMBER_OF_EVALUATIONS = 500
+    max_runs: int = 250
 
     def _run(self, X: np.ndarray, y: np.ndarray) -> None:
         best_config = self._find_best_model(*self._remove_singleton_categories(X, y))
@@ -100,7 +100,7 @@ class FindBestModelExperiment(BasePaymentClassificationExperiment):
             objective,
             space,
             algo=tpe.suggest,
-            max_evals=self.MAX_NUMBER_OF_EVALUATIONS,
+            max_evals=self.max_runs,
             trials=trials,
         )
         return trials
