@@ -1,5 +1,6 @@
 from logging import LoggerAdapter
 from math import ceil
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -50,7 +51,12 @@ class UnderSampler(RandomUnderSampler):
     def undersampled_to(self) -> int:
         return next(iter(self.sampling_strategy_.values()), 0)
 
-    def fit_resample(self, X: np.ndarray, y: np.ndarray, **params) -> "UnderSampler":
+    def fit_resample(
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        **params: Any,  # noqa: ANN401
+    ) -> "UnderSampler":
         """Fit the UnderSampler. Log the undersampled categories."""
         result = super().fit_resample(X, y, **params)
         categories = self.undersampled_categories

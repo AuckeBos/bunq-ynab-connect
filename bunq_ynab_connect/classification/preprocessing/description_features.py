@@ -12,7 +12,7 @@ class DescriptionFeatures(Features):
     max_features: int
     enabled: bool
 
-    def __init__(self, max_features: int | None = None, enabled: bool = True):
+    def __init__(self, max_features: int | None = None, enabled: bool = True):  # noqa: FBT001, FBT002
         self.max_features = max_features
         self.enabled = enabled
 
@@ -31,6 +31,11 @@ class DescriptionFeatures(Features):
         )
 
     def fit_tfidf_features(self, X: list[BunqPayment]) -> None:
+        """Fit the TF-IDF features on the descriptions of the payments.
+
+        Strip accents, lowercase, exclude numbers from the tokens, and limit the
+        number of features.
+        """
         self.tfidf_features = TfidfVectorizer(
             strip_accents="ascii",
             lowercase=True,

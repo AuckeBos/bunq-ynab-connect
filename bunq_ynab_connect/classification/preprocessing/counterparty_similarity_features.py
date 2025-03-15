@@ -16,7 +16,7 @@ class CounterpartySimilarityFeatures(Features):
     enabled: bool
     alias_features: StringSimilarityEncoder | None
 
-    def __init__(self, top_categories: int | None = None, enabled: bool = True):
+    def __init__(self, top_categories: int | None = None, enabled: bool = True):  # noqa: FBT001, FBT002
         self.top_categories = top_categories
         self.enabled = enabled
 

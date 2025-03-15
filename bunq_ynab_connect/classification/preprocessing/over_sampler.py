@@ -1,5 +1,6 @@
 from logging import LoggerAdapter
 from math import ceil
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -30,6 +31,7 @@ class OverSampler(BaseOverSampler):
             to k_neighbours+1.
         SMOTE will upsample classes with fewer samples than the percentile value to the
             percentile value.
+
     """
 
     k_neighbours: int
@@ -47,7 +49,7 @@ class OverSampler(BaseOverSampler):
     def random_sampler_strategy(self, y: np.ndarray) -> dict:
         """Find the samples to upsample with the RandomOverSampler.
 
-        SMOTE requires that all classes have at least k_neighbors samples.0124
+        SMOTE requires that all classes have at least k_neighbors samples.
         We therefor randomly oversample all classes with fewer samples than
         k_neighbors. Result: dict with each class that has < k samples,
         values: k.
@@ -85,7 +87,12 @@ class OverSampler(BaseOverSampler):
             0,
         )
 
-    def _fit_resample(self, X: np.ndarray, y: np.ndarray, **params) -> "OverSampler":
+    def _fit_resample(
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        **params: Any,  # noqa: ANN401
+    ) -> "OverSampler":
         """Fit the OverSampler. Log the upsampled categories."""
         if self.k_neighbours == 0 or self.percentile == 0.0:
             self.logger.debug("No upsampling needed")
