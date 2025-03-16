@@ -1,4 +1,4 @@
-FROM python:3.11-bookworm
+FROM python:3.11-slim-bullseye
 LABEL maintainer="Aucke Bos"
 
 # Set user
