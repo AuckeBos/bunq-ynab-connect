@@ -119,10 +119,10 @@ def train(max_runs: int = 250) -> None:
 
 
 @flow
-def exchange_pat(pat: str) -> None:
+def exchange_pat(pat: str, name: str) -> None:
     """Exchange a new PAT for a new API context."""
     client = BunqClient()
-    client.exchange_pat(pat)
+    client.exchange_pat(pat, name)
 
 
 def work() -> None:
