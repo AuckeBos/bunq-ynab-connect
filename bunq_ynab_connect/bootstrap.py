@@ -32,7 +32,7 @@ from bunq_ynab_connect.helpers.json_dict import JsonDict
 
 
 def _load_env() -> None:
-    load_dotenv(find_dotenv())
+    load_dotenv(find_dotenv(), override=True)
 
 
 def _get_logger(name: str) -> logging.LoggerAdapter:
