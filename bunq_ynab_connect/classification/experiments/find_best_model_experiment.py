@@ -1,3 +1,5 @@
+import contextlib
+from logging import LoggerAdapter
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -5,6 +7,7 @@ import numpy as np
 from hyperopt import STATUS_OK, Trials, fmin, hp, tpe
 from hyperopt.pyll.base import scope
 from imblearn.pipeline import Pipeline
+from kink import inject
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
     accuracy_score,
@@ -23,6 +26,29 @@ from bunq_ynab_connect.helpers.general import object_to_mlflow
 
 if TYPE_CHECKING:
     from sklearn.base import ClassifierMixin
+
+
+@contextlib.contextmanager
+def progress_callback(initial: int, total: int):  # noqa: ANN201
+    """Progress callback for hyperopt.
+
+    Logs the progress of the hyperopt optimization to the default application logger.
+    """
+
+    class ProgressContext:
+        n: int
+        logger: LoggerAdapter
+
+        @inject
+        def __init__(self, logger: LoggerAdapter):
+            self.n = initial
+            self.logger = logger
+
+        def update(self, n: int) -> None:
+            self.n += n
+            self.logger.info("Step %d/%d", self.n, total)
+
+    yield ProgressContext()
 
 
 class FindBestModelExperiment(BasePaymentClassificationExperiment):
@@ -102,6 +128,7 @@ class FindBestModelExperiment(BasePaymentClassificationExperiment):
             algo=tpe.suggest,
             max_evals=self.max_runs,
             trials=trials,
+            show_progressbar=progress_callback,
         )
         return trials
 
