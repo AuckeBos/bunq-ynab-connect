@@ -15,7 +15,7 @@ from mlflow.tracking import MlflowClient
 class Deployer:
     """Deploy the model for a run.
 
-    Run should be a run of FullTrainingExperiment, which logs and registers the model.
+    The run should have logged and registered a model of type DeployableMlflowModel.
 
     Attributes
     ----------
@@ -26,6 +26,11 @@ class Deployer:
         PRODUCTION_ALIAS: The alias to use for production
         mlserver_repository_url: The url to the mlserver repository.
             Contains budget_id stub
+        SCORE_DECREASE_THRESHOLD: The threshold for the score decrease to deploy
+            If the score of the new model is less than this threshold worse than the
+            existing model, the model will not be deployed. We allow for this margin,
+            because we always prefer to deploy. This is because a new run includes
+            all current categories of the budget.
 
     """
 
@@ -35,6 +40,8 @@ class Deployer:
     client: MlflowClient
     PRODUCTION_ALIAS = "production"
     mlserver_repository_url: str
+
+    SCORE_DECREASE_THRESHOLD = 0.025
 
     @inject
     def __init__(
@@ -59,8 +66,7 @@ class Deployer:
         - Restart the mlserver service (in docker)
         """
         new_model = self.new_model(run_id)
-        existing_model = self.existing_model
-        if self.is_better_than(new_model, existing_model):
+        if self.is_good_enough_to_deploy(new_model):
             self.transition_model(new_model)
             self.create_mlserver_config()
             self.restart_mlserver()
@@ -90,22 +96,36 @@ class Deployer:
             self.logger.exception("Could not load existing model", exc_info=False)  # noqa: LOG007
             return None
 
-    def is_better_than(
-        self, new_model: ModelVersion, existing_model: ModelVersion
-    ) -> bool:
-        if not existing_model:
+    def is_good_enough_to_deploy(self, new_model: ModelVersion) -> bool:
+        if not (existing_model := self.existing_model):
             return True
         new_score = self.score(new_model)
         existing_score = self.score(existing_model)
-        if new_score > existing_score:
-            self.logger.info("New model is better: %s > %s", new_score, existing_score)
+        if (
+            new_score > existing_score
+            or abs(new_score - existing_score) < self.SCORE_DECREASE_THRESHOLD
+        ):
+            self.logger.info(
+                "New score %s is good enough; old score was %s",
+                new_score,
+                existing_score,
+            )
             return True
-        self.logger.info("New model is worse: %s <= %s", new_score, existing_score)
+        self.logger.warning(
+            "New score %s is not good enough; old score was %s",
+            new_score,
+            existing_score,
+        )
         return False
 
     def score(self, model: ModelVersion) -> float:
+        """Get the final score of the model."""
         run = mlflow.get_run(model.run_id)
-        return run.data.metrics["cohen_kappa"]
+        try:
+            return run.data.metrics["final_score"]
+        except KeyError:
+            self.logger.warning("No final score found for run %s", model.run_id)
+            return 0.0
 
     def transition_model(self, model: ModelVersion) -> None:
         """Transition the model to production."""

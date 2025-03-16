@@ -2,7 +2,7 @@
 All parts of the project run in Docker containers. This page lists the containers, and their purpose.
 
 ## Containers
-The following containers are defined in the main compose files ([docker-compose.yml](../docker/docker-compose.yml), [development.yml](../docker/development.yml), [portainer.yml](../docker/portainer.yaml)). `development.yml` should be used during development, see [development.md](./development.md). `portainer.yml` should be used in production, see [README.md](../README.md). `docker-compose.yml` is a reference compose. 
+The following containers are defined in the main compose files ([development.yml](../docker/development.yml), [portainer.yml](../docker/portainer.yaml)). `development.yml` should be used during development, see [development.md](./development.md). `portainer.yml` should be used in production, see [README.md](../README.md).
 ### MongoDB
 `mongo` is a MongoDB container. All data is stored in this container. It contains one database, named `bunq_ynab_connect. This stores the following collections:
 - `bunq_accounts`: The list of all accounts in your Bunq account.
@@ -38,7 +38,7 @@ The Dockerfile is described by:
 `mlflow` is a container that hosts the MLFlow server. It is used to track experiments and register models. It is available at [http://localhost:12003](http://localhost:12003).
 
 ### MLServer
-`mlserver` is a container that hosts the MLServer. It is used to serve models. It retrieves the Models from the `mlflow` container, and makes makes them available as REST endpoints to other containers in the network (ie the `prefect-agent`). Whenever a payment is to be synced, a request to `mlserver` is made to classify it with the correct model. Swagger docs are available at [http://192.168.0.4:12006/v2/docs#/](http://192.168.0.4:12006/v2/docs#/)
+`mlserver` is a container that hosts the MLServer. It is used to serve models. It retrieves the Models from the `mlflow` container, and makes makes them available as REST endpoints to other containers in the network (ie the `prefect-agent`). Whenever a payment is to be synced, a request to `mlserver` is made to classify it with the correct model. Swagger docs are available at [http://localhost:12006/v2/docs#/](http://localhost:12006/v2/docs#/)
 
 ### MLServer restarter
 A temporary solution to the following problem:

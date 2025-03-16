@@ -1,6 +1,7 @@
 import click
 from kink import inject
 
+from bunq_ynab_connect.classification.deployer import Deployer
 from bunq_ynab_connect.classification.trainer import Trainer
 from bunq_ynab_connect.data.data_extractors.bunq_account_extractor import (
     BunqAccountExtractor,
@@ -60,8 +61,13 @@ def sync_payment(payment_id: int, skip_if_synced: bool) -> None:  # noqa: FBT001
 @inject
 def test(storage: AbstractStorage) -> None:  # noqa: ARG001
     """Testing function."""
-    trainer = Trainer(budget_id="my-budget")
+    budget_id = "my-budget"
+    trainer = Trainer(budget_id=budget_id)
     trainer.train()
+    run_id = trainer.train()
+    if run_id:
+        deployer = Deployer(budget_id=budget_id)
+        deployer.deploy(run_id)
 
 
 @cli.command()

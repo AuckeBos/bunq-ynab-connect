@@ -32,7 +32,7 @@ from bunq_ynab_connect.helpers.json_dict import JsonDict
 
 
 def _load_env() -> None:
-    load_dotenv(find_dotenv())
+    load_dotenv(find_dotenv(), override=True)
 
 
 def _get_logger(name: str) -> logging.LoggerAdapter:
@@ -45,7 +45,6 @@ def _get_logger(name: str) -> logging.LoggerAdapter:
         logger = get_run_logger()
     except MissingContextError:
         logger = get_logger(name)
-        logger.warning("Bad prefect logger;")
     logger.setLevel(logging.DEBUG)
     return logger
 
@@ -125,19 +124,17 @@ def import_mlserver_windows_friendly(logger: logging.LoggerAdapter) -> None:
     """
     try:
         import mlserver  # noqa: F401
-
-        logger.info("Good mlserver import;")
     except Exception:  # noqa: BLE001
         import subprocess
 
         logger.warning("Bad mlserver import; trying to install mlserver")
         install_cmd = "pip install mlserver"
         subprocess.Popen(install_cmd, shell=True, stdout=subprocess.DEVNULL)  # noqa: S602
-        logger.info("Good mlserver reinstall;")
+        logger.debug("Good mlserver reinstall;")
     finally:
         from mlserver.codecs import PandasCodec  # noqa: F401
 
-        logger.info("Good mlserver import;")
+        logger.debug("Good mlserver import;")
 
 
 def monkey_patch_mlserver() -> None:

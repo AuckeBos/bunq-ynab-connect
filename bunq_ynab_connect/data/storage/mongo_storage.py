@@ -38,7 +38,7 @@ class MongoStorage(AbstractStorage):
         self.test_connection()
         self.set_indexes()
 
-    def convert_query(self, query: list[tuple] | None = None) -> Any:  # noqa: ANN401
+    def convert_query(self, query: list[tuple] | None = None) -> Any:
         """Each operator is prefixed with a $. The list is converted to a dictionary."""
         query = query or []
         return {q[0]: {f"${q[1]}": q[2]} for q in query}

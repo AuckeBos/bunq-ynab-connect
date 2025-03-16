@@ -60,7 +60,7 @@ class BaseClient:
         endpoint: str,
         data: dict | None = None,
         headers: dict | None = None,
-        **endpoint_variables: Any,  # noqa: ANN401
+        **endpoint_variables: Any,
     ) -> dict:
         """Make a POST request to the bunq API.
 
@@ -97,7 +97,7 @@ class BaseClient:
         *,
         endpoint: str,
         params: dict | None = None,
-        **endpoint_variables: Any,  # noqa: ANN401
+        **endpoint_variables: Any,
     ) -> dict:
         """Make a GET request to the bunq API.
 
@@ -128,7 +128,7 @@ class BaseClient:
         params: dict | None = None,
         continue_loading_pages: Callable[[list], bool] | None = None,
         page_size: int = 200,
-        **endpoint_variables: Any,  # noqa: ANN401
+        **endpoint_variables: Any,
     ) -> list:
         """Perform a GET request in a paginated way.
 
@@ -199,7 +199,7 @@ class BaseClient:
         self.session_activator.ensure_session_active()
         return self.session_activator.session_token
 
-    def _format_endpoint(self, endpoint: str, **params: Any) -> str:  # noqa: ANN401
+    def _format_endpoint(self, endpoint: str, **params: Any) -> str:
         url = endpoint.format(**params)
         if url.startswith("/v1"):
             url = url.replace("/v1", "")

@@ -1,88 +1,53 @@
 from logging import LoggerAdapter
 
 from kink import inject
-from sklearn.base import ClassifierMixin
 
-from bunq_ynab_connect.classification.experiments.classifier_selection_experiment import (  # noqa: E501
-    ClassifierSelectionExperiment,
-)
-from bunq_ynab_connect.classification.experiments.classifier_tuning_experiment import (
-    ClassifierTuningExperiment,
-)
-from bunq_ynab_connect.classification.experiments.full_training_experiment import (
-    FullTrainingExperiment,
+from bunq_ynab_connect.classification.experiments.find_best_model_experiment import (
+    FindBestModelExperiment,
 )
 
 
 class Trainer:
     """Train a classifier.
 
-    Use the ClassifierSelectionExperiment to select the best classifier.
-    Use the ClassifierTuningExperiment to select the best parameters for the classifier.
-    Train the best classifier on the full dataset.
+    Finds the best model (config) and trains it. Log to mlflow.
 
     Attributes
     ----------
-        EXPERIMENT_NAME: Name of the experiment
         logger: LoggerAdapter
         budget_id: ID of the budget to train the classifier for
+        max_runs: Maximum number of runs for hyperopt
 
     """
 
-    EXPERIMENT_NAME = "Full Training"
-
     logger: LoggerAdapter
     budget_id: str
+    max_runs: int
 
     @inject
-    def __init__(self, logger: LoggerAdapter, budget_id: str):
+    def __init__(self, logger: LoggerAdapter, budget_id: str, max_runs: int):
         self.logger = logger
         self.budget_id = budget_id
-
-    budget_id: str
+        self.max_runs = max_runs
 
     def train(self) -> str:
-        """Select the best classifier and the best parameters for the given classifier.
+        """Train the classifier by running an experiment.
 
-        Then train the best classifier on the full dataset.
-
-        Returns
-        -------
-            The run ID of the FullTrainingExperiment
-
-        """
-        self.logger.info("Training for budget %s", self.budget_id)
-        classifier = self.select_best_classifier()
-        if not classifier:
-            self.logger.info("No classifier selected, training failed")
-            return None
-        parameters = self.select_best_parameters(classifier)
-        return self.train_classifier(classifier, parameters)
-
-    def select_best_classifier(self) -> ClassifierMixin:
-        """Run the ClassifierSelectionExperiment to select the best classifier."""
-        experiment = ClassifierSelectionExperiment(budget_id=self.budget_id)
-        experiment.run()
-        return experiment.get_best_classifier()
-
-    def select_best_parameters(self, classifier: ClassifierMixin) -> dict:
-        """Run the ClassifierTuningExperiment to select the best parameters."""
-        experiment = ClassifierTuningExperiment(
-            budget_id=self.budget_id, clf=classifier
-        )
-        experiment.run()
-        return experiment.get_best_parameters()
-
-    def train_classifier(self, classifier: ClassifierMixin, parameters: dict) -> str:
-        """Run the FullTrainingExperiment to train the classifier on the full dataset.
+        The experiment must find the best model (configuration), and
+        finally train on the complete dataset and log it. It should be logged
+        as a DeployableMlflowModel.
 
         Returns
         -------
-            The run ID of the experiment
+            The run ID of the experiment. It serves as input to the
+            Deployer
 
         """
-        experiment = FullTrainingExperiment(
-            budget_id=self.budget_id, clf=classifier, parameters=parameters
+        self.logger.info(
+            "Training for budget %s (max %s runs)", self.budget_id, self.max_runs
         )
+
+        experiment = FindBestModelExperiment(budget_id=self.budget_id)
+        experiment.max_runs = self.max_runs
         experiment.run()
         return experiment.parent_run_id
