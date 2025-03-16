@@ -90,7 +90,7 @@ class SessionActivator:
         if self.session_token is not None:
             return
         if not self._api_token_activated:
-            self._activate_api_token()
+            self.activate_api_token()
 
         self.logger.info("Creating new API session;")
 
@@ -125,14 +125,21 @@ class SessionActivator:
             and self.bunq_config["installation_context.device_id"] is not None
         )
 
-    def _activate_api_token(self) -> None:
+    def activate_api_token(self, name: str | None = None) -> None:
         """Activate the API token. Generate RSA key if not done yet.
 
         Activate RSA key if not done yet.
 
         Second step in the bunq authentication flow.
         Stores the API token and device id in the config.
+
+        Parameters
+        ----------
+        name : str, optional
+            The name of the device. Defaults to the platform node name.
+
         """
+        name = name or platform.node()
         if self._api_token_activated:
             return
         if not self._rsa_key_activated:
@@ -142,7 +149,7 @@ class SessionActivator:
             response = self.bunq_client.post(
                 endpoint="device-server",
                 data={
-                    "description": f"bunqynab_{platform.node()}",
+                    "description": f"bunqynab_{name}",
                     "secret": self.api_token,
                 },
             )

@@ -132,10 +132,18 @@ class BunqClient:
         else:
             return accounts
 
-    def exchange_pat(self, pat: str) -> None:
+    def exchange_pat(self, pat: str, name: str) -> None:
         """Trade a PAT for a new bunq config file.
 
         Remove some config variables, to enforce an exchange.
+
+        Parameters
+        ----------
+        pat : str
+            The PAT to trade.
+        name : str, optional
+            The name of the device.
+
         """
         old_config = self.bunq_config.data
         config = old_config.copy()
@@ -144,7 +152,7 @@ class BunqClient:
         del config["session_context"]
         self.bunq_config.save(config)
         try:
-            self.base_client.session_activator.ensure_session_active()
+            self.base_client.session_activator.activate_api_token(name)
         except Exception as e:
             self.bunq_config.save(old_config)
             msg = "Could not trade PAT for new bunq config"
