@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from kink import di
-from prefect import flow, serve, task
+from prefect import Flow, flow, serve, task
 from prefect.client.schemas.schedules import CronSchedule
 from prefect.concurrency.sync import concurrency
 from prefect_dask.task_runners import DaskTaskRunner
@@ -34,6 +34,8 @@ if TYPE_CHECKING:
     from bunq_ynab_connect.data.data_extractors.abstract_extractor import (
         AbstractExtractor,
     )
+
+from prefect.task_runners import SequentialTaskRunner
 
 
 @flow
@@ -97,7 +99,33 @@ def train_for_budget(budget_id: str, max_runs: int) -> None:
         deployer.deploy(run_id)
 
 
-@flow(task_runner=DaskTaskRunner())
+@flow
+def parent_flow(
+    task_runner_type: str = "sequential", max_runs: int = 100
+):  # pass this to `Deployment.build_from_flow`
+    if task_runner_type == "paralel":
+        task_runner = DaskTaskRunner()
+    else:
+        task_runner = SequentialTaskRunner()
+
+    return train.with_options(task_runner=task_runner)(max_runs=max_runs)
+
+
+@flow
+def dynamic_flow(flow_: Flow, task_runner_type: str = "sequential") -> Flow:
+    if task_runner_type == "paralel":
+        task_runner = DaskTaskRunner()
+    else:
+        task_runner = SequentialTaskRunner()
+
+    @flow(task_runner=task_runner)
+    def inner(*args, **kwargs):
+        return flow_(*args, **kwargs)
+
+    return inner
+
+
+@flow
 def train(max_runs: int = 250) -> None:
     """Train one classifier for each budget.
 
@@ -159,12 +187,12 @@ def work() -> None:
             description="Force sync payemnts of one iban within a date range",
             version="2024.09.12",
         ),
-        train.to_deployment(
+        dynamic_flow(train).to_deployment(
             name="train",
             description="Train one classifier for each budget",
             version="2024.09.12",
             schedules=[CronSchedule(cron="0 2 * * 0", timezone="Europe/Amsterdam")],
-            parameters={"max_runs": 100},
+            parameters={"max_runs": 100, "task_runner_type": "sequential"},
         ),
         exchange_pat.to_deployment(
             name="exchange_pat",

@@ -8,7 +8,9 @@ from hyperopt import STATUS_OK, Trials, fmin, hp, tpe
 from hyperopt.pyll.base import scope
 from imblearn.pipeline import Pipeline
 from kink import inject
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import (
+    RandomForestClassifier,
+)
 from sklearn.metrics import (
     accuracy_score,
     balanced_accuracy_score,
@@ -108,8 +110,8 @@ class FindBestModelExperiment(BasePaymentClassificationExperiment):
                 {
                     "classifier": RandomForestClassifier.__name__,
                     "parameters": {
-                        **self._feature_extraction_search_space,
-                        **self._sampling_search_space,
+                        **self._feature_extraction_search_space("rf"),
+                        **self._sampling_search_space("rf"),
                         "classifier__max_depth": hp.uniformint(
                             "classifier__max_depth", 50, 500
                         ),
@@ -118,9 +120,57 @@ class FindBestModelExperiment(BasePaymentClassificationExperiment):
                         ),
                     },
                 },
+                # {
+                #     "classifier": KNeighborsClassifier.__name__,
+                #     "parameters": {
+                #         **self._feature_extraction_search_space("knn"),
+                #         **self._sampling_search_space("knn"),
+                #         "classifier__n_neighbors": hp.uniformint(
+                #             "classifier__n_neighbors", 1, 20
+                #         ),
+                #         "classifier__weights": hp.choice(
+                #             "classifier__weights", ["uniform", "distance"]
+                #         ),
+                #         "classifier__algorithm": hp.choice(
+                #             "classifier__algorithm", ["auto", "ball_tree", "kd_tree"]
+                #         ),
+                #     },
+                # },
+                # {
+                #     "classifier": GradientBoostingClassifier.__name__,
+                #     "parameters": {
+                #         **self._feature_extraction_search_space("gb"),
+                #         **self._sampling_search_space("gb"),
+                #         "classifier__learning_rate": hp.uniform(
+                #             "classifier__learning_rate", 0.01, 0.5
+                #         ),
+                #         "classifier__n_estimators": hp.uniformint(
+                #             "classifier__n_estimators", 50, 500
+                #         ),
+                #     },
+                # },
+                # {
+                #     "classifier": MLPClassifier.__name__,
+                #     "parameters": {
+                #         **self._feature_extraction_search_space("mlp"),
+                #         **self._sampling_search_space("mlp"),
+                #         "classifier__hidden_layer_sizes": hp.uniformint(
+                #             "classifier__hidden_layer_sizes", 50, 500
+                #         ),
+                #         "classifier__activation": hp.choice(
+                #             "classifier__activation",
+                #             ["identity", "logistic", "tanh", "relu"],
+                #         ),
+                #         "classifier__alpha": hp.uniform(
+                #             "classifier__alpha", 0.0001, 0.1
+                #         ),
+                #     },
+                # },
             ],
         )
 
+        # uri = "mongodb://uname:pw@localhost:27017/hyperopt/jobs"
+        # trials = MongoTrials(uri)
         trials = Trials()
         fmin(
             objective,
@@ -165,51 +215,51 @@ class FindBestModelExperiment(BasePaymentClassificationExperiment):
         mlflow.log_metrics(metrics)
         return -metrics["final_score"]
 
-    @property
-    def _feature_extraction_search_space(self) -> dict:
-        """The search space configuration for the feature extraction."""
+    def _feature_extraction_search_space(self, classifier_name: str) -> dict:
+        """The search space configuration for the feature extraction."""  # noqa: D401
         return {
             "feature_extractor__description_features__max_features": scope.int(
                 hp.uniform(
-                    "feature_extractor__description_features__max_features",
+                    f"{classifier_name}_feature_extractor__description_features__max_features",
                     750,
                     3000,
                 )
             ),
             "feature_extractor__description_features__enabled": hp.choice(
-                "feature_extractor__description_features__enabled",
+                f"{classifier_name}_feature_extractor__description_features__enabled",
                 [True],
             ),
             "feature_extractor__alias_features__top_categories": hp.uniformint(
-                "feature_extractor__alias_features__top_categories", 20, 80
+                f"{classifier_name}_feature_extractor__alias_features__top_categories",
+                20,
+                80,
             ),
             "feature_extractor__alias_features__enabled": hp.choice(
-                "feature_extractor__alias_features__enabled",
+                f"{classifier_name}_feature_extractor__alias_features__enabled",
                 [False],
             ),
             "feature_extractor__counterparty_similarity_features__top_categories": hp.uniformint(  # noqa: E501
-                "feature_extractor__counterparty_similarity_features__top_categories",
+                f"{classifier_name}_feature_extractor__counterparty_similarity_features__top_categories",
                 20,
                 80,
             ),
             "feature_extractor__counterparty_similarity_features__enabled": hp.choice(
-                "feature_extractor__counterparty_similarity_features__enabled",
+                f"{classifier_name}_feature_extractor__counterparty_similarity_features__enabled",
                 [True],
             ),
         }
 
-    @property
-    def _sampling_search_space(self) -> dict:
-        """The search space configuration for the sampling."""
+    def _sampling_search_space(self, classifier_name: str) -> dict:
+        """The search space configuration for the sampling."""  # noqa: D401
         return {
             "under_sampler__percentile": hp.uniform(
-                "under_sampler__percentile", 0.9, 1.0
+                f"{classifier_name}_under_sampler__percentile", 0.9, 1.0
             ),
             "over_sampler__k_neighbours": hp.uniformint(
-                "over_sampler__k_neighbours", 0, 5
+                f"{classifier_name}_over_sampler__k_neighbours", 0, 5
             ),
             "over_sampler__percentile": hp.uniform(
-                "over_sampler__percentile", 0.2, 0.8
+                f"{classifier_name}_over_sampler__percentile", 0.2, 0.8
             ),
         }
 
