@@ -43,9 +43,7 @@ class AliasFeatures(Features):
     def payments_to_aliases(self, X: list[BunqPayment]) -> pd.DataFrame:
         return pd.DataFrame(
             {
-                "alias": [payment.alias["display_name"] for payment in X],
-                "counterparty_alias": [
-                    payment.counterparty_alias["display_name"] for payment in X
-                ],
+                "alias": [payment.alias_name for payment in X],
+                "counterparty_alias": [payment.counterparty_alias for payment in X],
             }
         )

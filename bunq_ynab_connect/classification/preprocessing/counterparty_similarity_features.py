@@ -43,7 +43,7 @@ class CounterpartySimilarityFeatures(Features):
         return pd.DataFrame(
             {
                 "counterparty_alias": [
-                    payment.counterparty_alias["display_name"] for payment in X
+                    payment.counterparty_alias_name for payment in X
                 ],
             }
         )
