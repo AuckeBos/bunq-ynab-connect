@@ -10,30 +10,49 @@
 #   universal: false
 
 -e file:.
+absl-py==2.1.0
+    # via tensorboard
+accelerate==0.34.2
+    # via autogluon-multimodal
+    # via autogluon-timeseries
+adagio==0.2.6
+    # via fugue
 aiofiles==24.1.0
     # via mlserver
 aiohappyeyeballs==2.4.0
     # via aiohttp
 aiohttp==3.10.5
+    # via aiohttp-cors
+    # via datasets
+    # via fsspec
+    # via ray
     # via tritonclient
+aiohttp-cors==0.8.0
+    # via ray
 aiokafka==0.11.0
     # via mlserver
 aiosignal==1.3.1
     # via aiohttp
+    # via ray
 aiosqlite==0.20.0
     # via prefect
 alembic==1.13.2
     # via mlflow
+    # via optuna
     # via prefect
 aniso8601==9.0.1
     # via graphene
 annotated-types==0.7.0
     # via pydantic
+antlr4-python3-runtime==4.9.3
+    # via omegaconf
 anyio==4.4.0
     # via httpx
     # via prefect
     # via starlette
     # via watchfiles
+appdirs==1.4.4
+    # via fs
 apprise==1.9.0
     # via prefect
 asgi-lifespan==2.1.0
@@ -51,8 +70,42 @@ attrs==24.2.0
     # via aiohttp
     # via jsonschema
     # via referencing
+autogluon==1.2
+    # via bunq-ynab-connect
+autogluon-common==1.2
+    # via autogluon-core
+    # via autogluon-features
+    # via autogluon-multimodal
+    # via autogluon-timeseries
+autogluon-core==1.2
+    # via autogluon
+    # via autogluon-multimodal
+    # via autogluon-tabular
+    # via autogluon-timeseries
+autogluon-features==1.2
+    # via autogluon
+    # via autogluon-multimodal
+    # via autogluon-tabular
+autogluon-multimodal==1.2
+    # via autogluon
+autogluon-tabular==1.2
+    # via autogluon
+    # via autogluon-timeseries
+autogluon-timeseries==1.2
+    # via autogluon
+beautifulsoup4==4.13.3
+    # via gdown
 blinker==1.8.2
     # via flask
+blis==0.7.11
+    # via thinc
+boto3==1.37.14
+    # via autogluon-common
+    # via autogluon-core
+    # via autogluon-multimodal
+botocore==1.37.14
+    # via boto3
+    # via s3transfer
 brotli==1.1.0
     # via geventhttpclient
 bz2file==0.98
@@ -60,6 +113,12 @@ cachetools==5.5.0
     # via google-auth
     # via mlflow-skinny
     # via prefect
+catalogue==2.0.10
+    # via spacy
+    # via srsly
+    # via thinc
+catboost==1.2.7
+    # via autogluon-tabular
 certifi==2024.8.30
     # via apprise
     # via geventhttpclient
@@ -80,48 +139,87 @@ click==8.1.7
     # via flask
     # via mlflow-skinny
     # via mlserver
+    # via model-index
+    # via nltk
+    # via opendatalab
+    # via openmim
     # via prefect
+    # via ray
     # via typer
     # via uvicorn
+cloudpathlib==0.21.0
+    # via weasel
 cloudpickle==3.0.0
     # via dask
     # via distributed
     # via hyperopt
     # via mlflow-skinny
+    # via mlforecast
     # via prefect
+    # via statsforecast
 colorama==0.4.6
     # via click
+    # via colorful
+    # via colorlog
     # via griffe
     # via ipython
+    # via opendatalab
+    # via openmim
     # via pytest
     # via tqdm
     # via uvicorn
+    # via wasabi
+colorful==0.5.6
+    # via ray
+colorlog==6.9.0
+    # via optuna
 comm==0.2.2
     # via ipykernel
+confection==0.1.5
+    # via thinc
+    # via weasel
 contourpy==1.3.0
     # via matplotlib
 coolname==2.2.0
     # via prefect
+coreforecast==0.0.12
+    # via autogluon-timeseries
+    # via mlforecast
+    # via statsforecast
 croniter==2.0.7
     # via prefect
 cryptography==43.0.1
     # via prefect
 cycler==0.12.1
     # via matplotlib
+cymem==2.0.11
+    # via preshed
+    # via spacy
+    # via thinc
 dask==2024.8.2
     # via distributed
 databricks-sdk==0.32.1
     # via mlflow-skinny
+datasets==3.4.1
+    # via evaluate
 dateparser==1.2.0
     # via prefect
 debugpy==1.8.12
     # via ipykernel
 decorator==5.1.1
     # via ipython
+defusedxml==0.7.1
+    # via autogluon-multimodal
 deprecated==1.2.14
     # via opentelemetry-api
     # via opentelemetry-exporter-otlp-proto-grpc
     # via opentelemetry-semantic-conventions
+dill==0.3.8
+    # via datasets
+    # via evaluate
+    # via multiprocess
+distlib==0.3.9
+    # via virtualenv
 distributed==2024.8.2
     # via prefect-dask
 dnspython==2.6.1
@@ -130,20 +228,42 @@ dnspython==2.6.1
 docker==7.1.0
     # via mlflow
     # via prefect
+einops==0.8.1
+    # via autogluon-tabular
 email-validator==2.2.0
     # via pydantic
+evaluate==0.4.3
+    # via autogluon-multimodal
 exceptiongroup==1.2.2
     # via prefect
     # via prefect-dask
 executing==2.2.0
     # via stack-data
+fastai==2.7.19
+    # via autogluon-tabular
 fastapi==0.110.0
     # via bunq-ynab-connect
     # via mlserver
 fastapi-cli==0.0.5
     # via bunq-ynab-connect
+fastcore==1.7.29
+    # via fastai
+    # via fastdownload
+fastdownload==0.0.7
+    # via fastai
+fastprogress==1.0.3
+    # via fastai
+    # via fastdownload
 feature-engine==1.8.3
     # via bunq-ynab-connect
+filelock==3.18.0
+    # via datasets
+    # via gdown
+    # via huggingface-hub
+    # via ray
+    # via torch
+    # via transformers
+    # via virtualenv
 flask==3.0.3
     # via mlflow
 fonttools==4.53.1
@@ -151,11 +271,28 @@ fonttools==4.53.1
 frozenlist==1.4.1
     # via aiohttp
     # via aiosignal
+    # via ray
+fs==2.4.16
+    # via triad
 fsspec==2024.9.0
     # via dask
+    # via datasets
+    # via evaluate
+    # via huggingface-hub
+    # via lightning
+    # via mlforecast
     # via prefect
+    # via pytorch-lightning
+    # via ray
+    # via torch
+    # via triad
+fugue==0.9.1
+    # via autogluon-timeseries
+    # via statsforecast
 future==1.0.0
     # via hyperopt
+gdown==5.2.0
+    # via nlpaug
 gevent==24.2.1
     # via geventhttpclient
     # via mlserver
@@ -166,10 +303,16 @@ gitdb==4.0.11
     # via gitpython
 gitpython==3.1.43
     # via mlflow-skinny
+gluonts==0.16.0
+    # via autogluon-timeseries
+google-api-core==2.24.2
+    # via opencensus
 google-auth==2.34.0
     # via databricks-sdk
+    # via google-api-core
     # via kubernetes
 googleapis-common-protos==1.65.0
+    # via google-api-core
     # via opentelemetry-exporter-otlp-proto-grpc
 graphene==3.3
     # via mlflow
@@ -179,6 +322,7 @@ graphql-core==3.2.4
 graphql-relay==3.2.0
     # via graphene
 graphviz==0.20.3
+    # via catboost
     # via prefect
 greenlet==3.1.0
     # via gevent
@@ -190,6 +334,8 @@ grpcio==1.66.1
     # via mlserver
     # via opentelemetry-exporter-otlp-proto-grpc
     # via py-grpc-prometheus
+    # via ray
+    # via tensorboard
 h11==0.14.0
     # via httpcore
     # via uvicorn
@@ -204,12 +350,21 @@ httptools==0.6.1
     # via uvicorn
 httpx==0.27.2
     # via prefect
+huggingface-hub==0.29.3
+    # via accelerate
+    # via autogluon-tabular
+    # via datasets
+    # via evaluate
+    # via timm
+    # via tokenizers
+    # via transformers
 humanize==4.10.0
     # via jinja2-humanize-extension
     # via prefect
 hyperframe==6.0.1
     # via h2
 hyperopt==0.2.7
+    # via autogluon-core
     # via bunq-ynab-connect
 idna==3.8
     # via anyio
@@ -217,6 +372,8 @@ idna==3.8
     # via httpx
     # via requests
     # via yarl
+imageio==2.37.0
+    # via scikit-image
 imbalanced-learn==0.13.0
     # via bunq-ynab-connect
 importlib-metadata==8.4.0
@@ -237,22 +394,32 @@ itsdangerous==2.2.0
 jedi==0.19.2
     # via ipython
 jinja2==3.1.4
+    # via autogluon-multimodal
     # via distributed
     # via flask
     # via jinja2-humanize-extension
     # via mlflow
     # via prefect
+    # via spacy
+    # via torch
 jinja2-humanize-extension==0.4.0
     # via prefect
+jmespath==1.0.1
+    # via boto3
+    # via botocore
 joblib==1.4.2
+    # via autogluon-timeseries
     # via imbalanced-learn
+    # via nltk
     # via scikit-learn
 jsonpatch==1.33
     # via prefect
 jsonpointer==3.0.0
     # via jsonpatch
-jsonschema==4.23.0
+jsonschema==4.21.1
+    # via autogluon-multimodal
     # via prefect
+    # via ray
 jsonschema-specifications==2023.12.1
     # via jsonschema
 jupyter-client==8.6.3
@@ -266,14 +433,35 @@ kiwisolver==1.4.7
     # via matplotlib
 kubernetes==29.0.0
     # via prefect
+langcodes==3.5.0
+    # via spacy
+language-data==1.3.0
+    # via langcodes
+lazy-loader==0.4
+    # via scikit-image
+lightgbm==4.5.0
+    # via autogluon-tabular
+lightning==2.5.0.post0
+    # via autogluon-multimodal
+    # via autogluon-timeseries
+lightning-utilities==0.14.1
+    # via lightning
+    # via pytorch-lightning
+    # via torchmetrics
+llvmlite==0.44.0
+    # via numba
 locket==1.0.0
     # via distributed
     # via partd
 mako==1.3.5
     # via alembic
+marisa-trie==1.2.1
+    # via language-data
 markdown==3.7
     # via apprise
     # via mlflow
+    # via model-index
+    # via tensorboard
 markdown-it-py==3.0.0
     # via rich
 markupsafe==2.1.5
@@ -281,6 +469,9 @@ markupsafe==2.1.5
     # via mako
     # via werkzeug
 matplotlib==3.9.2
+    # via autogluon-core
+    # via catboost
+    # via fastai
     # via mlflow
 matplotlib-inline==0.1.7
     # via ipykernel
@@ -292,40 +483,115 @@ mlflow==2.16.0
     # via mlserver-mlflow
 mlflow-skinny==2.16.0
     # via mlflow
+mlforecast==0.13.4
+    # via autogluon-timeseries
 mlserver==1.6.1
     # via bunq-ynab-connect
     # via mlserver-mlflow
 mlserver-mlflow==1.6.1
     # via bunq-ynab-connect
+model-index==0.1.11
+    # via openmim
 mongomock==4.2.0.post1
+mpmath==1.3.0
+    # via sympy
 msgpack==1.1.0
     # via distributed
+    # via ray
 multidict==6.1.0
     # via aiohttp
     # via yarl
+multiprocess==0.70.16
+    # via datasets
+    # via evaluate
+murmurhash==1.0.12
+    # via preshed
+    # via spacy
+    # via thinc
+narwhals==1.31.0
+    # via plotly
 nest-asyncio==1.6.0
     # via ipykernel
 networkx==3.4.2
+    # via autogluon-core
+    # via autogluon-tabular
+    # via autogluon-timeseries
     # via hyperopt
-numpy==2.1.1
+    # via scikit-image
+    # via torch
+nlpaug==1.1.11
+    # via autogluon-multimodal
+nltk==3.8.1
+    # via autogluon-multimodal
+numba==0.61.0
+    # via mlforecast
+    # via statsforecast
+    # via window-ops
+numpy==1.26.4
+    # via accelerate
+    # via autogluon-common
+    # via autogluon-core
+    # via autogluon-features
+    # via autogluon-multimodal
+    # via autogluon-tabular
+    # via autogluon-timeseries
+    # via blis
+    # via catboost
     # via contourpy
+    # via coreforecast
+    # via datasets
+    # via evaluate
     # via feature-engine
+    # via gluonts
     # via hyperopt
+    # via imageio
     # via imbalanced-learn
+    # via lightgbm
     # via matplotlib
     # via mlflow
     # via mlserver
+    # via nlpaug
+    # via numba
+    # via optuna
     # via pandas
     # via patsy
     # via pyarrow
+    # via pytorch-metric-learning
+    # via safetensors
+    # via scikit-image
     # via scikit-learn
     # via scipy
+    # via seqeval
+    # via spacy
+    # via statsforecast
     # via statsmodels
+    # via tensorboard
+    # via tensorboardx
+    # via thinc
+    # via tifffile
+    # via torchmetrics
+    # via torchvision
+    # via transformers
+    # via triad
     # via tritonclient
+    # via utilsforecast
+    # via window-ops
     # via xgboost
+nvidia-ml-py3==7.352.0
+    # via autogluon-multimodal
 oauthlib==3.2.2
     # via kubernetes
     # via requests-oauthlib
+omegaconf==2.2.3
+    # via autogluon-multimodal
+opencensus==0.11.4
+    # via ray
+opencensus-context==0.1.3
+    # via opencensus
+opendatalab==0.0.10
+    # via openmim
+openmim==0.3.9
+    # via autogluon-multimodal
 opentelemetry-api==1.27.0
     # via mlflow-skinny
     # via opentelemetry-exporter-otlp-proto-grpc
@@ -364,25 +630,74 @@ opentelemetry-semantic-conventions==0.48b0
 opentelemetry-util-http==0.48b0
     # via opentelemetry-instrumentation-asgi
     # via opentelemetry-instrumentation-fastapi
+openxlab==0.0.11
+    # via opendatalab
+optuna==4.2.1
+    # via mlforecast
+ordered-set==4.1.0
+    # via model-index
 orjson==3.10.7
+    # via autogluon-timeseries
     # via mlserver
     # via prefect
 packaging==24.1
+    # via accelerate
     # via aiokafka
     # via dask
+    # via datasets
     # via distributed
+    # via evaluate
+    # via fastai
+    # via fastcore
+    # via huggingface-hub
     # via ipykernel
+    # via lazy-loader
+    # via lightning
+    # via lightning-utilities
     # via matplotlib
     # via mlflow-skinny
+    # via mlforecast
     # via mongomock
+    # via optuna
+    # via plotly
     # via prefect
+    # via pytesseract
     # via pytest
+    # via pytorch-lightning
+    # via ray
+    # via scikit-image
+    # via spacy
     # via statsmodels
+    # via tensorboard
+    # via tensorboardx
+    # via thinc
+    # via torchmetrics
+    # via transformers
+    # via utilsforecast
+    # via weasel
 pandas==2.2.2
+    # via autogluon-common
+    # via autogluon-core
+    # via autogluon-features
+    # via autogluon-multimodal
+    # via autogluon-tabular
+    # via autogluon-timeseries
+    # via catboost
+    # via datasets
+    # via evaluate
+    # via fastai
     # via feature-engine
+    # via gluonts
     # via mlflow
+    # via mlforecast
     # via mlserver
+    # via nlpaug
+    # via openmim
+    # via ray
+    # via statsforecast
     # via statsmodels
+    # via triad
+    # via utilsforecast
 parso==0.8.4
     # via jedi
 partd==1.4.2
@@ -391,12 +706,27 @@ pathspec==0.12.1
     # via prefect
 patsy==1.0.1
     # via statsmodels
+pdf2image==1.17.0
+    # via autogluon-multimodal
 pendulum==2.1.2
     # via prefect
 pillow==10.4.0
+    # via autogluon-multimodal
+    # via fastai
+    # via imageio
     # via matplotlib
+    # via pdf2image
+    # via pytesseract
+    # via scikit-image
+    # via torchvision
+pip==25.0.1
+    # via fastai
+    # via openmim
 platformdirs==4.3.6
     # via jupyter-core
+    # via virtualenv
+plotly==6.0.1
+    # via catboost
 pluggy==1.5.0
     # via pytest
 prefect==2.20.6
@@ -404,27 +734,47 @@ prefect==2.20.6
     # via prefect-dask
 prefect-dask==0.2.10
     # via bunq-ynab-connect
+preshed==3.0.9
+    # via spacy
+    # via thinc
 prometheus-client==0.20.0
     # via py-grpc-prometheus
+    # via ray
     # via starlette-exporter
 prompt-toolkit==3.0.50
     # via ipython
+proto-plus==1.26.1
+    # via google-api-core
 protobuf==4.25.4
+    # via google-api-core
     # via googleapis-common-protos
     # via mlflow-skinny
     # via mlserver
     # via opentelemetry-proto
+    # via proto-plus
+    # via ray
+    # via tensorboard
+    # via tensorboardx
+    # via transformers
 psutil==6.0.0
+    # via accelerate
+    # via autogluon-common
     # via distributed
     # via ipykernel
 pure-eval==0.2.3
     # via stack-data
 py-grpc-prometheus==0.8.0
     # via mlserver
+py-spy==0.4.0
+    # via ray
 py4j==0.10.9.9
     # via hyperopt
 pyarrow==17.0.0
+    # via autogluon-core
+    # via datasets
     # via mlflow
+    # via ray
+    # via triad
 pyasn1==0.6.1
     # via pyasn1-modules
     # via rsa
@@ -432,12 +782,20 @@ pyasn1-modules==0.4.1
     # via google-auth
 pycparser==2.22
     # via cffi
+pycryptodome==3.22.0
+    # via opendatalab
 pydantic==2.7.1
     # via bunq-ynab-connect
+    # via confection
     # via fastapi
+    # via gluonts
     # via mlserver
     # via prefect
     # via pydantic-settings
+    # via ray
+    # via spacy
+    # via thinc
+    # via weasel
     # via ynab
 pydantic-core==2.18.2
     # via prefect
@@ -451,8 +809,13 @@ pymongo==4.8.0
     # via bunq-ynab-connect
 pyparsing==3.1.4
     # via matplotlib
+pysocks==1.7.1
+    # via requests
+pytesseract==0.3.10
+    # via autogluon-multimodal
 pytest==8.3.3
 python-dateutil==2.9.0.post0
+    # via botocore
     # via croniter
     # via dateparser
     # via jupyter-client
@@ -474,6 +837,11 @@ python-rapidjson==1.20
     # via tritonclient
 python-slugify==8.0.4
     # via prefect
+pytorch-lightning==2.5.0.post0
+    # via autogluon-timeseries
+    # via lightning
+pytorch-metric-learning==2.3.0
+    # via autogluon-multimodal
 pytz==2024.2
     # via croniter
     # via dateparser
@@ -482,20 +850,35 @@ pytz==2024.2
     # via prefect
 pytzdata==2020.1
     # via pendulum
-# pywin32==309 (excluded)
+# pywin32==310 (excluded)
     # via docker
     # via jupyter-core
+    # via opendatalab
 pyyaml==6.0.2
+    # via accelerate
     # via apprise
     # via dask
+    # via datasets
     # via distributed
+    # via fastai
+    # via huggingface-hub
     # via kubernetes
+    # via lightning
     # via mlflow-skinny
+    # via model-index
+    # via omegaconf
+    # via optuna
     # via prefect
+    # via pytorch-lightning
+    # via ray
+    # via timm
+    # via transformers
     # via uvicorn
 pyzmq==26.2.1
     # via ipykernel
     # via jupyter-client
+ray==2.39.0
+    # via autogluon-core
 readchar==4.2.0
     # via prefect
 referencing==0.35.1
@@ -503,19 +886,38 @@ referencing==0.35.1
     # via jsonschema-specifications
 regex==2024.9.11
     # via dateparser
+    # via nltk
+    # via transformers
 requests==2.32.3
     # via apprise
+    # via autogluon-core
+    # via autogluon-multimodal
     # via databricks-sdk
+    # via datasets
     # via docker
+    # via evaluate
+    # via fastai
+    # via gdown
+    # via google-api-core
+    # via huggingface-hub
     # via kubernetes
     # via mlflow-skinny
+    # via nlpaug
+    # via opendatalab
+    # via openmim
+    # via ray
     # via requests-oauthlib
+    # via spacy
+    # via transformers
+    # via weasel
 requests-oauthlib==2.0.0
     # via apprise
     # via kubernetes
 rfc3339-validator==0.1.4
     # via prefect
 rich==13.8.1
+    # via opendatalab
+    # via openmim
     # via prefect
     # via typer
 rpds-py==0.20.0
@@ -528,37 +930,81 @@ ruamel-yaml==0.18.6
 ruamel-yaml-clib==0.2.8
     # via ruamel-yaml
 ruff==0.6.4
+s3transfer==0.11.4
+    # via boto3
+safetensors==0.5.3
+    # via accelerate
+    # via huggingface-hub
+    # via timm
+    # via transformers
+scikit-image==0.24.0
+    # via autogluon-multimodal
 scikit-learn==1.5.2
+    # via autogluon-core
+    # via autogluon-features
+    # via autogluon-multimodal
+    # via autogluon-tabular
     # via bunq-ynab-connect
+    # via fastai
     # via feature-engine
     # via imbalanced-learn
     # via mlflow
+    # via mlforecast
+    # via pytorch-metric-learning
+    # via seqeval
     # via sklearn-compat
 scipy==1.14.1
+    # via autogluon-core
+    # via autogluon-multimodal
+    # via autogluon-tabular
+    # via autogluon-timeseries
+    # via catboost
+    # via fastai
     # via feature-engine
     # via hyperopt
     # via imbalanced-learn
+    # via lightgbm
     # via mlflow
+    # via scikit-image
     # via scikit-learn
+    # via statsforecast
     # via statsmodels
     # via xgboost
+sentencepiece==0.2.0
+    # via transformers
 sentinels==1.0.0
     # via mongomock
+seqeval==1.2.2
+    # via autogluon-multimodal
 setuptools==74.1.2
+    # via fs
+    # via lightning-utilities
+    # via marisa-trie
     # via opentelemetry-instrumentation
     # via py-grpc-prometheus
+    # via spacy
+    # via tensorboard
+    # via thinc
     # via zope-event
     # via zope-interface
 shellingham==1.5.4
     # via typer
 six==1.16.0
+    # via catboost
+    # via fs
     # via geventhttpclient
     # via hyperopt
     # via kubernetes
+    # via opencensus
     # via python-dateutil
     # via rfc3339-validator
+    # via tensorboard
+    # via triad
 sklearn-compat==0.1.3
     # via imbalanced-learn
+smart-open==7.1.0
+    # via ray
+    # via weasel
 smmap==5.0.1
     # via gitdb
 sniffio==1.3.1
@@ -568,12 +1014,27 @@ sniffio==1.3.1
     # via prefect
 sortedcontainers==2.4.0
     # via distributed
+soupsieve==2.6
+    # via beautifulsoup4
+spacy==3.7.5
+    # via autogluon-tabular
+    # via fastai
+spacy-legacy==3.0.12
+    # via spacy
+spacy-loggers==1.0.5
+    # via spacy
 sqlalchemy==2.0.34
     # via alembic
     # via mlflow
+    # via optuna
     # via prefect
 sqlparse==0.5.1
     # via mlflow-skinny
+srsly==2.5.1
+    # via confection
+    # via spacy
+    # via thinc
+    # via weasel
 stack-data==0.6.3
     # via ipython
 starlette==0.36.3
@@ -581,27 +1042,92 @@ starlette==0.36.3
     # via starlette-exporter
 starlette-exporter==0.23.0
     # via mlserver
+statsforecast==1.7.8
+    # via autogluon-timeseries
 statsmodels==0.14.4
     # via feature-engine
+    # via statsforecast
+sympy==1.13.1
+    # via torch
+tabulate==0.9.0
+    # via openmim
 tblib==3.0.0
     # via distributed
+tensorboard==2.19.0
+    # via autogluon-multimodal
+    # via autogluon-timeseries
+tensorboard-data-server==0.7.2
+    # via tensorboard
+tensorboardx==2.6.2.2
+    # via ray
 text-unidecode==1.3
+    # via autogluon-multimodal
     # via python-slugify
+thinc==8.2.5
+    # via spacy
 threadpoolctl==3.5.0
     # via imbalanced-learn
     # via scikit-learn
+    # via statsforecast
+tifffile==2025.3.13
+    # via scikit-image
+timm==1.0.3
+    # via autogluon-multimodal
+tokenizers==0.21.1
+    # via transformers
 toml==0.10.2
     # via prefect
 toolz==0.12.1
     # via dask
     # via distributed
+    # via gluonts
     # via partd
+torch==2.5.1
+    # via accelerate
+    # via autogluon-multimodal
+    # via autogluon-tabular
+    # via autogluon-timeseries
+    # via fastai
+    # via huggingface-hub
+    # via lightning
+    # via pytorch-lightning
+    # via pytorch-metric-learning
+    # via safetensors
+    # via timm
+    # via torchmetrics
+    # via torchvision
+torchmetrics==1.2.1
+    # via autogluon-multimodal
+    # via lightning
+    # via pytorch-lightning
+torchvision==0.20.1
+    # via autogluon-multimodal
+    # via fastai
+    # via timm
 tornado==6.4.1
     # via distributed
     # via ipykernel
     # via jupyter-client
 tqdm==4.67.1
+    # via autogluon-common
+    # via autogluon-core
+    # via autogluon-multimodal
+    # via autogluon-timeseries
+    # via datasets
+    # via evaluate
+    # via gdown
+    # via gluonts
+    # via huggingface-hub
     # via hyperopt
+    # via lightning
+    # via nltk
+    # via opendatalab
+    # via optuna
+    # via pytorch-lightning
+    # via pytorch-metric-learning
+    # via spacy
+    # via statsforecast
+    # via transformers
 traitlets==5.14.3
     # via comm
     # via ipykernel
@@ -609,23 +1135,38 @@ traitlets==5.14.3
     # via jupyter-client
     # via jupyter-core
     # via matplotlib-inline
+transformers==4.49.0
+    # via autogluon-multimodal
+    # via autogluon-timeseries
+triad==0.9.8
+    # via adagio
+    # via fugue
 tritonclient==2.46.0
     # via mlserver
 typer==0.12.5
     # via fastapi-cli
     # via prefect
+    # via spacy
+    # via weasel
 typing-extensions==4.12.2
     # via aiokafka
     # via aiosqlite
     # via alembic
+    # via beautifulsoup4
     # via fastapi
+    # via gluonts
+    # via huggingface-hub
     # via ipython
     # via kink
+    # via lightning
+    # via lightning-utilities
     # via opentelemetry-sdk
     # via prefect
     # via pydantic
     # via pydantic-core
+    # via pytorch-lightning
     # via sqlalchemy
+    # via torch
     # via typer
     # via ynab
 tzdata==2024.1
@@ -636,22 +1177,35 @@ tzlocal==5.2
 ujson==5.10.0
     # via prefect
 urllib3==2.2.2
+    # via botocore
     # via distributed
     # via docker
     # via kubernetes
     # via requests
     # via tritonclient
     # via ynab
+utilsforecast==0.2.4
+    # via autogluon-timeseries
+    # via mlforecast
+    # via statsforecast
 uvicorn==0.30.6
     # via fastapi-cli
     # via mlserver
     # via prefect
+virtualenv==20.29.3
+    # via ray
 waitress==3.0.0
     # via mlflow
+wasabi==1.1.3
+    # via spacy
+    # via thinc
+    # via weasel
 watchfiles==0.24.0
     # via uvicorn
 wcwidth==0.2.13
     # via prompt-toolkit
+weasel==0.4.1
+    # via spacy
 websocket-client==1.8.0
     # via kubernetes
 websockets==13.0.1
@@ -659,12 +1213,20 @@ websockets==13.0.1
     # via uvicorn
 werkzeug==3.0.4
     # via flask
+    # via tensorboard
+window-ops==0.0.15
+    # via mlforecast
 wrapt==1.16.0
     # via deprecated
     # via opentelemetry-instrumentation
     # via opentelemetry-instrumentation-grpc
+    # via smart-open
 xgboost==2.1.4
+    # via autogluon-tabular
     # via bunq-ynab-connect
+xxhash==3.5.0
+    # via datasets
+    # via evaluate
 yarl==1.11.1
     # via aiohttp
 ynab==1.0.1

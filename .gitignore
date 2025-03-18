@@ -167,3 +167,6 @@ cache
 mlflow
 
 .local
+
+# Autogluon output
+AutogluonModels/
