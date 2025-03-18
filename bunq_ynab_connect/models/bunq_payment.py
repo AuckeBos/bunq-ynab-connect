@@ -19,3 +19,23 @@ class BunqPayment(BaseModel):
     sub_type: str | None
     type: str | None
     updated: datetime | None
+
+    @property
+    def alias_name(self) -> str:
+        return self._get_name(self.alias)
+
+    @property
+    def counterparty_alias_name(self) -> str:
+        return self._get_name(self.counterparty_alias)
+
+    @staticmethod
+    def _get_name(alias: dict) -> str:
+        """Get the name of the alias.
+
+        Handle missing name w/o errors.
+        """
+        if "display_name" in alias:
+            return alias["display_name"]
+        if "name" in alias:
+            return alias["name"]
+        return "Unknown"
