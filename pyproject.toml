@@ -3,7 +3,7 @@ name = "bunq-ynab-connect"
 version = "0.1.0"
 description = "Automatically classify Bunq transactions and add to Ynab"
 dependencies = [
-    "mlflow",
+    "mlflow==2.16.0",
     "ynab",
     "scikit-learn",
     "kink",
