@@ -1,0 +1,29 @@
+name: "version_bumper"
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'bunq_ynab_connect/**'
+      - './pyproject.toml'
+
+jobs:
+  bump-version:
+    permissions:
+      contents: write  
+    if: github.event.pull_request.merged == false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: "0"
+
+      - name: Version bumper
+        uses: apowis/pyproject-bump-version@v0.0.2
+        with:
+          file_to_bump: "./pyproject.toml"
+          bump_type: "minor"
+          main_branch: "master"
+          python_version: "3.11"
