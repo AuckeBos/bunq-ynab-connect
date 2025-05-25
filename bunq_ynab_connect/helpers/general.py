@@ -42,7 +42,7 @@ def cache(logger: LoggerAdapter, ttl: int | None = None) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):  # noqa: ANN202,ANN002,ANN003
             key = str(args[1:]) + str(tuple(sorted(kwargs.items())))[1:-1]
-            c = shelve.open(f"{CACHE_DIR}/{func.__name__}_{key}")
+            c = shelve.open(f"{CACHE_DIR}/{func.__name__}_{key}")  # noqa: SIM115
             is_expired = (
                 "expires_at" in c
                 and c["expires_at"] is not None
