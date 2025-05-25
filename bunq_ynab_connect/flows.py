@@ -2,9 +2,8 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from kink import di
-from prefect import flow, serve, task
+from prefect import flow, serve, tags, task
 from prefect.client.schemas.schedules import CronSchedule
-from prefect.concurrency.sync import concurrency
 from prefect_dask.task_runners import DaskTaskRunner
 
 from bunq_ynab_connect.classification.deployer import Deployer
@@ -63,7 +62,7 @@ def sync_payment_queue() -> None:
 @flow
 def sync_payment(payment_id: int, skip_if_synced: bool) -> None:  # noqa: FBT001
     """Sync a single payment from bunq to YNAB."""
-    with concurrency("single-payment-sync", timeout_seconds=60):
+    with tags("single-payment-sync"):
         syncer = PaymentSyncer()
         syncer.sync_payment(payment_id, skip_if_synced=skip_if_synced)
 
