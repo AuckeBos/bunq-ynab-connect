@@ -41,7 +41,7 @@ class UnderSampler(RandomUnderSampler):
             category_counts > percentile_value
         ].index
 
-        return {c: percentile_value for c in categories_to_undersample}
+        return dict.fromkeys(categories_to_undersample, percentile_value)
 
     @property
     def undersampled_categories(self) -> list:

@@ -1,51 +1,25 @@
 [project]
 name = "bunq-ynab-connect"
-version = "0.1.0"
+version = "0.2.0"
 description = "Automatically classify Bunq transactions and add to Ynab"
-dependencies = [
-    "mlflow",
-    "ynab",
-    "scikit-learn",
-    "kink",
-    "python-dotenv",
-    "click",
-    "pymongo",
-    "prefect-dask",
-    "mlserver>=1.6",
-    "mlserver-mlflow",
-    "pydantic",
-    "griffe",
-    "fastapi",
-    "fastapi-cli",
-    "prefect",
-    "imbalanced-learn>=0.13.0",
-    "feature-engine>=1.8.3",
-    "xgboost>=2.1.4",
-    "hyperopt>=0.2.7",
-]
+dependencies = [ "mlflow==2.16.0", "ynab", "scikit-learn", "kink", "python-dotenv", "click", "pymongo", "prefect-dask", "mlserver>=1.6", "mlserver-mlflow", "pydantic", "griffe", "fastapi", "fastapi-cli", "prefect", "imbalanced-learn>=0.13.0", "feature-engine>=1.8.3", "xgboost>=2.1.4", "hyperopt>=0.2.7",]
 readme = "README.md"
 requires-python = ">= 3.11"
 
 [build-system]
-requires = ["hatchling"]
+requires = [ "hatchling",]
 build-backend = "hatchling.build"
 
 [tool.rye]
 managed = true
-dev-dependencies = [
-    "pytest>=8.3.2",
-    "mongomock>=4.1.2",
-    "bz2file>=0.98",
-    "ruff>=0.6.3",
-    "ipykernel>=6.29.5",
-]
-excluded-dependencies = ["pywin32"]
+dev-dependencies = [ "pytest>=8.3.2", "mongomock>=4.1.2", "bz2file>=0.98", "ruff>=0.6.3", "ipykernel>=6.29.5",]
+excluded-dependencies = [ "pywin32",]
+
+[tool.rye.workspace]
+members = [ "bunq_ynab_connect",]
 
 [tool.hatch.metadata]
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["bunq_ynab_connect"]
-
-[tool.rye.workspace]
-members = ["bunq_ynab_connect"]
+packages = [ "bunq_ynab_connect",]

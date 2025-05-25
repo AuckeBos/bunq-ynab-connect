@@ -58,7 +58,7 @@ class OverSampler(BaseOverSampler):
 
         category_counts = pd.Series(y).value_counts()
         categories_to_oversample = category_counts[category_counts < target].index
-        return {c: target for c in categories_to_oversample}
+        return dict.fromkeys(categories_to_oversample, target)
 
     def smote_sampler_strategy(self, y: np.ndarray) -> dict:
         """Find the samples to upsample with SMOTE.
@@ -72,7 +72,7 @@ class OverSampler(BaseOverSampler):
         categories_to_oversample = category_counts[
             category_counts < percentile_value
         ].index
-        return {c: percentile_value for c in categories_to_oversample}
+        return dict.fromkeys(categories_to_oversample, percentile_value)
 
     def upsampled_categories(self, step_name: str) -> list:
         return list(
