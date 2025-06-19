@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 from kink import di
 from prefect import flow, serve, tags, task
 from prefect.client.schemas.schedules import CronSchedule
-from prefect_dask.task_runners import DaskTaskRunner
 
 from bunq_ynab_connect.classification.deployer import Deployer
 from bunq_ynab_connect.classification.feature_store import FeatureStore
