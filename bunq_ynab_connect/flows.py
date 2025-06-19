@@ -96,7 +96,9 @@ def train_for_budget(budget_id: str, max_runs: int) -> None:
         deployer.deploy(run_id)
 
 
-@flow(task_runner=DaskTaskRunner())
+# Temp disable DaskTaskRunner, due to Serialization issue
+# @flow(task_runner=DaskTaskRunner())
+@flow
 def train(max_runs: int = 250) -> None:
     """Train one classifier for each budget.
 
