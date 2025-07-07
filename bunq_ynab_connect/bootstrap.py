@@ -121,22 +121,22 @@ def import_mlserver_windows_friendly(logger: logging.LoggerAdapter) -> None:
     https://github.com/SeldonIO/MLServer/issues/1022
     """
     try:
-        import mlserver  # noqa: F401
+        import mlserver  # noqa: F401, PLC0415
     except Exception:  # noqa: BLE001
-        import subprocess
+        import subprocess  # noqa: PLC0415
 
         logger.warning("Bad mlserver import; trying to install mlserver")
         install_cmd = "pip install mlserver"
         subprocess.Popen(install_cmd, shell=True, stdout=subprocess.DEVNULL)  # noqa: S602
         logger.debug("Good mlserver reinstall;")
     finally:
-        from mlserver.codecs import PandasCodec  # noqa: F401
+        from mlserver.codecs import PandasCodec  # noqa: F401, PLC0415
 
         logger.debug("Good mlserver import;")
 
 
 def monkey_patch_mlserver() -> None:
     """Fix an issue with mlserver, where datetime fiels cannot be encoded."""
-    from mlserver.codecs.numpy import _NumpyToDatatype
+    from mlserver.codecs.numpy import _NumpyToDatatype  # noqa: PLC0415
 
     _NumpyToDatatype["M"] = "BYTES"

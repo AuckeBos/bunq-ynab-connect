@@ -3,6 +3,7 @@ from logging import LoggerAdapter
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import mlflow
 import numpy as np
 from hyperopt import STATUS_OK, Trials, fmin, hp, tpe
 from hyperopt.pyll.base import scope
@@ -18,7 +19,6 @@ from sklearn.model_selection import (
     StratifiedShuffleSplit,
 )
 
-import mlflow
 from bunq_ynab_connect.classification.experiments.base_payment_classification_experiment import (  # noqa: E501
     BasePaymentClassificationExperiment,
 )
@@ -64,7 +64,7 @@ class FindBestModelExperiment(BasePaymentClassificationExperiment):
 
     """
 
-    max_runs: int = 250
+    max_runs: int = 25
 
     def _run(self, X: np.ndarray, y: np.ndarray) -> None:
         best_config = self._find_best_model(*self._remove_singleton_categories(X, y))
@@ -90,7 +90,7 @@ class FindBestModelExperiment(BasePaymentClassificationExperiment):
                 classifier: ClassifierMixin = eval(params["classifier"])()  # noqa: S307
                 pipeline = self.create_pipeline(classifier)
                 pipeline.set_params(**params["parameters"])
-                mlflow.log_params(pipeline.get_params())
+                mlflow.log_params(pipeline.get_params(), run_id=run.info.run_id)
                 result = self._train_and_score(pipeline, X, y)
 
                 return {
@@ -242,7 +242,7 @@ class FindBestModelExperiment(BasePaymentClassificationExperiment):
         pipeline = self.create_pipeline(classifier)
         pipeline.set_params(**trial_result["parameters"])
         pipeline.fit(X, y)
-        mlflow.log_params(pipeline.get_params())
+        mlflow.log_params(pipeline.get_params(), run_id=self.parent_run_id)
 
         mlflow.sklearn.log_model(pipeline, "classifier")
         object_to_mlflow(self.label_encoder, "label_encoder")
