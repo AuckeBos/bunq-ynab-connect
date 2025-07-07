@@ -23,7 +23,6 @@ With portainer up and running, create a new stack, using [portainer.yaml](docker
 
 - `MONGO_URI` and `MONGO_DB` define your Mongo location and DB name. You probably don't need to change these.
 - `MONGO_USER` and `MONGO_PASSWORD` define the user and password for your Mongo DB. You should change these to your liking.
-- `BUNQ_ONETIME_TOKEN` is a token you can create in the Bunq app, see [Bunq API key](https://doc.bunq.com/#:~:text=Create%20an%20API%20key.,%E2%86%92%20Developers%20%E2%86%92%20API%20keys). This token is only used upon your first sync, to exchange it for a config file.
 - `BUNQ_CALLBACK_HOST` is the host where you want to receive Bunq payments. If not set, If set, payments will be synced as soon as they are made; else once per hour. Should _not_ include `https://` nor `/payments`.
 - `YNAB_TOKEN` is your [Ynab PAT](https://api.youneedabudget.com/#personal-access-tokens). 
 - `START_SYNC_DATE` Defines what Bunq transactions will be synced to Ynab. Upon your first sync, your MongoDB is ingsted with all your Bunq payments. All payments that occured after the START_SYNC_DATE will be synced to Ynab. It is therefor important to set this value with care. Most likely, it is OK to set this to the current date. If you'd set it in in the past, all your bunq payments since then are synced to Ynab, while you've probably already entered them manually. Note that you can easily identify auto-synced payments in Ynab by the blue flag:large_blue_circle:.
@@ -39,6 +38,12 @@ Before you can start syncing, you must define what Ynab budgets and accounts bel
 ### Linking Ynab accounts with Bunq accounts
 The link between these two is created using the description of your Ynab account. The project can simultaneously link and sync as many accounts of as many budgets with as many payment accounts as you like. For each account to link, open it in Ynab, and press the edit icon:pencil2:. Enter the IBAN you which to link into the "Account Notes" section. The code will use an exact match on this text field. 
 
+### Exchange bunq PAT
+The Bunq API makes use of a config file. This config file is created based on a One-Time-Token. Generating this file is done by running flow `exchange_pat`. To do so:
+- Create a new PAT in the Bunq app.
+- Run this flow, with the PAT as parameter. Provide an identifiable name for your server as well.
+    - The new PAT is exchanged for a config file, which is restricted to the current external IP of your server.
+- Cleanup any old PATs from the Bunq app.
 
 ## Usage
 Prefect is used for orchestration and monitoring. This is therefor your best starting point to start syncing. Open it on [http://localhost:12002](http://localhost:12002) (or your servers' IP). You'll find the active deployments in the [deployments](http://localhost:12002/deployments) tab. The two most important deployments are:

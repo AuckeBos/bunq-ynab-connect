@@ -1,15 +1,15 @@
 import json
 from logging import LoggerAdapter
 
-from kink import inject
-
-import docker
 import mlflow
-from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
-from bunq_ynab_connect.helpers.config import MLSERVER_CONFIG_DIR
+from kink import inject
 from mlflow.entities.model_registry.model_version import ModelVersion
 from mlflow.exceptions import RestException
 from mlflow.tracking import MlflowClient
+
+import docker
+from bunq_ynab_connect.data.storage.abstract_storage import AbstractStorage
+from bunq_ynab_connect.helpers.config import MLSERVER_CONFIG_DIR
 
 
 class Deployer:

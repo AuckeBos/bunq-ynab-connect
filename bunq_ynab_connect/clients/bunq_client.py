@@ -148,8 +148,10 @@ class BunqClient:
         old_config = self.bunq_config.data
         config = old_config.copy()
         config["api_token"] = pat
-        del config["installation_context"]
-        del config["session_context"]
+        if "installation_context" in config:
+            del config["installation_context"]
+        if "session_context" in config:
+            del config["session_context"]
         self.bunq_config.save(config)
         try:
             self.base_client.session_activator.activate_api_token(name)

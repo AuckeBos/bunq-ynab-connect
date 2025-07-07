@@ -10,7 +10,6 @@ CONFIG_DIR = PROJECT_DIR / ".." / "config"
 
 BUNQ_CONFIG_DIR = CONFIG_DIR / "bunq"
 BUNQ_CALLBACK_INDEX = "bunq_callback"
-BUNQ_ONETIME_API_TOKEN_INDEX = "bunq_api_token"  # noqa: S105
 BUNQ_CONFIG_INDEX = "bunq_config"
 
 METADATA_DIR = PROJECT_DIR / "metadata"
