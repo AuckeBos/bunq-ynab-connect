@@ -205,6 +205,7 @@ jinja2==3.1.6
     # via distributed
     # via flask
     # via jinja2-humanize-extension
+    # via mlflow
     # via prefect
 jinja2-humanize-extension==0.4.0
     # via prefect
@@ -230,6 +231,7 @@ mako==1.3.10
     # via alembic
 markdown==3.8.2
     # via apprise
+    # via mlflow
 markdown-it-py==3.0.0
     # via rich
 markupsafe==3.0.2
@@ -241,10 +243,10 @@ matplotlib==3.10.3
     # via mlflow
 mdurl==0.1.2
     # via markdown-it-py
-mlflow==3.0.1
+mlflow==2.22.1
     # via bunq-ynab-connect
     # via mlserver-mlflow
-mlflow-skinny==3.0.1
+mlflow-skinny==2.22.1
     # via mlflow
 mlserver==1.7.1
     # via bunq-ynab-connect
@@ -318,7 +320,7 @@ opentelemetry-util-http==0.55b1
 orjson==3.10.18
     # via mlserver
     # via prefect
-packaging==25.0
+packaging==24.2
     # via aiokafka
     # via dask
     # via distributed
@@ -327,7 +329,7 @@ packaging==25.0
     # via opentelemetry-instrumentation
     # via prefect
     # via statsmodels
-pandas==2.3.0
+pandas==2.2.3
     # via feature-engine
     # via mlflow
     # via mlserver
@@ -365,7 +367,7 @@ py-grpc-prometheus==0.8.0
     # via mlserver
 py4j==0.10.9.9
     # via hyperopt
-pyarrow==20.0.0
+pyarrow==19.0.1
     # via mlflow
 pyasn1==0.6.1
     # via pyasn1-modules

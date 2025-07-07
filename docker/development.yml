@@ -72,7 +72,7 @@ services:
     command: --interval 300 bunqynab_prefect_agent
 
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v3.0.1
+    image: ghcr.io/mlflow/mlflow:v2.22.1
     container_name: bunqynab_mlflow
     restart: unless-stopped
 
