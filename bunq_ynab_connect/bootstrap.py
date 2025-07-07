@@ -20,7 +20,6 @@ from bunq_ynab_connect.helpers.config import (
     BUNQ_CALLBACK_INDEX,
     BUNQ_CONFIG_DIR,
     BUNQ_CONFIG_INDEX,
-    BUNQ_ONETIME_API_TOKEN_INDEX,
     CACHE_DIR,
     CONFIG_DIR,
     LOGS_DIR,
@@ -75,7 +74,6 @@ def bootstrap_di() -> None:
     # Bunq config
     di[BunqClient] = lambda _: BunqClient()
     di[BUNQ_CALLBACK_INDEX] = os.getenv("BUNQ_CALLBACK_HOST")
-    di[BUNQ_ONETIME_API_TOKEN_INDEX] = os.getenv("BUNQ_ONETIME_TOKEN")
     bunq_environment = BunqEnvironment(os.getenv("BUNQ_ENVIRONMENT", "SANDBOX"))
     di[BunqEnvironment] = bunq_environment
     di[BUNQ_CONFIG_INDEX] = JsonDict(

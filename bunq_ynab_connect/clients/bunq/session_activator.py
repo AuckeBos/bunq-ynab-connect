@@ -34,8 +34,6 @@ class SessionActivator:
     Attributes
     ----------
         logger (LoggerAdapter): The logger
-        api_token_from_env (str): The API token, read from env vars. Used for the very
-            first setup. Token is stored in json config once activated.
         bunq_client (BaseClient): The bunq client
         bunq_config (JsonDict): The bunq config file, stored as json.
             All required info is stored here, including session tokens.
@@ -46,7 +44,6 @@ class SessionActivator:
     """
 
     logger: LoggerAdapter
-    api_token_from_env: str
     bunq_client: "BaseClient"
     bunq_config: JsonDict
     SAFETY_MARGIN_SESSION_EXPIRATION_SECONDS = 60
@@ -54,12 +51,10 @@ class SessionActivator:
     @inject
     def __init__(
         self,
-        bunq_api_token: str,
         bunq_client: "BaseClient",
         bunq_config: JsonDict,
         logger: LoggerAdapter,
     ) -> None:
-        self.api_token_from_env = bunq_api_token
         self.bunq_client = bunq_client
         self.bunq_config = bunq_config
         self.logger = logger
@@ -263,4 +258,5 @@ class SessionActivator:
         """Once the token is activated, store it in config and use from there."""
         if token := self.bunq_config["api_token"]:
             return token
-        return self.api_token_from_env
+        msg = "API token not found. Please exchange a PAT before the first use"
+        raise ValueError(msg)
