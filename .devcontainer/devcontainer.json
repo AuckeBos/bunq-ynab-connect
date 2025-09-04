@@ -1,0 +1,46 @@
+{
+    "name": "bunq-ynab-connect",
+    "dockerComposeFile": [
+        "../docker/development.yml",
+        "docker-compose.devcontainer.yml"
+    ],
+    "service": "dev",
+    "workspaceFolder": "/workspaces/bunq-ynab-connect",
+    "runServices": [
+        "mongodb",
+        "mongo-express",
+        "prefect-server",
+        "mlflow",
+        "mlserver",
+        "mlserver_restarter",
+        "callback",
+        "dev"
+    ],
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:2": {},
+        "ghcr.io/devcontainers/features/python:1": {
+            "version": "3.11"
+        },
+        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+        "ghcr.io/devcontainers-extra/features/rye:1": {}
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-toolsai.jupyter",
+                "charliermarsh.ruff",
+                "eamodio.gitlens"
+            ]
+        }
+    },
+    "forwardPorts": [
+        12001,
+        12002,
+        12003,
+        12005
+    ],
+    "postCreateCommand": "rye sync",
+    "remoteUser": "vscode"
+}

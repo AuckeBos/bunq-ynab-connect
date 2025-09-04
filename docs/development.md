@@ -13,3 +13,18 @@ Ruff is used for code formatting. A step in the [cicd pipeline](/.github/workflo
 
 # Tasks and commands
 Some VSCode tasks are defined in the project. Moreover, often-used commands are stored and described in [commands.md](/docs/commands.md).
+
+## Dev Containers (VS Code)
+An optional devcontainer is provided in `.devcontainer/` that lets you develop inside a container with Python 3.11 and Rye preinstalled while reusing the existing Docker Compose stack for MongoDB, MLflow, Prefect, etc.
+
+- Open this repository in VS Code and run: "Dev Containers: Reopen in Container".
+- The devcontainer will start alongside the services from `docker/development.yml`.
+- Your workspace is mounted at `/workspaces/bunq-ynab-connect`. The Python environment is managed by Rye; dependencies are installed automatically with `rye sync` on first start.
+- The container has Docker CLI access; you can run `docker compose -f docker/development.yml up` from the integrated terminal if you prefer starting services from within the container.
+
+Ports forwarded: 12001 (mongo-express), 12002 (Prefect UI), 12003 (MLflow), 12005 (mlserver).
+
+Benefits:
+- Consistent Python toolchain (3.11, Rye, Ruff) across machines
+- Clean host machine (no need to install Python toolchains locally)
+- Works on Windows, macOS, and Linux the same way
