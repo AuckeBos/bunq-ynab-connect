@@ -1,0 +1,132 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: bunqynab_mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    ports:
+      - 27017:27017
+    volumes:
+      - bunq_ynab_connect_data:/data/db
+
+  # mongo-express:
+  #   image: mongo-express:latest
+  #   container_name: bunqynab_mongo_ui
+  #   restart: unless-stopped
+  #   environment:
+  #     ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER}
+  #     ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
+  #     ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_USER}
+  #     ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_PASSWORD}
+  #     ME_CONFIG_MONGODB_SERVER: bunqynab_mongodb
+  #   ports:
+  #     - 12001:8081
+  #   depends_on:
+  #     - mongodb
+  # prefect-server:
+  #   image: prefecthq/prefect:3.4.7-python3.11
+  #   container_name: bunqynab_prefect_server
+  #   restart: unless-stopped
+  #   environment:
+  #     - PREFECT_SERVER_API_HOST=${PREFECT_SERVER_API_HOST}
+  #     - PREFECT_API_URL=${PREFECT_API_URL_FOR_SERVER} # Update if accessing from outside Docker
+  #     - PREFECT_UI_URL=${PREFECT_API_URL_FOR_SERVER} # Update if accessing from outside Docker
+  #   ports:
+  #     - 12002:4200
+  #   volumes:
+  #     - bunq_ynab_connect_prefect:/root/.prefect
+  #   entrypoint: ["/opt/prefect/entrypoint.sh", "prefect", "server", "start"]
+
+  # prefect-agent:
+  #   image: index.docker.io/auckebos/bunq-ynab-connect:latest
+  #   container_name: bunqynab_prefect_agent
+  #   restart: unless-stopped
+  #   env_file:
+  #     - stack.env
+  #   ports:
+  #     - "12004:8787"
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock # Docker sock needed to be able to restart the mlserver container
+  #     - bunq_ynab_config:/home/bunqynab/config
+  #   command: ["/bin/sh", "-c", "/home/bunqynab/entrypoint.sh"]
+  #   depends_on:
+  #     - prefect-server
+
+  # watchtower:
+  #   image: containrrr/watchtower
+  #   container_name: bunqynab_watchtower
+  #   restart: unless-stopped
+  #   environment:
+  #     - WATCHTOWER_CLEANUP=true
+  #     - WATCHTOWER_SCOPE=bunqynab
+  #     - WATCHTOWER_POLL_INTERVAL=300
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+
+  # mlflow:
+  #   image: ghcr.io/mlflow/mlflow:v2.22.1
+  #   container_name: bunqynab_mlflow
+  #   restart: unless-stopped
+  #   ports:
+  #     - 12003:5000
+  #   volumes:
+  #     - bunq_ynab_connect_mlflow:/mlflow
+  #   command: mlflow server --backend-store-uri sqlite:////mlflow/mlflow.db --host 0.0.0.0 --artifacts-destination /mlflow/artifacts
+
+  # mlserver:
+  #   image: index.docker.io/auckebos/bunq-ynab-connect:latest
+  #   container_name: bunqynab_mlserver
+  #   restart: unless-stopped
+  #   env_file:
+  #     - stack.env
+  #   ports:
+  #     - 12005:8080
+  #   volumes:
+  #     - bunq_ynab_config:/home/bunqynab/config
+  #   command: mlserver start /home/bunqynab/config/mlserver
+
+  # # Temporary solution to restart mlserver daily. Since Prefect agent has no access to the docker socket
+  # mlserver_restarter:
+  #   image: docker:cli
+  #   container_name: bunqynab_mlserver_restarter
+  #   restart: unless-stopped
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   command:
+  #     [
+  #       "/bin/sh",
+  #       "-c",
+  #       "while true; do sleep 86400; docker restart bunqynab_mlserver; done",
+  #     ]
+
+  # callback:
+  #   image: index.docker.io/auckebos/bunq-ynab-connect:latest
+  #   container_name: bunqynab_callback_server
+  #   restart: unless-stopped
+  #   volumes:
+  #     - bunq_ynab_config:/home/bunqynab/config
+  #   env_file:
+  #     - stack.env
+  #   command: uvicorn bunq_ynab_connect.sync_bunq_to_ynab.callback_server:app --host 0.0.0.0
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.http.routers.callback.rule=Host(`${BUNQ_CALLBACK_HOST}`)
+  #     - traefik.http.routers.callback.entrypoints=https
+  #     - traefik.http.routers.callback.tls.certresolver=${RESOLVER_NAME}
+  #     - traefik.http.routers.callback.tls=true
+  #     - traefik.http.services.callback.loadbalancer.server.port=8000
+  #   depends_on:
+  #     - mongodb
+
+volumes:
+  bunq_ynab_connect_data:
+  bunq_ynab_connect_prefect:
+  bunq_ynab_config:
+  bunq_ynab_connect_mlflow:
+
+networks:
+  default:
+    name: bunqynab
+    external: true

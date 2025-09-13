@@ -1,46 +1,39 @@
 {
-    "name": "bunq-ynab-connect",
+    "name": "bunq-ynab-connect-devcontainer",
     "dockerComposeFile": [
-        "../docker/development.yml",
-        "docker-compose.devcontainer.yml"
+        "../docker/compose.yml",
+        "compose.override.yml"
     ],
     "service": "dev",
-    "workspaceFolder": "/workspaces/bunq-ynab-connect",
-    "runServices": [
-        "mongodb",
-        "mongo-express",
-        "prefect-server",
-        "mlflow",
-        "mlserver",
-        "mlserver_restarter",
-        "callback",
-        "dev"
-    ],
-    "features": {
-        "ghcr.io/devcontainers/features/common-utils:2": {},
-        "ghcr.io/devcontainers/features/python:1": {
-            "version": "3.11"
-        },
-        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
-        "ghcr.io/devcontainers-extra/features/rye:1": {}
-    },
+    "workspaceFolder": "/home/bunqynab/bunq_ynab_connect",
     "customizations": {
         "vscode": {
-            "extensions": [
-                "ms-python.python",
-                "ms-python.vscode-pylance",
-                "ms-toolsai.jupyter",
+            "extenstions": [
+                "bierner.markdown-mermaid",
                 "charliermarsh.ruff",
-                "eamodio.gitlens"
+                "donjayamanne.githistory",
+                "donjayamanne.python-extension-pack",
+                "github.copilot",
+                "github.copilot-chat",
+                "hediet.vscode-drawio",
+                "isudox.vscode-jetbrains-keybindings",
+                "k--kato.intellij-idea-keybindings",
+                "mhutchie.git-graph",
+                "ms-python.python",
+                "meezilla.json",
+                "yzhang.markdown-all-in-one",
+                "ms-vscode-remote.remote-containers"
             ]
         }
     },
     "forwardPorts": [
+        27017,
         12001,
-        12002,
         12003,
+        12004,
         12005
     ],
-    "postCreateCommand": "rye sync",
-    "remoteUser": "vscode"
+    "features": {
+        "ghcr.io/devcontainers/features/git:1": {}
+    }
 }

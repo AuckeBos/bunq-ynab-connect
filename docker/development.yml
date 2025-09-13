@@ -1,143 +1,52 @@
 services:
-  mongodb:
-    image: mongo:latest
-    restart: unless-stopped
-    container_name: bunqynab_mongodb
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-    ports:
-      - 27017:27017
+  # devcontainer
+  dev:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+    container_name: dev
+    env_file:
+      - ../.env
     volumes:
-      - bunq_ynab_connect_data:/data/db
-
-  mongo-express:
-    image: mongo-express:latest
-    container_name: bunqynab_mongo_ui
-    restart: unless-stopped
-
-    ports:
-      - 12001:8081
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
-      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_USER}
-      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_PASSWORD}
-      ME_CONFIG_MONGODB_SERVER: mongodb
+      - ../bunq_ynab_connect:/home/bunqynab/bunq_ynab_connect:cached
+      - ../config:/home/bunqynab/config:cached
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: ["tail", "-f", "/dev/null"]
     depends_on:
-      - mongodb
-
-  prefect-server:
-    image: prefecthq/prefect:3.4.7-python3.11
-    container_name: bunqynab_prefect_server
-    restart: unless-stopped
-    volumes:
-      - bunq_ynab_connect_prefect:/root/.prefect
-    entrypoint: ["/opt/prefect/entrypoint.sh", "prefect", "server", "start"]
-    environment:
-      - PREFECT_SERVER_API_HOST=${PREFECT_SERVER_API_HOST}
-      # If you want to access Prefect Server from anywhere other than the Docker host machine, you will need to change
-      # PREFECT_UI_URL and PREFECT_API_URL to match the external hostname/IP used to load the  UI in your web browser.
-      - PREFECT_API_URL=${PREFECT_API_URL_FOR_SERVER}
-      - PREFECT_UI_URL=${PREFECT_API_URL_FOR_SERVER}
-    ports:
-      - 12002:4200
+      - prefect-server
 
   prefect-agent:
     build:
       context: ../
       dockerfile: docker/Dockerfile
-    container_name: bunqynab_prefect_agent
-    restart: unless-stopped
+    pull_policy: builds # never pull, always build
     env_file:
-      - ../.docker-env
-    ports:
-      - "12004:8787"
-    volumes:
-      - ../bunq_ynab_connect:/home/bunqynab/bunq_ynab_connect
-      - ../config:/home/bunqynab/config
-      # Docker sock needed to be able to restart the mlserver container
+      - ../.env
+    volumes: !override
+      - ../bunq_ynab_connect:/home/bunqynab/bunq_ynab_connect:cached
+      - ../config:/home/bunqynab/config:cached
       - /var/run/docker.sock:/var/run/docker.sock
-    depends_on:
-      - prefect-server
-    command: "/bin/sh -c /home/bunqynab/entrypoint.sh"
-
-  watchtower:
-    image: containrrr/watchtower
-    container_name: bunqynab_watchtower
-    restart: unless-stopped
-
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 300 bunqynab_prefect_agent
-
-  mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.22.1
-    container_name: bunqynab_mlflow
-    restart: unless-stopped
-
-    ports:
-      - "12003:5000"
-    volumes:
-      - bunq_ynab_connect_mlflow:/mlflow
-    command: mlflow server --backend-store-uri sqlite:////mlflow/mlflow.db --host 0.0.0.0 --artifacts-destination /mlflow/artifacts
 
   mlserver:
     build:
       context: ../
       dockerfile: docker/Dockerfile
-    container_name: bunqynab_mlserver
-    restart: unless-stopped
+    pull_policy: builds # never pull, always build
     env_file:
-      - ../.docker-env
-    ports:
-      - "12005:8080"
-    volumes:
-      - ../bunq_ynab_connect:/home/bunqynab/bunq_ynab_connect
-      - ../config:/home/bunqynab/config
-    command: "mlserver start /home/bunqynab/config/mlserver"
-
-  # Temporary solution to restart mlserver daily. Since Prefect agent has no access to the docker socket
-  mlserver_restarter:
-    image: docker:cli
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-
-    command:
-      [
-        "/bin/sh",
-        "-c",
-        "while true; do sleep 86400; docker restart bunqynab_mlserver; done",
-      ]
-    restart: unless-stopped
+      - ../.env
+    volumes: !override
+      - ../bunq_ynab_connect:/home/bunqynab/bunq_ynab_connect:cached
+      - ../config:/home/bunqynab/config:cached
+      - /var/run/docker.sock:/var/run/docker.sock
 
   callback:
     build:
       context: ../
       dockerfile: docker/Dockerfile
-    container_name: bunqynab_callback_server
-    volumes:
-      - ../bunq_ynab_connect:/home/bunqynab/bunq_ynab_connect
-      - ../config:/home/bunqynab/config
+    pull_policy: builds # never pull, always build
     env_file:
-      - ../.docker-env
-    command: "uvicorn bunq_ynab_connect.sync_bunq_to_ynab.callback_server:app --host 0.0.0.0"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.callback.rule=Host(`${BUNQ_CALLBACK_HOST}`)"
-      - "traefik.http.routers.callback.entrypoints=websecure"
-      - "traefik.http.routers.callback.tls.certresolver=${RESOLVER_NAME}"
-      - "traefik.http.routers.callback.tls=true"
-      - "traefik.http.services.callback.loadbalancer.server.port=8000"
-    depends_on:
-      - mongodb
-
-volumes:
-  bunq_ynab_connect_data:
-  bunq_ynab_connect_prefect:
-  bunq_ynab_connect_mlflow:
-
-# Make sure the traefik container joins this network too
-networks:
-  default:
-    name: bunq
+      - ../.env
+    volumes: !override
+      - ../bunq_ynab_connect:/home/bunqynab/bunq_ynab_connect:cached
+      - ../config:/home/bunqynab/config:cached
+      - /var/run/docker.sock:/var/run/docker.sock

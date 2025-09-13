@@ -1,0 +1,53 @@
+services:
+  # devcontainer
+  dev:
+    image: !reset null
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+    container_name: dev
+    env_file: !override
+      - ../.env
+    volumes:
+      - ../:/home/bunqynab:cached
+      # - ../config:/home/bunqynab/config:cached
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: ["tail", "-f", "/dev/null"]
+    # depends_on:
+      # - prefect-server
+
+  # prefect-agent:
+  #   image: !reset null
+  #   build:
+  #     context: ../
+  #     dockerfile: docker/Dockerfile
+  #   env_file: !override
+  #     - ../.env
+  #   volumes: !override
+  #     - ../:/home/bunqynab:cached
+  #     # - ../config:/home/bunqynab/config:cached
+  #     - /var/run/docker.sock:/var/run/docker.sock
+
+  # mlserver:
+  #   image: !reset null  
+  #   build:
+  #     context: ../
+  #     dockerfile: docker/Dockerfile
+  #   env_file: !override
+  #     - ../.env
+  #   volumes: !override
+  #     - ../:/home/bunqynab:cached
+  #     # - ../config:/home/bunqynab/config:cached
+  #     - /var/run/docker.sock:/var/run/docker.sock
+
+  # callback:
+  #   image: !reset null  
+  #   build:
+  #     context: ../
+  #     dockerfile: docker/Dockerfile
+  #   env_file: !override
+  #     - ../.env
+  #   volumes: !override
+  #     - ../:/home/bunqynab:cached
+  #     # - ../config:/home/bunqynab/config:cached
+  #     - /var/run/docker.sock:/var/run/docker.sock

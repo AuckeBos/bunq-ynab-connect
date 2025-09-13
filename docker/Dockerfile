@@ -1,6 +1,11 @@
 FROM python:3.11-slim-bullseye
 LABEL maintainer="Aucke Bos"
 
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+# Copy from the cache instead of linking since it's a mounted volume
+ENV UV_LINK_MODE=copy
+
 # Set user
 ARG USERNAME=bunqynab
 ARG UID=1000
@@ -9,23 +14,27 @@ RUN apt update && \
     apt install -y sudo && \
     addgroup --gid $GID bunqynab && \
     adduser --uid $UID --gid $GID --disabled-password --gecos "" bunqynab && \
-    echo 'bunqynab ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+    echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 RUN apt-get install -y --no-install-recommends build-essential
 RUN apt install -y gcc
 RUN chmod -R 755 /home/$USERNAME
+
 # Copy files
-COPY --chown=bunqynab:bunqynab ./pyproject.toml ./requirements.lock ./docker/*.sh ./README.md /home/bunqynab/
-RUN chmod +x /home/bunqynab/*.sh
-RUN chown -R bunqynab:bunqynab /home/bunqynab
+COPY --chown=$USERNAME:$USERNAME ./pyproject.toml ./requirements.lock ./docker/*.sh ./README.md /home/$USERNAME/
+RUN chmod +x /home/$USERNAME/*.sh
+RUN chown -R $USERNAME:$USERNAME /home/$USERNAME
 
 # Install deps
-WORKDIR /home/bunqynab
-RUN PYTHONDONTWRITEBYTECODE=1 pip install --no-cache-dir -r requirements.lock
+WORKDIR /home/$USERNAME
+RUN uv sync
+
+ENV PATH="/home/$USERNAME/.venv/bin:$PATH"
 
 # Install self
-COPY --chown=bunqynab:bunqynab ./bunq_ynab_connect /home/bunqynab/bunq_ynab_connect
-RUN PYTHONDONTWRITEBYTECODE=1 pip install --no-cache-dir -e .
+# COPY --chown=$USERNAME:$USERNAME ./bunq_ynab_connect /home/$USERNAME/bunq_ynab_connect
+# RUN PYTHONDONTWRITEBYTECODE=1 pip install --no-cache-dir -e .
 
-ENV USERNAME=bunqynab
+ENV USERNAME=$USERNAME
 USER $USERNAME
 CMD ["/bin/bash", "./entrypoint.sh"]
+
