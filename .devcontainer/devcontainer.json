@@ -5,10 +5,10 @@
         "compose.override.yml"
     ],
     "service": "dev",
-    "workspaceFolder": "/home/bunqynab/bunq_ynab_connect",
+    "workspaceFolder": "/workspace",
     "customizations": {
         "vscode": {
-            "extenstions": [
+            "extensions": [
                 "bierner.markdown-mermaid",
                 "charliermarsh.ruff",
                 "donjayamanne.githistory",
@@ -26,14 +26,8 @@
             ]
         }
     },
-    "forwardPorts": [
-        27017,
-        12001,
-        12003,
-        12004,
-        12005
-    ],
     "features": {
         "ghcr.io/devcontainers/features/git:1": {}
-    }
+    },
+    "postCreateCommand": "bash .devcontainer/post_create.sh"
 }

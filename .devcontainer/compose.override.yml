@@ -1,32 +1,32 @@
 services:
   # devcontainer
   dev:
-    image: !reset null
+    build:
+      context: ../.devcontainer
+      dockerfile: Dockerfile
+      args:
+        USERNAME: dev
+        PYTHON_VERSION: 3.11
+    container_name: dev
+    env_file:
+      - ../.env
+    volumes:
+      - ..:/workspace:cached
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - prefect-server
+
+  prefect-agent:
     build:
       context: ../
       dockerfile: docker/Dockerfile
-    container_name: dev
+    pull_policy: build # never pull, always build
     env_file: !override
       - ../.env
-    volumes:
-      - ../:/home/bunqynab:cached
-      # - ../config:/home/bunqynab/config:cached
+    volumes: !override
+      - ../bunq_ynab_connect:/home/bunqynab/bunq_ynab_connect:cached
+      - ../config:/home/bunqynab/config:cached
       - /var/run/docker.sock:/var/run/docker.sock
-    command: ["tail", "-f", "/dev/null"]
-    # depends_on:
-      # - prefect-server
-
-  # prefect-agent:
-  #   image: !reset null
-  #   build:
-  #     context: ../
-  #     dockerfile: docker/Dockerfile
-  #   env_file: !override
-  #     - ../.env
-  #   volumes: !override
-  #     - ../:/home/bunqynab:cached
-  #     # - ../config:/home/bunqynab/config:cached
-  #     - /var/run/docker.sock:/var/run/docker.sock
 
   # mlserver:
   #   image: !reset null  

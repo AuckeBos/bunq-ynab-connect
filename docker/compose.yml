@@ -5,54 +5,55 @@ services:
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_ROOT_PASSWORD:  ${MONGO_PASSWORD}
     ports:
       - 27017:27017
     volumes:
-      - bunq_ynab_connect_data:/data/db
+      - bunqynab_bunq_ynab_connect_data:/data/db
 
-  # mongo-express:
-  #   image: mongo-express:latest
-  #   container_name: bunqynab_mongo_ui
-  #   restart: unless-stopped
-  #   environment:
-  #     ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER}
-  #     ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
-  #     ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_USER}
-  #     ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_PASSWORD}
-  #     ME_CONFIG_MONGODB_SERVER: bunqynab_mongodb
-  #   ports:
-  #     - 12001:8081
-  #   depends_on:
-  #     - mongodb
-  # prefect-server:
-  #   image: prefecthq/prefect:3.4.7-python3.11
-  #   container_name: bunqynab_prefect_server
-  #   restart: unless-stopped
-  #   environment:
-  #     - PREFECT_SERVER_API_HOST=${PREFECT_SERVER_API_HOST}
-  #     - PREFECT_API_URL=${PREFECT_API_URL_FOR_SERVER} # Update if accessing from outside Docker
-  #     - PREFECT_UI_URL=${PREFECT_API_URL_FOR_SERVER} # Update if accessing from outside Docker
-  #   ports:
-  #     - 12002:4200
-  #   volumes:
-  #     - bunq_ynab_connect_prefect:/root/.prefect
-  #   entrypoint: ["/opt/prefect/entrypoint.sh", "prefect", "server", "start"]
+  mongo-express:
+    image: mongo-express:latest
+    container_name: bunqynab_mongo_ui
+    restart: unless-stopped
+    environment:
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_USER}
+      ME_CONFIG_BASICAUTH_PASSWORD:  ${MONGO_PASSWORD}
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_MONGODB_SERVER: bunqynab_mongodb
+    ports:
+      - 12001:8081
+    depends_on:
+      - mongodb
 
-  # prefect-agent:
-  #   image: index.docker.io/auckebos/bunq-ynab-connect:latest
-  #   container_name: bunqynab_prefect_agent
-  #   restart: unless-stopped
-  #   env_file:
-  #     - stack.env
-  #   ports:
-  #     - "12004:8787"
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock # Docker sock needed to be able to restart the mlserver container
-  #     - bunq_ynab_config:/home/bunqynab/config
-  #   command: ["/bin/sh", "-c", "/home/bunqynab/entrypoint.sh"]
-  #   depends_on:
-  #     - prefect-server
+  prefect-server:
+    image: prefecthq/prefect:3.4.7-python3.11
+    container_name: bunqynab_prefect_server
+    restart: unless-stopped
+    environment:
+      - PREFECT_SERVER_API_HOST=${PREFECT_SERVER_API_HOST}
+      - PREFECT_API_URL=${PREFECT_API_URL_FOR_SERVER} # Update if accessing from outside Docker
+      - PREFECT_UI_URL=${PREFECT_API_URL_FOR_SERVER} # Update if accessing from outside Docker
+    ports:
+      - 12002:4200
+    volumes:
+      - bunq_ynab_connect_prefect:/root/.prefect
+    entrypoint: ["/opt/prefect/entrypoint.sh", "prefect", "server", "start"]
+
+  prefect-agent:
+    image: index.docker.io/auckebos/bunq-ynab-connect:latest
+    container_name: bunqynab_prefect_agent
+    restart: unless-stopped
+    env_file:
+      - stack.env
+    ports:
+      - "12004:8787"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # Docker sock needed to be able to restart the mlserver container
+      - bunq_ynab_config:/home/bunqynab/config
+    command: ["/bin/sh", "-c", "/home/bunqynab/entrypoint.sh"]
+    depends_on:
+      - prefect-server
 
   # watchtower:
   #   image: containrrr/watchtower
@@ -121,7 +122,8 @@ services:
   #     - mongodb
 
 volumes:
-  bunq_ynab_connect_data:
+  bunqynab_bunq_ynab_connect_data:
+    external: true
   bunq_ynab_connect_prefect:
   bunq_ynab_config:
   bunq_ynab_connect_mlflow:
