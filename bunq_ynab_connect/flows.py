@@ -33,6 +33,8 @@ if TYPE_CHECKING:
         AbstractExtractor,
     )
 
+from bunq_ynab_connect.scripts.remove_old_mlflow_runs import run
+
 
 @flow
 def extract() -> None:
@@ -125,6 +127,12 @@ def exchange_pat(pat: str, name: str) -> None:
     client.exchange_pat(pat, name)
 
 
+@flow
+def remove_old_mlflow_runs() -> None:
+    """Remove MLFLOW runs older than 30 days, to prevent storage bloat."""
+    run()
+
+
 def work() -> None:
     """Create a deployment for each flow, and serve all of them."""
     serve(
@@ -170,5 +178,12 @@ def work() -> None:
             name="exchange_pat",
             description="Exchange a PAT for a Bunq config file",
             version="2024.09.12",
+        ),
+        remove_old_mlflow_runs.to_deployment(
+            name="remove_old_mlflow_runs",
+            description="Remove MLFLOW runs older than 30 days",
+            version="2024.09.12",
+            # weekly on Mondays at midnight
+            schedules=[CronSchedule(cron="0 0 * * 1", timezone="Europe/Amsterdam")],
         ),
     )

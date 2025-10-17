@@ -16,6 +16,7 @@ The following flows exist:
     - Run this flow, with the PAT as parameter.
         - The new PAT is exchanged for a config file, which is restricted to the new IP.
     - Remove the old PAT from the Bunq app.
+- `remove_old_mlflow_runs`. Runs weekly on Mondays at midnight. Removes MLFLOW runs older than 30 days, to prevent storage bloat.
 
 # Logging
 Prefect is used to store the logs. If anything fails or doesn't work as expected, use Prefect as the first source of information. 
