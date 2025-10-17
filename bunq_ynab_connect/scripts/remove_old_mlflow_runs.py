@@ -13,7 +13,7 @@ from bunq_ynab_connect.helpers.general import now
 
 logging.basicConfig(level=logging.INFO)
 
-DAYS_TO_KEEP = 0
+DAYS_TO_KEEP = 30
 
 
 def run() -> None:
