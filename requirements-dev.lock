@@ -10,65 +10,70 @@
 #   universal: false
 
 -e file:.
-aiofiles==24.1.0
+aiofiles==25.1.0
     # via mlserver
 aiohappyeyeballs==2.6.1
     # via aiohttp
-aiohttp==3.12.13
+aiohttp==3.13.2
     # via tritonclient
 aiokafka==0.12.0
     # via mlserver
 aiosignal==1.4.0
     # via aiohttp
-aiosqlite==0.21.0
+aiosqlite==0.22.0
     # via prefect
-alembic==1.16.2
+alembic==1.17.2
     # via mlflow
     # via prefect
 annotated-types==0.7.0
     # via pydantic
-anyio==4.9.0
+anyio==4.12.0
     # via httpx
     # via prefect
     # via starlette
     # via watchfiles
-apprise==1.9.3
+apprise==1.9.6
     # via prefect
 asgi-lifespan==2.1.0
     # via prefect
-asgiref==3.9.0
+asgiref==3.11.0
     # via opentelemetry-instrumentation-asgi
-asttokens==3.0.0
+asttokens==3.0.1
     # via stack-data
 async-timeout==5.0.1
     # via aiokafka
-asyncpg==0.30.0
+asyncpg==0.31.0
     # via prefect
-attrs==25.3.0
+attrs==25.4.0
     # via aiohttp
     # via jsonschema
     # via referencing
+beartype==0.22.9
+    # via py-key-value-aio
+    # via py-key-value-shared
 blinker==1.9.0
     # via flask
-brotli==1.1.0
+brotli==1.2.0
     # via geventhttpclient
 bz2file==0.98
 cachetools==5.5.2
     # via google-auth
     # via mlflow-skinny
     # via prefect
-certifi==2025.6.15
+    # via py-key-value-aio
+certifi==2025.11.12
     # via apprise
     # via geventhttpclient
     # via httpcore
     # via httpx
     # via requests
-cffi==1.17.1
+    # via ynab
+cffi==2.0.0
     # via cryptography
     # via gevent
-charset-normalizer==3.4.2
+charset-normalizer==3.4.4
     # via requests
-click==8.1.8
+click==8.3.1
     # via apprise
     # via bunq-ynab-connect
     # via dask
@@ -80,12 +85,13 @@ click==8.1.8
     # via rich-toolkit
     # via typer
     # via uvicorn
-cloudpickle==3.1.1
+cloudpickle==3.1.2
     # via dask
     # via distributed
     # via hyperopt
     # via mlflow-skinny
     # via prefect
+    # via pydocket
 colorama==0.4.6
     # via click
     # via griffe
@@ -93,118 +99,120 @@ colorama==0.4.6
     # via pytest
     # via tqdm
     # via uvicorn
-comm==0.2.2
+comm==0.2.3
     # via ipykernel
-contourpy==1.3.2
+contourpy==1.3.3
     # via matplotlib
 coolname==2.2.0
     # via prefect
-cryptography==45.0.5
+cryptography==46.0.3
     # via prefect
 cycler==0.12.1
     # via matplotlib
-dask==2025.5.1
+dask==2025.12.0
     # via distributed
-databricks-sdk==0.57.0
+databricks-sdk==0.74.0
     # via mlflow-skinny
 dateparser==1.2.2
     # via prefect
-debugpy==1.8.14
+debugpy==1.8.18
     # via ipykernel
 decorator==5.2.1
     # via ipython
-distributed==2025.5.1
+distributed==2025.12.0
     # via prefect-dask
-dnspython==2.7.0
+dnspython==2.8.0
     # via pymongo
 docker==7.1.0
     # via mlflow
     # via prefect
-exceptiongroup==1.3.0
+exceptiongroup==1.3.1
     # via prefect
-executing==2.2.0
+executing==2.2.1
     # via stack-data
+fakeredis==2.32.1
+    # via pydocket
 fastapi==0.115.14
     # via bunq-ynab-connect
     # via mlflow-skinny
     # via mlserver
     # via prefect
-fastapi-cli==0.0.8
+fastapi-cli==0.0.16
     # via bunq-ynab-connect
-feature-engine==1.8.3
+feature-engine==1.9.3
     # via bunq-ynab-connect
-flask==3.1.1
+flask==3.1.2
     # via mlflow
-fonttools==4.58.5
+fonttools==4.61.1
     # via matplotlib
-frozenlist==1.7.0
+frozenlist==1.8.0
     # via aiohttp
     # via aiosignal
-fsspec==2025.5.1
+fsspec==2025.12.0
     # via dask
     # via prefect
 future==1.0.0
     # via hyperopt
-gevent==25.5.1
+gevent==25.9.1
     # via geventhttpclient
     # via mlserver
-geventhttpclient==2.3.4
+geventhttpclient==2.3.7
     # via mlserver
     # via tritonclient
 gitdb==4.0.12
     # via gitpython
-gitpython==3.1.44
+gitpython==3.1.45
     # via mlflow-skinny
-google-auth==2.40.3
+google-auth==2.44.0
     # via databricks-sdk
-googleapis-common-protos==1.70.0
+googleapis-common-protos==1.72.0
     # via opentelemetry-exporter-otlp-proto-grpc
 graphene==3.4.3
     # via mlflow
-graphql-core==3.2.6
+graphql-core==3.2.7
     # via graphene
     # via graphql-relay
 graphql-relay==3.2.0
     # via graphene
 graphviz==0.21
     # via prefect
-greenlet==3.2.3
+greenlet==3.3.0
     # via gevent
     # via sqlalchemy
-griffe==1.7.3
+griffe==1.15.0
     # via bunq-ynab-connect
     # via prefect
-grpcio==1.73.1
+grpcio==1.76.0
     # via mlserver
     # via opentelemetry-exporter-otlp-proto-grpc
     # via py-grpc-prometheus
 h11==0.16.0
     # via httpcore
     # via uvicorn
-h2==4.2.0
+h2==4.3.0
     # via httpx
 hpack==4.1.0
     # via h2
 httpcore==1.0.9
     # via httpx
     # via prefect
-httptools==0.6.4
+httptools==0.7.1
     # via uvicorn
 httpx==0.28.1
     # via prefect
-humanize==4.12.3
+humanize==4.14.0
     # via jinja2-humanize-extension
     # via prefect
 hyperframe==6.1.0
     # via h2
 hyperopt==0.2.7
     # via bunq-ynab-connect
-idna==3.10
+idna==3.11
     # via anyio
     # via httpx
     # via requests
     # via yarl
-imbalanced-learn==0.13.0
+imbalanced-learn==0.12.4
     # via bunq-ynab-connect
 importlib-metadata==8.7.0
     # via dask
@@ -212,10 +220,10 @@ importlib-metadata==8.7.0
     # via opentelemetry-api
 importlib-resources==6.5.2
     # via mlserver
-iniconfig==2.1.0
+iniconfig==2.3.0
     # via pytest
-ipykernel==6.29.5
-ipython==9.4.0
+ipykernel==7.1.0
+ipython==9.8.0
     # via ipykernel
 ipython-pygments-lexers==1.1.1
     # via ipython
@@ -231,52 +239,54 @@ jinja2==3.1.6
     # via prefect
 jinja2-humanize-extension==0.4.0
     # via prefect
-joblib==1.5.1
+joblib==1.5.3
     # via imbalanced-learn
     # via scikit-learn
 jsonpatch==1.33
     # via prefect
 jsonpointer==3.0.0
     # via jsonpatch
-jsonschema==4.24.0
+jsonschema==4.25.1
     # via prefect
-jsonschema-specifications==2025.4.1
+jsonschema-specifications==2025.9.1
     # via jsonschema
-jupyter-client==8.6.3
+jupyter-client==8.7.0
     # via ipykernel
-jupyter-core==5.8.1
+jupyter-core==5.9.1
     # via ipykernel
     # via jupyter-client
 kink==0.8.1
     # via bunq-ynab-connect
-kiwisolver==1.4.8
+kiwisolver==1.4.9
     # via matplotlib
 locket==1.0.0
     # via distributed
     # via partd
+lupa==2.6
+    # via fakeredis
 mako==1.3.10
     # via alembic
-markdown==3.8.2
+markdown==3.10
     # via apprise
     # via mlflow
-markdown-it-py==3.0.0
+markdown-it-py==4.0.0
     # via rich
-markupsafe==3.0.2
+markupsafe==3.0.3
     # via flask
     # via jinja2
     # via mako
     # via werkzeug
-matplotlib==3.10.3
+matplotlib==3.10.8
     # via mlflow
-matplotlib-inline==0.1.7
+matplotlib-inline==0.2.1
     # via ipykernel
     # via ipython
 mdurl==0.1.2
     # via markdown-it-py
-mlflow==2.22.1
+mlflow==2.22.4
     # via bunq-ynab-connect
     # via mlserver-mlflow
-mlflow-skinny==2.22.1
+mlflow-skinny==2.22.4
     # via mlflow
 mlserver==1.7.1
     # via bunq-ynab-connect
@@ -284,16 +294,16 @@ mlserver==1.7.1
 mlserver-mlflow==1.7.1
     # via bunq-ynab-connect
 mongomock==4.3.0
-msgpack==1.1.1
+msgpack==1.1.2
     # via distributed
-multidict==6.6.3
+multidict==6.7.0
     # via aiohttp
     # via yarl
 nest-asyncio==1.6.0
     # via ipykernel
-networkx==3.5
+networkx==3.6.1
     # via hyperopt
-numpy==2.3.1
+numpy==2.3.5
     # via contourpy
     # via feature-engine
     # via hyperopt
@@ -310,9 +320,10 @@ numpy==2.3.1
     # via xgboost
 oauthlib==3.3.1
     # via requests-oauthlib
-opentelemetry-api==1.34.1
+opentelemetry-api==1.39.1
     # via mlflow-skinny
     # via opentelemetry-exporter-otlp-proto-grpc
+    # via opentelemetry-exporter-prometheus
     # via opentelemetry-instrumentation
     # via opentelemetry-instrumentation-asgi
     # via opentelemetry-instrumentation-fastapi
@@ -320,37 +331,42 @@ opentelemetry-api==1.34.1
     # via opentelemetry-sdk
     # via opentelemetry-semantic-conventions
     # via prefect
-opentelemetry-exporter-otlp-proto-common==1.34.1
+    # via pydocket
+opentelemetry-exporter-otlp-proto-common==1.39.1
     # via opentelemetry-exporter-otlp-proto-grpc
-opentelemetry-exporter-otlp-proto-grpc==1.34.1
+opentelemetry-exporter-otlp-proto-grpc==1.39.1
     # via mlserver
-opentelemetry-instrumentation==0.55b1
+opentelemetry-exporter-prometheus==0.60b1
+    # via pydocket
+opentelemetry-instrumentation==0.60b1
     # via opentelemetry-instrumentation-asgi
     # via opentelemetry-instrumentation-fastapi
     # via opentelemetry-instrumentation-grpc
-opentelemetry-instrumentation-asgi==0.55b1
+    # via pydocket
+opentelemetry-instrumentation-asgi==0.60b1
     # via opentelemetry-instrumentation-fastapi
-opentelemetry-instrumentation-fastapi==0.55b1
+opentelemetry-instrumentation-fastapi==0.60b1
     # via mlserver
-opentelemetry-instrumentation-grpc==0.55b1
+opentelemetry-instrumentation-grpc==0.60b1
     # via mlserver
-opentelemetry-proto==1.34.1
+opentelemetry-proto==1.39.1
     # via opentelemetry-exporter-otlp-proto-common
     # via opentelemetry-exporter-otlp-proto-grpc
-opentelemetry-sdk==1.34.1
+opentelemetry-sdk==1.39.1
     # via mlflow-skinny
     # via mlserver
     # via opentelemetry-exporter-otlp-proto-grpc
-opentelemetry-semantic-conventions==0.55b1
+    # via opentelemetry-exporter-prometheus
+opentelemetry-semantic-conventions==0.60b1
     # via opentelemetry-instrumentation
     # via opentelemetry-instrumentation-asgi
     # via opentelemetry-instrumentation-fastapi
     # via opentelemetry-instrumentation-grpc
     # via opentelemetry-sdk
-opentelemetry-util-http==0.55b1
+opentelemetry-util-http==0.60b1
     # via opentelemetry-instrumentation-asgi
     # via opentelemetry-instrumentation-fastapi
-orjson==3.10.18
+orjson==3.11.5
     # via mlserver
     # via prefect
 packaging==24.2
@@ -365,53 +381,63 @@ packaging==24.2
     # via prefect
     # via pytest
     # via statsmodels
-pandas==2.2.3
+pandas==2.3.3
     # via feature-engine
     # via mlflow
     # via mlserver
     # via statsmodels
-parso==0.8.4
+parso==0.8.5
     # via jedi
 partd==1.4.2
     # via dask
 pathspec==0.12.1
     # via prefect
-patsy==1.0.1
+patsy==1.0.2
     # via statsmodels
 pendulum==3.1.0
     # via prefect
-pillow==11.3.0
+perf-analyzer==0.1.0
+    # via tritonclient
+pillow==12.0.0
     # via matplotlib
-platformdirs==4.3.8
+platformdirs==4.5.1
     # via jupyter-core
 pluggy==1.6.0
+    # via prefect
     # via pytest
-prefect==3.4.7
+prefect==3.6.6
     # via bunq-ynab-connect
     # via prefect-dask
 prefect-dask==0.3.6
     # via bunq-ynab-connect
-prometheus-client==0.22.1
+prometheus-client==0.23.1
+    # via opentelemetry-exporter-prometheus
     # via prefect
     # via py-grpc-prometheus
+    # via pydocket
     # via starlette-exporter
-prompt-toolkit==3.0.51
+prompt-toolkit==3.0.52
     # via ipython
-propcache==0.3.2
+propcache==0.4.1
     # via aiohttp
     # via yarl
-protobuf==5.29.5
+protobuf==6.33.2
+    # via databricks-sdk
     # via googleapis-common-protos
     # via mlflow-skinny
     # via mlserver
     # via opentelemetry-proto
-psutil==7.0.0
+psutil==7.1.3
     # via distributed
     # via ipykernel
 pure-eval==0.2.3
     # via stack-data
 py-grpc-prometheus==0.8.0
     # via mlserver
+py-key-value-aio==0.3.0
+    # via pydocket
+py-key-value-shared==0.3.0
+    # via py-key-value-aio
 py4j==0.10.9.9
     # via hyperopt
 pyarrow==19.0.1
@@ -421,9 +447,9 @@ pyasn1==0.6.1
     # via rsa
 pyasn1-modules==0.4.2
     # via google-auth
-pycparser==2.22
+pycparser==2.23
     # via cffi
-pydantic==2.11.7
+pydantic==2.12.5
     # via bunq-ynab-connect
     # via fastapi
     # via mlflow-skinny
@@ -432,24 +458,26 @@ pydantic==2.11.7
     # via pydantic-extra-types
     # via pydantic-settings
     # via ynab
-pydantic-core==2.33.2
+pydantic-core==2.41.5
     # via prefect
     # via pydantic
-pydantic-extra-types==2.10.5
+pydantic-extra-types==2.10.6
     # via prefect
-pydantic-settings==2.10.1
+pydantic-settings==2.12.0
     # via mlserver
+    # via prefect
+pydocket==0.15.5
     # via prefect
 pygments==2.19.2
     # via ipython
     # via ipython-pygments-lexers
     # via pytest
     # via rich
-pymongo==4.13.2
+pymongo==4.15.5
     # via bunq-ynab-connect
-pyparsing==3.2.3
+pyparsing==3.2.5
     # via matplotlib
-pytest==8.4.1
+pytest==9.0.2
 python-dateutil==2.9.0.post0
     # via dateparser
     # via graphene
@@ -459,45 +487,48 @@ python-dateutil==2.9.0.post0
     # via pendulum
     # via prefect
     # via ynab
-python-dotenv==1.1.1
+python-dotenv==1.2.1
     # via bunq-ynab-connect
     # via mlserver
     # via pydantic-settings
     # via uvicorn
+python-json-logger==4.0.0
+    # via pydocket
 python-multipart==0.0.20
     # via mlserver
-python-rapidjson==1.20
+python-rapidjson==1.23
     # via tritonclient
 python-slugify==8.0.4
-    # via prefect
-python-socks==2.7.1
     # via prefect
 pytz==2025.2
     # via dateparser
     # via mongomock
     # via pandas
     # via prefect
-# pywin32==310 (excluded)
+# pywin32==311 (excluded)
     # via docker
-    # via jupyter-core
-pyyaml==6.0.2
+pyyaml==6.0.3
     # via apprise
     # via dask
     # via distributed
     # via mlflow-skinny
     # via prefect
     # via uvicorn
-pyzmq==27.0.0
+pyzmq==27.1.0
     # via ipykernel
     # via jupyter-client
 readchar==4.2.1
     # via prefect
-referencing==0.36.2
+redis==7.1.0
+    # via fakeredis
+    # via py-key-value-aio
+    # via pydocket
+referencing==0.37.0
     # via jsonschema
     # via jsonschema-specifications
-regex==2024.11.6
+regex==2025.11.3
     # via dateparser
-requests==2.32.4
+requests==2.32.5
     # via apprise
     # via databricks-sdk
     # via docker
@@ -507,29 +538,29 @@ requests-oauthlib==2.0.0
     # via apprise
 rfc3339-validator==0.1.4
     # via prefect
-rich==14.0.0
+rich==14.2.0
     # via prefect
+    # via pydocket
     # via rich-toolkit
     # via typer
-rich-toolkit==0.14.8
+rich-toolkit==0.17.0
     # via fastapi-cli
-rpds-py==0.26.0
+rpds-py==0.30.0
     # via jsonschema
     # via referencing
 rsa==4.9.1
     # via google-auth
-ruamel-yaml==0.18.14
+ruamel-yaml==0.18.16
     # via prefect
-ruamel-yaml-clib==0.2.12
+ruamel-yaml-clib==0.2.15
     # via ruamel-yaml
-ruff==0.12.2
-scikit-learn==1.6.1
+ruff==0.14.9
+scikit-learn==1.8.0
     # via bunq-ynab-connect
     # via feature-engine
     # via imbalanced-learn
     # via mlflow
-    # via sklearn-compat
-scipy==1.16.0
+scipy==1.16.3
     # via feature-engine
     # via hyperopt
     # via imbalanced-learn
@@ -539,33 +570,29 @@ scipy==1.16.0
     # via xgboost
 semver==3.0.4
     # via prefect
-sentinels==1.0.0
+sentinels==1.1.1
     # via mongomock
 setuptools==80.9.0
     # via py-grpc-prometheus
-    # via zope-event
-    # via zope-interface
 shellingham==1.5.4
     # via typer
 six==1.17.0
     # via hyperopt
     # via python-dateutil
     # via rfc3339-validator
-sklearn-compat==0.1.3
-    # via imbalanced-learn
 smmap==5.0.2
     # via gitdb
 sniffio==1.3.1
-    # via anyio
     # via asgi-lifespan
     # via prefect
 sortedcontainers==2.4.0
     # via distributed
-sqlalchemy==2.0.41
+    # via fakeredis
+sqlalchemy==2.0.45
     # via alembic
     # via mlflow
     # via prefect
-sqlparse==0.5.3
+sqlparse==0.5.4
     # via mlflow-skinny
 stack-data==0.6.3
     # via ipython
@@ -574,9 +601,9 @@ starlette==0.46.2
     # via starlette-exporter
 starlette-exporter==0.23.0
     # via mlserver
-statsmodels==0.14.5
+statsmodels==0.14.6
     # via feature-engine
-tblib==3.1.0
+tblib==3.2.2
     # via distributed
 text-unidecode==1.3
     # via python-slugify
@@ -585,37 +612,37 @@ threadpoolctl==3.6.0
     # via scikit-learn
 toml==0.10.2
     # via prefect
-toolz==1.0.0
+toolz==1.1.0
     # via dask
     # via distributed
     # via partd
-tornado==6.5.1
+tornado==6.5.4
     # via distributed
     # via ipykernel
     # via jupyter-client
 tqdm==4.67.1
     # via hyperopt
 traitlets==5.14.3
-    # via comm
     # via ipykernel
     # via ipython
     # via jupyter-client
     # via jupyter-core
     # via matplotlib-inline
-tritonclient==2.59.0
+tritonclient==2.63.0
     # via mlserver
-typer==0.16.0
+typer==0.19.2
     # via fastapi-cli
     # via prefect
-typing-extensions==4.14.1
+    # via pydocket
+typing-extensions==4.15.0
     # via aiokafka
     # via aiosignal
-    # via aiosqlite
     # via alembic
     # via anyio
     # via exceptiongroup
     # via fastapi
     # via graphene
+    # via grpcio
     # via ipython
     # via kink
     # via mlflow-skinny
@@ -624,65 +651,66 @@ typing-extensions==4.14.1
     # via opentelemetry-sdk
     # via opentelemetry-semantic-conventions
     # via prefect
+    # via py-key-value-shared
     # via pydantic
     # via pydantic-core
     # via pydantic-extra-types
+    # via pydocket
     # via referencing
     # via rich-toolkit
     # via sqlalchemy
     # via typer
     # via typing-inspection
     # via ynab
-typing-inspection==0.4.1
+typing-inspection==0.4.2
     # via pydantic
     # via pydantic-settings
-tzdata==2025.2
+tzdata==2025.3
+    # via apprise
     # via pandas
     # via pendulum
     # via tzlocal
 tzlocal==5.3.1
     # via dateparser
-ujson==5.10.0
-    # via prefect
-urllib3==2.5.0
+urllib3==2.6.2
     # via distributed
     # via docker
     # via geventhttpclient
     # via requests
     # via tritonclient
     # via ynab
-uv==0.7.19
+uv==0.9.17
     # via prefect
-uvicorn==0.35.0
+uvicorn==0.38.0
     # via fastapi-cli
     # via mlflow-skinny
     # via mlserver
     # via prefect
 waitress==3.0.2
     # via mlflow
-watchfiles==1.1.0
+watchfiles==1.1.1
     # via uvicorn
-wcwidth==0.2.13
+wcwidth==0.2.14
     # via prompt-toolkit
 websockets==15.0.1
     # via prefect
     # via uvicorn
-werkzeug==3.1.3
+werkzeug==3.1.4
     # via flask
-wrapt==1.17.2
+wrapt==1.17.3
     # via opentelemetry-instrumentation
     # via opentelemetry-instrumentation-grpc
-xgboost==3.0.2
+xgboost==3.1.2
     # via bunq-ynab-connect
-yarl==1.20.1
+yarl==1.22.0
     # via aiohttp
-ynab==1.6.0
+ynab==1.9.0
     # via bunq-ynab-connect
 zict==3.0.0
     # via distributed
 zipp==3.23.0
     # via importlib-metadata
-zope-event==5.1
+zope-event==6.1
     # via gevent
-zope-interface==7.2
+zope-interface==8.1.1
     # via gevent

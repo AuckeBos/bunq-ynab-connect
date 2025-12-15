@@ -2,7 +2,28 @@
 name = "bunq-ynab-connect"
 version = "0.6.0"
 description = "Automatically classify Bunq transactions and add to Ynab"
-dependencies = [ "mlflow<3.0", "ynab", "scikit-learn", "kink", "python-dotenv", "click", "pymongo", "prefect-dask", "mlserver>=1.6", "mlserver-mlflow", "pydantic", "griffe", "fastapi", "fastapi-cli", "prefect", "imbalanced-learn>=0.13.0", "feature-engine>=1.8.3", "xgboost>=2.1.4", "hyperopt>=0.2.7",]
+dependencies = [
+    "mlflow<3.0",
+    "ynab",
+    "scikit-learn",
+    "kink",
+    "python-dotenv",
+    "click",
+    "pymongo",
+    "prefect-dask",
+    "mlserver>=1.6",
+    "mlserver-mlflow",
+    "pydantic",
+    "griffe",
+    "fastapi",
+    "fastapi-cli",
+    "prefect",
+    "imbalanced-learn<=0.13.0",
+    "feature-engine>=1.8.3",
+    "xgboost>=2.1.4",
+    "hyperopt>=0.2.7",
+    "uvloop==0.21.0; sys_platform == 'adm_win64'",
+]
 readme = "README.md"
 requires-python = ">= 3.11"
 
