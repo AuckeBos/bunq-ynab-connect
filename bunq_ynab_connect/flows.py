@@ -116,8 +116,12 @@ def train(max_runs: int = 250) -> None:
 
     storage = di[AbstractStorage]
     budget_ids = YnabBudget.get_budget_ids(storage)
-    for budget_id in budget_ids:
+    futures = [
         train_for_budget.submit(budget_id=budget_id, max_runs=max_runs)
+        for budget_id in budget_ids
+    ]
+    for future in futures:
+        future.wait()
 
 
 @flow
