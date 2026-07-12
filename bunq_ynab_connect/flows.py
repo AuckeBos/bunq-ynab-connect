@@ -175,7 +175,8 @@ def work() -> None:
             name="train",
             description="Train one classifier for each budget",
             version="2024.09.12",
-            schedules=[CronSchedule(cron="0 2 * * 0", timezone="Europe/Amsterdam")],
+            # Sunday at 21:00
+            schedules=[CronSchedule(cron="0 21 * * 0", timezone="Europe/Amsterdam")],
             parameters={"max_runs": 100},
         ),
         exchange_pat.to_deployment(
